@@ -1,0 +1,2 @@
+export const SYSTEM_USERS_PROVIDER_TOKEN = 'SYSTEM_USERS_PROVIDER_TOKEN';
+export const SYSTEM_USERS_COLLECTION = 'system_users';
