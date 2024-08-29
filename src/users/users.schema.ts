@@ -1,52 +1,17 @@
 import { Schema } from 'mongoose';
-import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { USERS_COLLECTION } from './users.constants';
-
-export interface IEmergencyContact {
-  phone_no: string;
-  relationship: string;
-  name: string;
-  address:string;
-}
-
-export const EmergencyContactSchema = new Schema<IEmergencyContact>(
-  {
-    phone_no: {
-      type: String,
-      required: true,
-      default:''
-    },
-    relationship: {
-      type: String,
-      required: true,
-      default:''
-    },
-    name: {
-      type: String,
-      required: true,
-      default:''
-    },
-    address: {
-      type: String,
-      required: true,
-      default:''
-    },
-  }
-);
 
 export interface IUsers {
   _id?: Schema.Types.ObjectId;
   image: string;
   first_name: string;
-  sur_name: string;
+  last_name: string;
   email: string;
+  country_code: string;
   phone_no: string;
-  password: string;
-  email_verified:boolean;
-  email_verified_at: Date;
-  finger_print_enabled: boolean;
-  fcm_token?: string;
-  emergency_contacts?: IEmergencyContact[]
+  dob: string;
+  uuid: string;
+  created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
   is_deleted?: boolean;
@@ -57,57 +22,42 @@ export const UsersSchema = new Schema<IUsers>(
     image: {
       type: String,
       required: false,
-      default:''
+      default: ''
     },
     first_name: {
       type: String,
       required: false,
-      default:''
+      default: ''
     },
-    sur_name: {
+    last_name: {
       type: String,
       required: false,
-      default:''
+      default: ''
     },
     email: {
-        type: String,
-        required: false,
-        default:''
-      },
-    emergency_contacts:{
-      type: [EmergencyContactSchema],
-        required: false,
-        default:[]
+      type: String,
+      required: false,
+      default: ''
+    },
+    country_code: {
+      type: String,
+      required: false,
+      default: ''
     },
     phone_no: {
-        type: String,
-        required: false,
-        default:''
-      },
-    fcm_token:{
       type: String,
-        required: false,
-        default:''
-      },
-    password: {
-        type: String,
-        required: false,
-        default:null
-      },
-    email_verified: {
-        type: Boolean,
-        required: false,
-        default:false
-      },
-    email_verified_at: {
-        type: Date,
-        required: false,
-        default:new Date()
-      },
-    finger_print_enabled:{
-        type: Boolean,
-        required: false,
-        default: false,
+      required: false,
+      default: ''
+    },
+    dob: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    uuid: {
+      type: String,
+      required: false,
+      default: ''
     },
     is_disabled: {
       type: Boolean,
@@ -119,10 +69,15 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       default: false,
     },
+    created_by: {
+      type: Schema.Types.ObjectId,
+      required: false,
+      ref: USERS_COLLECTION,
+    },
     updated_by: {
       type: Schema.Types.ObjectId,
       required: false,
-      ref: SYSTEM_USERS_COLLECTION,
+      ref: USERS_COLLECTION,
     },
   },
   {

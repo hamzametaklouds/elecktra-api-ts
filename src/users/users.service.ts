@@ -8,7 +8,6 @@ import { CreateUserDto } from './dtos/create-users.dto';
 import { UpdateUserDto } from './dtos/update-users.dto';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { BroadNotificationsDto } from './dtos/broadcast-notifications.dto';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -24,6 +23,11 @@ export class UsersService {
   async getUserByEmail(email: string): Promise<IUsers> {
     return await this.userModel
       .findOne({ email: email, is_deleted: false });
+  }
+
+  async getUserByUUID(uuid: string): Promise<IUsers> {
+    return await this.userModel
+      .findOne({ uuid: uuid, is_deleted: false });
   }
 
   async getUserByPhoneNumber(phone_no: string): Promise<IUsers> {
@@ -76,33 +80,7 @@ export class UsersService {
   }
 
 
-  async pushContacts(user_id, body) {
 
-    const user = await this.userModel.findById(user_id);
-
-    if (!user) {
-      throw new NotFoundException('user with this specified id does not exist')
-    }
-
-    const updatedUser = await this.userModel.findByIdAndUpdate({ _id: user_id }, { $push: { emergency_contacts: body } }, { new: true })
-    const { password, ...data } = updatedUser;
-    return { status: true, statusCode: 204, message: "User has been updated with the contact successfully", data: data }
-
-  }
-
-  async pullContacts(user_id, body) {
-
-    const user = await this.userModel.findById(user_id);
-
-    if (!user) {
-      throw new NotFoundException('user with this specified id does not exist')
-    }
-
-    const updatedUser = await this.userModel.findByIdAndUpdate({ _id: user_id }, { $pull: { emergency_contacts: { phone_no: body.phone_no } } }, { new: true })
-    const { password, ...data } = updatedUser;
-    return { status: true, statusCode: 204, message: "Contact removed successfully", data: data }
-
-  }
   /**
    * The purpose of this method is to create user inside mongodb
    * @param datasetObject receives user object of interface type IUsers as an argument
@@ -112,52 +90,43 @@ export class UsersService {
     const {
       image,
       first_name,
-      sur_name,
+      last_name,
       email,
+      dob,
+      uuid,
+      country_code,
       phone_no,
-      fcm_token,
-      password,
-      finger_print_enabled
     } = userObject;
 
     const ifEmailExists = await this.getUserByEmail(email);
     if (ifEmailExists) {
-      return { status: false, statusCode: 409, message: 'Email already exists', data: null }
+      throw new ConflictException('Email already exists')
     }
     const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
     if (ifPhoneExists) {
-      return { status: false, statusCode: 409, message: 'Phone number already exists', data: null }
+      throw new ConflictException('Phone number already exists')
     }
 
-
-
-    const hashPassword = await bcrypt.hash(password, 10);
+    const ifUuidExists = await this.userModel.findOne({ uuid: uuid });
+    if (ifUuidExists) {
+      throw new ConflictException('UUID already exists')
+    }
 
     let createdUser;
 
     createdUser = await new this.userModel({
       image,
       first_name,
-      sur_name,
+      last_name,
       email,
-      fcm_token,
+      dob,
+      uuid,
+      country_code,
       phone_no,
-      password: hashPassword,
-      finger_print_enabled
     }).save();
 
 
-    return {
-      status: true, statusCode: 201, message: 'User created successfully', data: {
-        _id: createdUser._id,
-        first_name: createdUser.first_name,
-        sure_name: createdUser.sure_name,
-        email: createdUser.email,
-        phone_no: createdUser.phone_no,
-        email_verified: createdUser.email_verified,
-        phone_verified: createdUser.phone_verified,
-      }
-    }
+    return createdUser
 
   }
 

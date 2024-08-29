@@ -27,7 +27,7 @@ export class CreateUserDto {
     default: '',
   })
   @IsString()
-  sur_name: string;
+  last_name: string;
 
   @ApiProperty({
     description: 'email string e.g last_name= jonathan.charles@gmail.com',
@@ -38,6 +38,30 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty({
+    description: 'uuid string e.g uuid= ',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  uuid: string;
+
+  @ApiProperty({
+    description: 'dob string e.g dob= ',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  dob: string;
+
+  @ApiProperty({
+    description: 'country_code string e.g country_code= +2',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  country_code: string;
+
+  @ApiProperty({
     description: 'phone_no string e.g phone_no= +(555) 555-1234',
     required: true,
     default: '',
@@ -45,31 +69,6 @@ export class CreateUserDto {
   @IsString()
   phone_no: string;
 
-  @ApiProperty({
-    description: 'fcm_token string e.g fcm_token=asadadasfefefrf',
-    required: true,
-    default: '',
-  })
-  @IsOptional()
-  @IsString()
-  fcm_token: string;
 
-  @ApiProperty({
-    description: 'password string e.g password= xyz123',
-    required: true,
-    default: '',
-  })
-  @IsString()
-  password: string;
 
-  @ApiProperty({
-    description: 'finger_print_enabled boolean e.g finger_print_enabled=true',
-    required: false,
-    default: false,
-  })
-  @IsBoolean()
-  @IsOptional()
-  finger_print_enabled?: boolean;
-
-  
 }

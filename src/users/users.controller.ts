@@ -11,9 +11,6 @@ import { UpdateUserDto } from './dtos/update-users.dto';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { Request } from 'express';
-import { BroadNotificationsDto } from './dtos/broadcast-notifications.dto';
-import { ChnagePasswordDto } from './dtos/change-password.dto';
-import { AddContactDto } from './dtos/add-emergency-contact.dt';
 import { RemoveContactDto } from './dtos/remove-emergency-contact.dto';
 
 const { RESOURCE_CREATED } = getMessages('user(s)');
