@@ -26,6 +26,14 @@ export class AuthController {
         return createAuth;
     }
 
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    @ApiBody({ type: SignUpUserDto })
+    @Post('google/log-in')
+    async googleLogin(@Body() body: SignUpUserDto) {
+        const createAuth = await this.authService.googleLoginUser(body);
+        return createAuth;
+    }
+
     /**
      * 
      * @param body 

@@ -130,6 +130,51 @@ export class UsersService {
 
   }
 
+
+  async insertGoogleUser(userObject: CreateUserDto) {
+    const {
+      image,
+      first_name,
+      last_name,
+      email,
+      dob,
+      uuid,
+      country_code,
+      phone_no,
+    } = userObject;
+
+    const ifEmailExists = await this.getUserByEmail(email);
+    if (ifEmailExists) {
+      throw new ConflictException('Email already exists')
+    }
+    const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
+    if (ifPhoneExists) {
+      throw new ConflictException('Phone number already exists')
+    }
+
+    const ifUuidExists = await this.userModel.findOne({ uuid: uuid });
+    if (ifUuidExists) {
+      throw new ConflictException('UUID already exists')
+    }
+
+    let createdUser;
+
+    createdUser = await new this.userModel({
+      image,
+      first_name,
+      last_name,
+      email,
+      dob,
+      uuid,
+      country_code,
+      phone_no,
+    }).save();
+
+
+    return createdUser
+
+  }
+
   /**
    * The purpose of this method is to update user data
    * @param userId receives userId of the user that we want to update

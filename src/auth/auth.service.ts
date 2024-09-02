@@ -28,7 +28,29 @@ export class AuthService {
     }
 
     return {
-      access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successfully', user: user
+      access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successful', user: user
+    };
+
+  }
+
+  async googleLoginUser(body: SignUpUserDto): Promise<any> {
+
+    let user = await this.usersService.getUserByUUID(body.uuid);
+
+    if (!user) {
+
+      user = await this.usersService.insertUser(body)
+
+    }
+
+
+    if (user.is_disabled) {
+      throw new ForbiddenException('We are sorry, but your account has been temporarily blocked. Please contact our customer support team for further assistance')
+
+    }
+
+    return {
+      access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successful', user: user
     };
 
   }
