@@ -10,6 +10,9 @@ import { FileUploadModule } from './file-upload/file-upload.module';
 import { SystemUsersModule } from './system-users/system-users.module';
 import { UsersModule } from './users/users.module';
 import { ScreenConfigsModule } from './screen-configs/screen-configs.module';
+import { HotelAndCarsModule } from './hotel-and-cars/hotel-and-cars.module';
+import { DestinationsModule } from './destinations/destinations.module';
+import { BookingsModule } from './bookings/bookings.module';
 
 
 
@@ -47,7 +50,10 @@ import { ScreenConfigsModule } from './screen-configs/screen-configs.module';
     FileUploadModule,
     SystemUsersModule,
     UsersModule,
-    ScreenConfigsModule
+    ScreenConfigsModule,
+    HotelAndCarsModule,
+    DestinationsModule,
+    BookingsModule
   ],
   controllers: [AppController],
   providers: [AppService],

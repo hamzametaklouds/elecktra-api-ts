@@ -79,6 +79,47 @@ export class UsersService {
 
   }
 
+  async createGoogleUser(userObject) {
+    const {
+
+      first_name,
+      last_name,
+      email,
+      uuid,
+      country_code,
+      phone_no,
+    } = userObject;
+
+    const ifEmailExists = await this.getUserByEmail(email);
+    if (ifEmailExists) {
+      throw new ConflictException('Email already exists')
+    }
+    // const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
+    // if (ifPhoneExists) {
+    //   throw new ConflictException('Phone number already exists')
+    // }
+
+    const ifUuidExists = await this.userModel.findOne({ uuid: uuid });
+    if (ifUuidExists) {
+      throw new ConflictException('UUID already exists')
+    }
+
+    let createdUser;
+
+    createdUser = await new this.userModel({
+      first_name,
+      last_name,
+      email,
+      uuid,
+      country_code,
+      phone_no,
+    }).save();
+
+
+    return createdUser
+
+  }
+
 
 
   /**

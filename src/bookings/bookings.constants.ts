@@ -1,0 +1,2 @@
+export const BOOKINGS_PROVIDER_TOKEN = 'BOOKINGS_PROVIDER_TOKEN';
+export const BOOKINGS_COLLECTION = 'bookings';

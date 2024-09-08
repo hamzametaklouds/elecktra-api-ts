@@ -1,9 +1,10 @@
 import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import * as bcrypt from 'bcryptjs'
 import { JwtService } from '@nestjs/jwt';
 import { SignUpUserDto } from './dtos/sign-up.dto';
 import { SystemUsersService } from 'src/system-users/system-users.service';
+import admin from "firebase-admin"
+import { GoogleLoginDto } from './dtos/google-log-in.dto';
 
 
 
@@ -33,24 +34,41 @@ export class AuthService {
 
   }
 
-  async googleLoginUser(body: SignUpUserDto): Promise<any> {
+  async googleLoginUser(body: GoogleLoginDto): Promise<any> {
 
-    let user = await this.usersService.getUserByUUID(body.uuid);
+    const decodedToken = await admin.auth().verifyIdToken(body.access_token)
 
-    if (!user) {
+    const userRecordFirebase = await admin.auth().getUser(decodedToken.uid)
 
-      user = await this.usersService.insertUser(body)
+    if (!userRecordFirebase) {
+      throw new BadRequestException('Invalid token')
+    }
+
+    let userExists = await this.usersService.getUserByEmail(userRecordFirebase.email)
+
+    if (!userExists) {
+
+      const fullName = userRecordFirebase.displayName.split(" ")
+      const firstName = fullName[0]
+      const lastName = fullName[1]
+
+      userExists = await this.usersService.createGoogleUser({
+        first_name: firstName,
+        last_name: lastName,
+        email: userRecordFirebase.email,
+        uuid: userRecordFirebase.uid,
+        country_code: null,
+        phone_no: userRecordFirebase.phoneNumber ? userRecordFirebase.phoneNumber : null
+      })
 
     }
 
-
-    if (user.is_disabled) {
+    if (userExists.is_disabled) {
       throw new ForbiddenException('We are sorry, but your account has been temporarily blocked. Please contact our customer support team for further assistance')
-
     }
 
     return {
-      access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successful', user: user
+      access_token: this.jwtService.sign({ userName: userExists.first_name, sub: userExists._id }), message: 'Login Successful', user: userExists
     };
 
   }

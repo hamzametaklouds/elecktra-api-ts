@@ -4,6 +4,7 @@ import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/log-in.dto';
 import { SignUpUserDto } from './dtos/sign-up.dto';
+import { GoogleLoginDto } from './dtos/google-log-in.dto';
 
 UseFilters(HttpExceptionFilter);
 @Controller('auth')
@@ -27,9 +28,9 @@ export class AuthController {
     }
 
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    @ApiBody({ type: SignUpUserDto })
+    @ApiBody({ type: GoogleLoginDto })
     @Post('google/log-in')
-    async googleLogin(@Body() body: SignUpUserDto) {
+    async googleLogin(@Body() body: GoogleLoginDto) {
         const createAuth = await this.authService.googleLoginUser(body);
         return createAuth;
     }
