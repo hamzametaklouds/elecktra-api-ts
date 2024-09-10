@@ -35,16 +35,16 @@ export class HotelAndCarsService {
                 address: 'Central New York City',
                 bedrooms_available: 45,
                 images: [
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=dwZ6FKYAgxspCM&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=V5_AAvGMs_PU4M&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=DiWjt0ne9sITjM&vssid=mosaic'
+                    'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/11a7dbd9-3c5c-4316-8671-ffb2d26f1c4b.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/c588e25b-c20a-472a-af9f-6ae9335933d2.png'
                 ],
                 highlights: [{
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=XYCryyOYTe6ZPM&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/dced58d8-b9fb-48d2-8847-2aac82618817.png',
                     detail: 'Hot tub'
                 },
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Washer and Dryer'
                 }],
                 price: 12,
@@ -61,23 +61,18 @@ export class HotelAndCarsService {
                 address: 'Central Chicago City',
                 bedrooms_available: 45,
                 images: [
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=dwZ6FKYAgxspCM&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=V5_AAvGMs_PU4M&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=DiWjt0ne9sITjM&vssid=mosaic'
+                    'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/11a7dbd9-3c5c-4316-8671-ffb2d26f1c4b.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/c588e25b-c20a-472a-af9f-6ae9335933d2.png'
                 ],
                 highlights: [{
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=XYCryyOYTe6ZPM&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/dced58d8-b9fb-48d2-8847-2aac82618817.png',
                     detail: 'Hot tub'
                 },
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Washer and Dryer'
-                },
-                {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
-                    detail: 'Jaccuzi'
-                }
-                ],
+                }],
                 price: 897,
                 ratings: 4.5,
                 total_reviews: 2321,
@@ -92,23 +87,18 @@ export class HotelAndCarsService {
                 address: 'Central Chicago City',
                 bedrooms_available: 90,
                 images: [
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=dwZ6FKYAgxspCM&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=V5_AAvGMs_PU4M&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=DiWjt0ne9sITjM&vssid=mosaic'
+                    'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/11a7dbd9-3c5c-4316-8671-ffb2d26f1c4b.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/c588e25b-c20a-472a-af9f-6ae9335933d2.png'
                 ],
                 highlights: [{
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=XYCryyOYTe6ZPM&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/dced58d8-b9fb-48d2-8847-2aac82618817.png',
                     detail: 'Hot tub'
                 },
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Washer and Dryer'
-                },
-                {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
-                    detail: 'Jaccuzi'
-                }
-                ],
+                }],
                 price: 897,
                 ratings: 4.5,
                 total_reviews: 2321,
@@ -123,23 +113,18 @@ export class HotelAndCarsService {
                 address: 'Central Chicago City',
                 bedrooms_available: 8,
                 images: [
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=dwZ6FKYAgxspCM&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=V5_AAvGMs_PU4M&vssid=mosaic',
-                    'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=DiWjt0ne9sITjM&vssid=mosaic'
+                    'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/11a7dbd9-3c5c-4316-8671-ffb2d26f1c4b.png',
+                    'https://s3.amazonaws.com/staging.carnivalist-images/c588e25b-c20a-472a-af9f-6ae9335933d2.png'
                 ],
                 highlights: [{
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=XYCryyOYTe6ZPM&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/dced58d8-b9fb-48d2-8847-2aac82618817.png',
                     detail: 'Hot tub'
                 },
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Washer and Dryer'
-                },
-                {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
-                    detail: 'Jaccuzi'
-                }
-                ],
+                }],
                 price: 150,
                 ratings: 4,
                 total_reviews: 123,
@@ -164,16 +149,16 @@ export class HotelAndCarsService {
             address: 'Central New York City',
             bedrooms_available: 45,
             images: [
-                'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=dwZ6FKYAgxspCM&vssid=mosaic',
-                'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=V5_AAvGMs_PU4M&vssid=mosaic',
-                'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ5qIq-j2td5cgsNW_jooO32aErjQ:1725800050055&q=hotel+images&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&sqi=2&ved=2ahUKEwiMib-XsrOIAxUYcPEDHWFXNNAQtKgLegQIFxAB&biw=1440&bih=731&dpr=2#vhid=DiWjt0ne9sITjM&vssid=mosaic'
+                'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png',
+                'https://s3.amazonaws.com/staging.carnivalist-images/11a7dbd9-3c5c-4316-8671-ffb2d26f1c4b.png',
+                'https://s3.amazonaws.com/staging.carnivalist-images/c588e25b-c20a-472a-af9f-6ae9335933d2.png'
             ],
             highlights: [{
-                icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=XYCryyOYTe6ZPM&vssid=mosaic',
+                icon: 'https://s3.amazonaws.com/staging.carnivalist-images/dced58d8-b9fb-48d2-8847-2aac82618817.png',
                 detail: 'Hot tub'
             },
             {
-                icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                 detail: 'Washer and Dryer'
             }],
             price: 12,
@@ -183,19 +168,19 @@ export class HotelAndCarsService {
             long: 38.76,
             amenities: [
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Wifi'
                 },
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Kitchen'
                 },
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Refrigerator'
                 },
                 {
-                    icon: 'https://www.google.com/search?sca_esv=a83123858829115d&rlz=1C5CHFA_enPK1043PK1045&sxsrf=ADLYWIJ029LDT5_1QGJXeZwK-pzqfiAOHg:1725799897271&q=icons&udm=2&fbs=AEQNm0Aa4sjWe7Rqy32pFwRj0UkWd8nbOJfsBGGB5IQQO6L3J_86uWOeqwdnV0yaSF-x2joQcoZ-0Q2Udkt2zEybT7HdNV1kobqvEwEVRYBCltlBtQd5-pPeakpVgpgEn2RgmgzeZo15rltNMrDtoZe63sl46hHJXZmfPBeZdqdwrtlSxkvce3I&sa=X&ved=2ahUKEwjH6NHOsbOIAxULUaQEHbFDM70QtKgLegQIGhAB&biw=1440&bih=731&dpr=2#vhid=LcoQ8DQhO-Qz_M&vssid=mosaic',
+                    icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
                     detail: 'Dryer'
                 }
             ],
@@ -213,7 +198,12 @@ export class HotelAndCarsService {
             ],
             availablity_from: '',
             availablity_till: '',
-            cancellation_policy: 'jnfskj jk ttkje kjkj kjs fkjs kjf skj fkj sfkjfs dfkjd skjs skj skjs kj '
+            cancellation_policy: 'jnfskj jk ttkje kjkj kjs fkjs kjf skj fkj sfkjfs dfkjd skjs skj skjs kj ',
+            host_details: {
+                name: 'Hamza Sohail',
+                years_of_experience: 7,
+
+            }
 
         }
 
