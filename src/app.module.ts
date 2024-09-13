@@ -13,6 +13,7 @@ import { ScreenConfigsModule } from './screen-configs/screen-configs.module';
 import { HotelAndCarsModule } from './hotel-and-cars/hotel-and-cars.module';
 import { DestinationsModule } from './destinations/destinations.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { OptionsModule } from './options/options.module';
 
 
 
@@ -53,7 +54,8 @@ import { BookingsModule } from './bookings/bookings.module';
     ScreenConfigsModule,
     HotelAndCarsModule,
     DestinationsModule,
-    BookingsModule
+    BookingsModule,
+    OptionsModule
   ],
   controllers: [AppController],
   providers: [AppService],

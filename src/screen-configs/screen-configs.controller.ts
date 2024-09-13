@@ -1,5 +1,4 @@
-import { Controller, Get, Post, Body, UseFilters, Query, UseGuards, Req, BadRequestException } from '@nestjs/common';
-import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
+import { Controller, Get, Post, Body, Query, Req, BadRequestException } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
 import { ScreenConfigsService } from './screen-configs.service';

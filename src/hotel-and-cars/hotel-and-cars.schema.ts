@@ -1,14 +1,13 @@
 import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { HOTEL_AND_CARS_COLLECTION } from './hotel-and-cars.constants';
+import { OPTIONS_COLLECTION } from 'src/options/options.constants';
 
 
 export enum RecordType {
     C = 'Car',
     H = 'Hotel'
 }
-
-
 
 export enum BookingStatus {
     P = 'Pending',
@@ -172,12 +171,14 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         amenities: {
             type: [Schema.Types.ObjectId],
             required: true,
-            default: null
+            default: null,
+            ref: OPTIONS_COLLECTION
         },
         car_options: {
             type: [Schema.Types.ObjectId],
             required: true,
-            default: null
+            default: null,
+            ref: OPTIONS_COLLECTION
         },
         type: {
             type: String,

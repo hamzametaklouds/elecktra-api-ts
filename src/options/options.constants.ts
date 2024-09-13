@@ -1,0 +1,2 @@
+export const OPTIONS_PROVIDER_TOKEN = 'OPTIONS_PROVIDER_TOKEN';
+export const OPTIONS_COLLECTION = 'options';

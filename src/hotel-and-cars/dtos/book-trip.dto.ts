@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class PlanTripDto {
 
@@ -10,6 +10,7 @@ export class PlanTripDto {
         default: '',
     })
     @IsString()
+    @IsOptional()
     start_date: string;
 
     @ApiProperty({
@@ -18,6 +19,7 @@ export class PlanTripDto {
         default: '',
     })
     @IsString()
+    @IsOptional()
     end_date: string;
 
     @ApiProperty({
