@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { HOTEL_AND_CARS_COLLECTION } from './hotel-and-cars.constants';
 import { OPTIONS_COLLECTION } from 'src/options/options.constants';
+import { ILocation } from 'src/app/interfaces';
 
 
 export enum RecordType {
@@ -81,6 +82,9 @@ export interface IHotelDetails {
     ground_rules: string;
 }
 
+
+
+
 export const HotelDetailsSchema = new Schema<IHotelDetails>(
     {
         cancellation_policy: {
@@ -124,8 +128,9 @@ export interface IHotelAndCars {
     amenities: Schema.Types.ObjectId[]
     car_options: Schema.Types.ObjectId[]
     type: string;
-    lat: number;
-    long: number;
+    location: ILocation;
+    // lat: number;
+    // long: number;
     price: number;
     total_rooms: number;
     rooms_reserved: number;
@@ -186,16 +191,28 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             enum: RecordType,
             default: RecordType.H
         },
-        lat: {
-            type: Number,
-            required: true,
-            default: null
+        location: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                required: true,
+                default: 'Point'
+            },
+            coordinates: {
+                type: [Number],  // [longitude, latitude]
+                required: true
+            }
         },
-        long: {
-            type: Number,
-            required: true,
-            default: null
-        },
+        // lat: {
+        //     type: Number,
+        //     required: true,
+        //     default: null
+        // },
+        // long: {
+        //     type: Number,
+        //     required: true,
+        //     default: null
+        // },
         price: {
             type: Number,
             required: true,
@@ -274,3 +291,5 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
 HotelAndCarSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function () {
     this.lean();
 });
+
+HotelAndCarSchema.index({ location: '2dsphere' });

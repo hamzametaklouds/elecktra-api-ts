@@ -14,6 +14,7 @@ import { HotelAndCarsModule } from './hotel-and-cars/hotel-and-cars.module';
 import { DestinationsModule } from './destinations/destinations.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { OptionsModule } from './options/options.module';
+import { WhishlistModule } from './whishlist/whishlist.module';
 
 
 
@@ -55,7 +56,8 @@ import { OptionsModule } from './options/options.module';
     HotelAndCarsModule,
     DestinationsModule,
     BookingsModule,
-    OptionsModule
+    OptionsModule,
+    WhishlistModule
   ],
   controllers: [AppController],
   providers: [AppService],

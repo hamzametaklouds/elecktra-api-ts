@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { DESTINATIONS_COLLECTION } from './destinations.constants';
+import { ILocation } from 'src/app/interfaces';
 
 
 
@@ -9,8 +10,9 @@ export interface IDestinations {
     title: string;
     description: string;
     images: string[]
-    lat: number;
-    long: number;
+    location: ILocation
+    // lat: number;
+    // long: number;
     is_popular: boolean;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
@@ -35,16 +37,28 @@ export const DestinationSchema = new Schema<IDestinations>(
             required: true,
             default: null
         },
-        lat: {
-            type: Number,
-            required: true,
-            default: null
+        location: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                required: true,
+                default: 'Point'
+            },
+            coordinates: {
+                type: [Number],  // [longitude, latitude]
+                required: true
+            }
         },
-        long: {
-            type: Number,
-            required: true,
-            default: null
-        },
+        // lat: {
+        //     type: Number,
+        //     required: true,
+        //     default: null
+        // },
+        // long: {
+        //     type: Number,
+        //     required: true,
+        //     default: null
+        // },
         is_popular: {
             type: Boolean,
             required: false,

@@ -13,6 +13,12 @@ export class HotelAndCarsService {
     ) { }
 
 
+    async getHotelOrCarById(id) {
+
+        return await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false })
+
+    }
+
 
     async planTrip(body: PlanTripDto, user: { userId?: ObjectId }) {
 
@@ -52,6 +58,7 @@ export class HotelAndCarsService {
                 total_reviews: 321,
                 lat: 36.98,
                 long: 38.76,
+                is_in_whishlist: false
 
             },
             {
@@ -78,6 +85,7 @@ export class HotelAndCarsService {
                 total_reviews: 2321,
                 lat: 36.98,
                 long: 38.76,
+                is_in_whishlist: true
 
             },
             {
@@ -104,6 +112,7 @@ export class HotelAndCarsService {
                 total_reviews: 2321,
                 lat: 36.98,
                 long: 38.76,
+                is_in_whishlist: false
 
             },
             {
@@ -130,6 +139,7 @@ export class HotelAndCarsService {
                 total_reviews: 123,
                 lat: 36.98,
                 long: 38.76,
+                is_in_whishlist: true
 
             }
 

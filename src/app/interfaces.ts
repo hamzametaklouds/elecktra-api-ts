@@ -31,3 +31,8 @@ export interface IImage {
   buffer: Buffer;
   size: number;
 }
+
+export interface ILocation {
+  type: 'Point';  // Geospatial type, always 'Point' for a single location
+  coordinates: [number, number];  // [longitude, latitude]
+}

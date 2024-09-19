@@ -7,6 +7,7 @@ import { HotelAndCarModel } from './hotel-and-cars.model';
 @Module({
   imports: [DatabaseModule],
   controllers: [HotelAndCarsController],
-  providers: [HotelAndCarsService, ...HotelAndCarModel]
+  providers: [HotelAndCarsService, ...HotelAndCarModel],
+  exports: [HotelAndCarsService]
 })
 export class HotelAndCarsModule { }
