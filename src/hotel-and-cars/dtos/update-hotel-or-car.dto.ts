@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
-import { RecordType } from '../hotel-and-cars.schema';
+import { HotelType, RecordType } from '../hotel-and-cars.schema';
 
 export class UpdateHotelAndCarDto {
 
@@ -143,6 +143,15 @@ export class UpdateHotelAndCarDto {
     @IsString()
     @IsOptional()
     availability_till: string;
+
+    @ApiProperty({
+        description: 'hotel_type string e.g hotel_type=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsEnum(HotelType)
+    @IsOptional()
+    hotel_type: string;
 
 
     @ApiProperty({

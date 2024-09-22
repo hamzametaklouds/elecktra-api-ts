@@ -16,6 +16,12 @@ export enum BookingStatus {
     CN = 'Cancelled',
 }
 
+export enum HotelType {
+    H = 'Hotel',
+    F = 'Flat',
+    GH = 'Guest House',
+}
+
 export interface ICarDetails {
     _id?: Schema.Types.ObjectId;
     year: number;
@@ -132,6 +138,7 @@ export interface IHotelAndCars {
     // lat: number;
     // long: number;
     price: number;
+    hotel_type?: string;
     total_rooms: number;
     rooms_reserved: number;
     availability_from: Date;
@@ -156,6 +163,12 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         description: {
             type: String,
             required: true,
+            default: null
+        },
+        hotel_type: {
+            type: String,
+            enum: HotelType,
+            required: false,
             default: null
         },
         images: {

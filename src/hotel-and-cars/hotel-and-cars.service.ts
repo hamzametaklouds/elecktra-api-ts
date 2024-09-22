@@ -216,6 +216,7 @@ export class HotelAndCarsService {
             price,
             total_rooms,
             rooms_reserved,
+            hotel_type,
             availability_from,
             availability_till,
             host_or_owner,
@@ -232,6 +233,7 @@ export class HotelAndCarsService {
                 address,
                 highlights,
                 amenities,
+                hotel_type,
                 car_options,
                 type,
                 location: {
