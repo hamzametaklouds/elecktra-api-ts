@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
 import { RecordType } from '../hotel-and-cars.schema';
 
-export class CreateHotelAndCarDto {
+export class UpdateHotelAndCarDto {
 
     @ApiProperty({
         description: 'title string e.g title=raoarsalanlatif@gmail.com',
@@ -11,7 +11,7 @@ export class CreateHotelAndCarDto {
         default: '',
     })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     title: string;
 
     @ApiProperty({
@@ -20,7 +20,7 @@ export class CreateHotelAndCarDto {
         default: '',
     })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     description: string;
 
     @ApiProperty({
@@ -78,6 +78,7 @@ export class CreateHotelAndCarDto {
     })
     @IsString()
     @IsEnum(RecordType)
+    @IsOptional()
     type: string;
 
     @ApiProperty({
@@ -104,6 +105,7 @@ export class CreateHotelAndCarDto {
         default: 0,
     })
     @IsNumber()
+    @IsOptional()
     price: number;
 
     @ApiProperty({
@@ -149,24 +151,26 @@ export class CreateHotelAndCarDto {
         default: 0,
     })
     @IsMongoId()
+    @IsOptional()
     host_or_owner: ObjectId;
 
     @ApiProperty({
         description: 'car_details string e.g car_details=[{icon:,detail:}]',
         required: true,
-        default:
-        {
-            year: 2000,
-            seats: 0,
-            mileage: '',
-            fuel_type: '',
-            transmission: '',
-            duration_conditions: [''],
-            owner_rules: ''
-        },
+        default: [
+            {
+                year: 2000,
+                seats: 0,
+                mileage: '',
+                fuel_type: '',
+                transmission: '',
+                duration_conditions: [''],
+                owner_rules: ''
+            }],
     })
+    @IsArray()
     @IsOptional()
-    car_details: object;
+    car_details: object[];
 
 
     @ApiProperty({
@@ -178,9 +182,18 @@ export class CreateHotelAndCarDto {
             ground_rules: '',
         },
     })
+    @IsArray()
     @IsOptional()
-    hotel_details: object;
+    hotel_details: object[];
 
+    @ApiProperty({
+        description: 'is_available number e.g is_available=676',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_available: boolean
 
 
 

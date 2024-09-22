@@ -9,8 +9,9 @@ import { HotelAndCarsService } from './hotel-and-cars.service';
 import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
 import { IPaginationQuery } from 'src/app/interfaces';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
+import { CreateHotelAndCarDto } from './dtos/create-hotel-or-car.dto';
 
-const { RESOURCE_CREATED } = getMessages('boking(s)');
+const { RESOURCE_CREATED } = getMessages('hotel-or-car(s)');
 
 @ApiTags('hotel-and-cars')
 @Controller('hotel-and-cars')
@@ -24,7 +25,7 @@ export class HotelAndCarsController {
     @ApiBody({ type: PlanTripDto })
     async planTrip(@ParamsHandler() pagination: IPaginationQuery, @Body() body: PlanTripDto, @Req() req: Request) {
         const { $rpp, $page, $filter, $orderBy } = pagination;
-        const createBooking = await this.hotelAndCarsService.planTrip(body, req.user);
+        const createBooking = await this.hotelAndCarsService.planTrip(body, req.user, $filter, $orderBy);
         return { message: 'Hotels Data fetched successfully', data: createBooking };
     }
 
@@ -35,5 +36,16 @@ export class HotelAndCarsController {
         const hotels = await this.hotelAndCarsService.hotelDetail(hotel_id, req.user);
         return { message: 'Hotels Data fetched successfully', data: hotels };
     }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Post()
+    @ApiBody({ type: CreateHotelAndCarDto })
+    async insert(@Body() body: CreateHotelAndCarDto, @Req() req: Request) {
+        const createOption = await this.hotelAndCarsService.insertOption(body, req.user);
+        return { message: RESOURCE_CREATED, data: createOption };
+    }
+
+
 
 }

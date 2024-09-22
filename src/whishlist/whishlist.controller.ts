@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -10,11 +10,23 @@ import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 const { RESOURCE_CREATED } = getMessages('whishlist(s)');
 
 
-@Controller('whishlist')
-@ApiTags('whishlist')
+@Controller('wishlist')
+@ApiTags('wishlist')
 export class WhishlistController {
     constructor(private whishlistService: WhishlistService) { }
 
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Get()
+    async get(@Req() req: Request) {
+
+        const screens = await this.whishlistService.getWishlist(req.user)
+
+        return screens
+
+
+    }
 
 
     @ApiBearerAuth(AuthorizationHeader)

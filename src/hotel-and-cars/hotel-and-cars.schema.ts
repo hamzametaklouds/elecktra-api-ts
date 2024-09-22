@@ -73,7 +73,7 @@ export const CarDetailSchema = new Schema<ICarDetails>(
 export interface IHighlights {
     _id?: Schema.Types.ObjectId;
     icon: string;
-    deatail: string;
+    detail: string;
 }
 
 export interface IHotelDetails {
@@ -109,7 +109,7 @@ export const HighlightSchema = new Schema<IHighlights>(
             required: false,
             default: null
         },
-        deatail: {
+        detail: {
             type: String,
             required: false,
             default: null
@@ -165,29 +165,29 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         },
         address: {
             type: String,
-            required: true,
+            required: false,
             default: null
         },
         highlights: {
             type: [HighlightSchema],
-            required: true,
+            required: false,
             default: null
         },
         amenities: {
             type: [Schema.Types.ObjectId],
-            required: true,
+            required: false,
             default: null,
             ref: OPTIONS_COLLECTION
         },
         car_options: {
             type: [Schema.Types.ObjectId],
-            required: true,
+            required: false,
             default: null,
             ref: OPTIONS_COLLECTION
         },
         type: {
             type: String,
-            required: true,
+            required: false,
             enum: RecordType,
             default: RecordType.H
         },
@@ -215,27 +215,27 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         // },
         price: {
             type: Number,
-            required: true,
+            required: false,
             default: null
         },
         total_rooms: {
             type: Number,
-            required: true,
+            required: false,
             default: null
         },
         rooms_reserved: {
             type: Number,
-            required: true,
-            default: null
+            required: false,
+            default: 0
         },
         availability_from: {
             type: Date,
-            required: true,
+            required: false,
             default: null
         },
         availability_till: {
             type: Date,
-            required: true,
+            required: false,
             default: null
         },
         host_or_owner: {

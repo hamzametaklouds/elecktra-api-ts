@@ -15,6 +15,33 @@ export class WhishlistService {
     ) { }
 
 
+    async getWishlist(user: { userId?: ObjectId }) {
+        const userExists = await this.whishlistModel.findOne({ user_id: user.userId, is_deleted: false })
+
+        if (!userExists) {
+            throw new BadRequestException('Wishlist does not exist')
+        }
+        return await this.whishlistModel.aggregate([
+            {
+                $match: { user_id: userExists._id }
+            },
+            {
+                $lookup: {
+                    from: 'hotel_and_cars',
+                    localField: 'hotels',
+                    foreignField: '_id',
+                    as: 'hotels',
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    hotels: '$hotels'
+                }
+            }
+
+        ])
+    }
 
     async insertWhishlist(body: CreateWhishlistDto, user: { userId?: ObjectId }) {
 

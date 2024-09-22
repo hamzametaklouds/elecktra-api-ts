@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { OPTIONS_PROVIDER_TOKEN } from './options.constants';
-import { IOptions } from './options.schema';
+import { IOptions, OptionParentType, OptionSubType } from './options.schema';
 import { CreateOptionDto } from './dtos/create-options.dto';
 
 @Injectable()
@@ -11,11 +11,20 @@ export class OptionsService {
         private optionsModel: Model<IOptions>
     ) { }
 
-    // async getScreens(screen) {
-    //     return await this.optionsModel
-    //         .find({ type: screen })
-    //         .sort({ order_number: 1 })
-    // }
+    async getOptionsForAmenities() {
+        const essentials = await this.optionsModel
+            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.E }, { title: 1, description: 1, sub_type: 1 })
+
+        const features = await this.optionsModel
+            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.F }, { title: 1, description: 1, sub_type: 1 })
+
+        return {
+            essentials: essentials,
+            features: features
+        }
+    }
+
+
 
 
     async insertOption(body: CreateOptionDto, user: { userId?: ObjectId }) {
@@ -28,7 +37,7 @@ export class OptionsService {
                 description,
                 parent_type,
                 sub_type,
-                created_by: user.userId
+                created_by: user?.userId || null
             }).save();
 
 

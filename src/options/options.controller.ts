@@ -17,13 +17,23 @@ export class OptionsController {
     constructor(private optionService: OptionsService) { }
 
 
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Get('amenities')
+    async detail() {
+        const options = await this.optionService.getOptionsForAmenities();
+        return { message: 'Amenities essentials and features fetched successfully', data: options };
+    }
+
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
     @Post()
     @ApiBody({ type: CreateOptionDto })
     async insert(@Body() body: CreateOptionDto, @Req() req: Request) {
-        const createScreenConfig = await this.optionService.insertOption(body, req.user);
-        return { message: RESOURCE_CREATED, data: createScreenConfig };
+        const createOption = await this.optionService.insertOption(body, req.user);
+        return { message: RESOURCE_CREATED, data: createOption };
     }
+
+
 }
