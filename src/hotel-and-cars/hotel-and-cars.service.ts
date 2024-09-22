@@ -53,6 +53,7 @@ export class HotelAndCarsService {
                     ratings: 3.2,
                     total_reviews: 321,
                     location: 1,
+                    hotel_type: 1,
                     is_in_wishlist: { $literal: false },
 
                 }
@@ -99,6 +100,7 @@ export class HotelAndCarsService {
                     ratings: 3.2,
                     total_reviews: 321,
                     location: 1,
+                    hotel_type: 1,
                     is_in_wishlist: { $literal: false },
                     amenities: 1,
                     reviews: [
