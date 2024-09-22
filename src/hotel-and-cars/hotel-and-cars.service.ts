@@ -41,6 +41,9 @@ export class HotelAndCarsService {
                 $match: { is_deleted: false, ...$filter }
             },
             {
+                $sort: $sortBy
+            },
+            {
                 $project: {
                     _id: 1,
                     title: 1,

@@ -21,6 +21,14 @@ export class CreateOptionDto {
     description: string;
 
     @ApiProperty({
+        description: 'icon string e.g icon=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    icon: string;
+
+    @ApiProperty({
         description: 'parent_type string e.g parent_type=xyzabc',
         required: true,
         default: '',

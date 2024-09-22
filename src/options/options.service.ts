@@ -13,10 +13,10 @@ export class OptionsService {
 
     async getOptionsForAmenities() {
         const essentials = await this.optionsModel
-            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.E }, { title: 1, description: 1, sub_type: 1 })
+            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.E }, { title: 1, description: 1, sub_type: 1, icon: 1 })
 
         const features = await this.optionsModel
-            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.F }, { title: 1, description: 1, sub_type: 1 })
+            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.F }, { title: 1, description: 1, sub_type: 1, icon: 1 })
 
         return {
             essentials: essentials,
@@ -29,12 +29,13 @@ export class OptionsService {
 
     async insertOption(body: CreateOptionDto, user: { userId?: ObjectId }) {
 
-        const { title, description, parent_type, sub_type } = body;
+        const { title, description, parent_type, icon, sub_type } = body;
 
         const screen = await new this.optionsModel(
             {
                 title,
                 description,
+                icon,
                 parent_type,
                 sub_type,
                 created_by: user?.userId || null

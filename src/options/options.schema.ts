@@ -26,6 +26,7 @@ export interface IOptions {
     description: string;
     parent_type: string;
     sub_type: string;
+    icon: string;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -40,6 +41,11 @@ export const OptionSchema = new Schema<IOptions>(
             default: null
         },
         description: {
+            type: String,
+            required: true,
+            default: null
+        },
+        icon: {
             type: String,
             required: true,
             default: null
