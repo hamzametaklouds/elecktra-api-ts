@@ -5,6 +5,7 @@ import { HOTEL_AND_CARS_PROVIDER_TOKEN } from './hotel-and-cars.constants';
 import { IHotelAndCars } from './hotel-and-cars.schema';
 import { CreateHotelAndCarDto } from './dtos/create-hotel-or-car.dto';
 import { matchFilters } from 'src/app/mongo.utils';
+const moment = require('moment');
 
 @Injectable()
 export class HotelAndCarsService {
@@ -34,9 +35,52 @@ export class HotelAndCarsService {
             long
         } = body;
 
+        let hotel
+
         $filter = matchFilters($filter)
 
-        const hotel = await this.hotelAndCarsModel.aggregate([
+        // if (start_date && end_date) {
+        //     const startDate = moment(start_date).utc().toDate();
+        //     const endDate = moment(end_date).utc().toDate();
+
+        //     console.log("Start Date:", startDate);
+        //     console.log("End Date:", endDate);
+
+        //     hotel = await this.hotelAndCarsModel.aggregate([
+        //         {
+        //             $match: {
+        //                 is_deleted: false,
+        //                 availablity_from: { $gte: startDate },   // Hotel must be available starting on or before start_date
+        //                 availability_till: { $gte: endDate } // Hotel should be available on or after the start date
+        //             }
+        //         },
+        //         {
+        //             $sort: $sortBy
+        //         },
+        //         {
+        //             $project: {
+        //                 _id: 1,
+        //                 title: 1,
+        //                 description: 1,
+        //                 address: 1,
+        //                 bedrooms_available: '$total_rooms',
+        //                 images: 1,
+        //                 highlights: 1,
+        //                 price: 1,
+        //                 ratings: 3.2,
+        //                 total_reviews: 321,
+        //                 location: 1,
+        //                 hotel_type: 1,
+        //                 is_in_wishlist: { $literal: false },
+        //             }
+        //         }
+        //     ])
+
+
+        // }
+
+
+        hotel = await this.hotelAndCarsModel.aggregate([
             {
                 $match: { is_deleted: false, ...$filter }
             },
@@ -53,8 +97,8 @@ export class HotelAndCarsService {
                     images: 1,
                     highlights: 1,
                     price: 1,
-                    ratings: 3.2,
-                    total_reviews: 321,
+                    ratings: { $literal: 3.2 },
+                    total_reviews: { $literal: 321 },
                     location: 1,
                     hotel_type: 1,
                     is_in_wishlist: { $literal: false },
@@ -62,6 +106,10 @@ export class HotelAndCarsService {
                 }
             }
         ])
+
+
+
+        console.log(hotel)
 
 
 
@@ -263,3 +311,4 @@ export class HotelAndCarsService {
 
     }
 }
+
