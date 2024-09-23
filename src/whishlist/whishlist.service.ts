@@ -64,7 +64,7 @@ export class WhishlistService {
                 whishlist = await new this.whishlistModel(
                     {
                         user_id: user.userId,
-                        $push: { hotels: hotel_and_car._id },
+                        hotels: [hotel_and_car._id],
                         created_by: user.userId
                     }).save();
 
