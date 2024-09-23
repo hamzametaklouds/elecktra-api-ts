@@ -42,8 +42,10 @@ export class HotelAndCarsController {
     @Post()
     @ApiBody({ type: CreateHotelAndCarDto })
     async insert(@Body() body: CreateHotelAndCarDto, @Req() req: Request) {
+
         const createOption = await this.hotelAndCarsService.insertOption(body, req.user);
         return { message: RESOURCE_CREATED, data: createOption };
+
     }
 
 

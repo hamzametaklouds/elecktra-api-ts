@@ -59,6 +59,9 @@ export class HotelAndCarsService {
                             spherical: true,
                             query: {
                                 is_deleted: false,
+                                ...$filter,
+                                availability_from: { $lte: endDate },  // Ensure available from before or on endDate
+                                availability_till: { $gte: startDate } // Ensure available till after or on startDate
                             },
                         },
                     },
@@ -88,14 +91,27 @@ export class HotelAndCarsService {
                 console.error("Error during aggregation:", error);
                 throw new Error("Could not fetch hotels");
             }
-        } else {
+        }
+        else {
             try {
                 hotel = await this.hotelAndCarsModel.aggregate([
                     {
-                        $match: { is_deleted: false, ...$filter }
+                        $geoNear: {
+                            near: {
+                                type: "Point",
+                                coordinates: [long, lat]
+                            },
+                            distanceField: "dist.calculated",
+                            maxDistance: 50000, // Adjust distance as needed
+                            spherical: true,
+                            query: {
+                                is_deleted: false,
+                                ...$filter,
+                            },
+                        },
                     },
                     {
-                        $sort: $sortBy
+                        $sort: { "dist.calculated": 1 }
                     },
                     {
                         $project: {

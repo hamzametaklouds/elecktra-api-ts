@@ -23,8 +23,7 @@ export class WhishlistController {
 
         const screens = await this.whishlistService.getWishlist(req.user)
 
-        return screens
-
+        return screens;
 
     }
 

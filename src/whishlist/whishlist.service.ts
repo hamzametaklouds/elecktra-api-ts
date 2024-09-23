@@ -23,7 +23,7 @@ export class WhishlistService {
         }
 
         console.log()
-        return await this.whishlistModel.aggregate([
+        const hotels = await this.whishlistModel.aggregate([
             {
                 $match: { user_id: userExists.user_id }
             },
@@ -38,11 +38,32 @@ export class WhishlistService {
             {
                 $project: {
                     _id: 1,
-                    hotels: '$hotels'
+                    hotels: {
+                        $map: {
+                            input: '$hotels',
+                            as: 'hotel',
+                            in: {
+                                _id: '$$hotel._id',
+                                title: '$$hotel.title',
+                                description: '$$hotel.description',
+                                address: '$$hotel.address',
+                                images: '$$hotel.images',
+                                highlights: '$$hotel.highlights',
+                                price: '$$hotel.price',
+                                ratings: { $literal: 3.2 },
+                                total_reviews: { $literal: 321 },
+                                location: '$$hotel.location',
+                                hotel_type: '$$hotel.hotel_type',
+                                is_in_wishlist: { $literal: false }
+                            }
+                        }
+                    }
                 }
             }
-
         ])
+
+        return hotels[0]?.hotels && hotels[0]?.hotels?.length !== 0 ? hotels[0]?.hotels : []
+
     }
 
     async insertWhishlist(body: CreateWhishlistDto, user: { userId?: ObjectId }) {
