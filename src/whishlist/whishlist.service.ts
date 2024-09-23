@@ -21,9 +21,11 @@ export class WhishlistService {
         if (!userExists) {
             throw new BadRequestException('Wishlist does not exist')
         }
+
+        console.log()
         return await this.whishlistModel.aggregate([
             {
-                $match: { user_id: userExists._id }
+                $match: { user_id: userExists.user_id }
             },
             {
                 $lookup: {
