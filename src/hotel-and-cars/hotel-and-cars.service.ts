@@ -153,7 +153,7 @@ export class HotelAndCarsService {
 
         const hotel = await this.hotelAndCarsModel.aggregate([
             {
-                $match: { is_deleted: false }
+                $match: { _id: hotelExists._id, is_deleted: false }
             },
             {
                 $lookup: {
