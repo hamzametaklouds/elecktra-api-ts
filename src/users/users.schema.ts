@@ -9,6 +9,14 @@ export interface IUsers {
   email: string;
   country_code: string;
   phone_no: string;
+  gender?: string
+  biography?: string
+  emergency_contact?: string;
+  country?: string
+  street?: string
+  suite?: string
+  city?: string
+  post_code?: string
   dob: string;
   uuid: string;
   created_by?: Schema.Types.ObjectId;
@@ -45,6 +53,46 @@ export const UsersSchema = new Schema<IUsers>(
       default: ''
     },
     phone_no: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    gender: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    biography: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    emergency_contact: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    country: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    street: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    suite: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    city: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    post_code: {
       type: String,
       required: false,
       default: ''

@@ -29,7 +29,7 @@ export class UpdateUserDto {
   })
   @IsString()
   @IsOptional()
-  sur_name: string;
+  last_name: string;
 
   @ApiProperty({
     description: 'fcm_token string e.g fcm_token= Charles',
@@ -49,6 +49,16 @@ export class UpdateUserDto {
   @IsOptional()
   email: string;
 
+
+  @ApiProperty({
+    description: 'country_code string e.g country_code= +(555)',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  country_code: string;
+
   @ApiProperty({
     description: 'phone_no string e.g phone_no= +(555) 555-1234',
     required: true,
@@ -59,31 +69,87 @@ export class UpdateUserDto {
   phone_no: string;
 
   @ApiProperty({
-    description: 'password string e.g password= xyz123',
+    description: 'gender string e.g gender= +(555) 555-1234',
     required: true,
     default: '',
   })
   @IsString()
   @IsOptional()
-  password: string;
+  gender: string;
 
   @ApiProperty({
-    description: 'finger_print_enabled boolean e.g finger_print_enabled=true',
-    required: false,
-    default: false,
+    description: 'phone_no string e.g phone_no= +(555) 555-1234',
+    required: true,
+    default: '',
   })
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  finger_print_enabled?: boolean;
+  biography: string;
 
   @ApiProperty({
-    description: 'is_disabled boolean e.g is_disabled=true',
-    required: false,
-    default: false,
+    description: 'emergency_contact string e.g emergency_contact= +(555) 555-1234',
+    required: true,
+    default: '',
   })
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  is_disabled?: boolean;
+  emergency_contact: string;
+
+  @ApiProperty({
+    description: 'country string e.g country= +(555) 555-1234',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  country: string;
+
+  @ApiProperty({
+    description: 'street string e.g street= +(555) 555-1234',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  street: string;
+
+  @ApiProperty({
+    description: 'suite string e.g suite= +(555) 555-1234',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  suite: string;
+
+  @ApiProperty({
+    description: 'city string e.g city= +(555) 555-1234',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  city: string;
+
+  @ApiProperty({
+    description: 'post_code string e.g post_code= +(555) 555-1234',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  post_code: string;
+
+
+  @ApiProperty({
+    description: 'dob string e.g dob= +(555) 555-1234',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  dob: string;
+
 
   @ApiProperty({
     description: 'is_deleted boolean e.g is_deleted=true',
@@ -94,15 +160,6 @@ export class UpdateUserDto {
   @IsOptional()
   is_deleted?: boolean;
 
-  @ApiProperty({
-    description: 'updated_by mongo id',
-    required: false,
-    default: false,
-  })
-  @IsMongoId()
-  @IsOptional()
-  updated_by?: ObjectId;
 
-  
-  
+
 }

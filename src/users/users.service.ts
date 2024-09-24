@@ -40,6 +40,11 @@ export class UsersService {
       .findOne({ _id: id, is_deleted: false })
   }
 
+  async getUserData(user: { userId?: ObjectId }): Promise<IUsers> {
+    return await this.userModel
+      .findOne({ _id: user.userId, is_deleted: false })
+  }
+
 
 
   /**
@@ -222,48 +227,61 @@ export class UsersService {
    * @param userObject receives the user object that contains data that we want to update as an argument
    * @returns the updated user object
    */
-  async updateUser(userId: string, userObject: UpdateUserDto) {
+  async updateUser(userObject: UpdateUserDto, user: { userId?: ObjectId }) {
+
+    const userExists = await this.userModel.findOne({ _id: user.userId })
+
+    if (!userExists) {
+      throw new BadRequestException('Invalid token')
+    }
+
     const {
       image,
       first_name,
-      sur_name,
+      last_name,
       email,
       phone_no,
-      password,
       fcm_token,
       is_deleted,
-      is_disabled,
-      updated_by,
+      country_code,
+      gender,
+      biography,
+      emergency_contact,
+      country,
+      street,
+      suite,
+      city,
+      post_code,
+      dob
+
     } = userObject;
 
-    if (!userObject) {
-      return { status: false, statusCode: 400, message: 'New Data Not Found', data: null }
-
-    }
-
-    let hashPassword;
-    if (password) {
-      hashPassword = await bcrypt.hash(password, 10);
-    }
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
+      userExists._id,
       {
         image,
         first_name,
-        sur_name,
+        last_name,
         email,
         phone_no,
         fcm_token,
-        password: hashPassword,
         is_deleted,
-        is_disabled,
-        updated_by
+        country_code,
+        gender,
+        biography,
+        emergency_contact,
+        country,
+        street,
+        suite,
+        city,
+        post_code,
+        dob
       },
       { new: true }
     );
 
-    return { status: true, statusCode: 204, message: `User ${is_deleted ? 'deleted' : is_disabled ? 'disabled' : 'updated'} successfully`, data: updatedUser };
+    return { status: true, statusCode: 204, message: `User ${is_deleted ? 'deleted' : is_deleted ? 'deleted' : 'updated'} successfully`, data: updatedUser };
   }
 
 }
