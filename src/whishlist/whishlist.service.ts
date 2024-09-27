@@ -1,4 +1,4 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { CreateWhishlistDto } from './dtos/create-whishlist.dto';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
@@ -11,10 +11,14 @@ export class WhishlistService {
     constructor(
         @Inject(WHISHLIST_PROVIDER_TOKEN)
         private whishlistModel: Model<IWhishlist>,
+        @Inject(forwardRef(() => HotelAndCarsService))
         private hotelAndCarsService: HotelAndCarsService
     ) { }
 
 
+    async getWishlistById(userId) {
+        return await this.whishlistModel.findOne({ user_id: userId, is_deleted: false })
+    }
     async getWishlist(user: { userId?: ObjectId }) {
         const userExists = await this.whishlistModel.findOne({ user_id: user.userId, is_deleted: false })
 
@@ -54,13 +58,16 @@ export class WhishlistService {
                                 total_reviews: { $literal: 321 },
                                 location: '$$hotel.location',
                                 hotel_type: '$$hotel.hotel_type',
-                                is_in_wishlist: { $literal: false }
+                                is_in_wishlist: { $literal: true }
                             }
                         }
                     }
                 }
             }
         ])
+
+
+
 
         return hotels[0]?.hotels && hotels[0]?.hotels?.length !== 0 ? hotels[0]?.hotels : []
 

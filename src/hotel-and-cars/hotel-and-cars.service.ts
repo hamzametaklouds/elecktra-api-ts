@@ -1,10 +1,11 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { PlanTripDto } from './dtos/book-trip.dto';
 import { Model, ObjectId } from 'mongoose';
 import { HOTEL_AND_CARS_PROVIDER_TOKEN } from './hotel-and-cars.constants';
 import { IHotelAndCars } from './hotel-and-cars.schema';
 import { CreateHotelAndCarDto } from './dtos/create-hotel-or-car.dto';
 import { matchFilters } from 'src/app/mongo.utils';
+import { WhishlistService } from 'src/whishlist/whishlist.service';
 const moment = require('moment');
 
 @Injectable()
@@ -12,7 +13,9 @@ export class HotelAndCarsService {
 
     constructor(
         @Inject(HOTEL_AND_CARS_PROVIDER_TOKEN)
-        private hotelAndCarsModel: Model<IHotelAndCars>
+        private hotelAndCarsModel: Model<IHotelAndCars>,
+        @Inject(forwardRef(() => WhishlistService))
+        private wishListService: WhishlistService
     ) { }
 
 
@@ -33,9 +36,11 @@ export class HotelAndCarsService {
             long
         } = body;
 
-        let hotel;
+        let hotel = [];
 
         $filter = matchFilters($filter);
+
+        const userWishList = await this.wishListService.getWishlistById(user.userId)
 
         if ((start_date && start_date !== '') && (end_date && end_date !== '')) {
             const startDate = moment(start_date).utc().startOf('day').toDate();
@@ -137,6 +142,13 @@ export class HotelAndCarsService {
             }
         }
 
+        if (userWishList) {
+            hotel.forEach((value) => {
+                // Check if the hotel's _id exists in the userWishlist.hotels array
+                value.is_in_wishlist = userWishList.hotels.includes(value._id);
+            });
+        }
+
         console.log("Hotels found:", hotel);
         return hotel;
     }
@@ -203,6 +215,10 @@ export class HotelAndCarsService {
                 }
             }
         ])
+
+        const userWishList = await this.wishListService.getWishlistById(user.userId)
+
+        hotel[0].is_in_wishlist = userWishList.hotels.includes(hotel[0]._id);
 
 
 
