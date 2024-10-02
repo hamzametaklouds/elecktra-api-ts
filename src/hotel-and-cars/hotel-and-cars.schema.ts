@@ -167,7 +167,6 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         },
         hotel_type: {
             type: String,
-            enum: HotelType,
             required: false,
             default: null
         },
