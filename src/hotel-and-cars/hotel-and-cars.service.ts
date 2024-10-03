@@ -158,6 +158,8 @@ export class HotelAndCarsService {
 
     async planCarTrip(body: PlanCarTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
         const {
+            start_date,
+            end_date,
             lat,
             long
         } = body;
@@ -167,6 +169,9 @@ export class HotelAndCarsService {
         $filter = matchFilters($filter);
 
         const userWishList = await this.wishListService.getWishlistById(user.userId)
+
+        const startDate = moment(start_date).utc().startOf('day').toDate();
+        const endDate = moment(end_date).utc().endOf('day').toDate();
 
 
         try {
@@ -183,6 +188,8 @@ export class HotelAndCarsService {
                         query: {
                             is_deleted: false,
                             ...$filter,
+                            availability_from: { $lte: endDate },
+                            availability_till: { $gte: startDate },
                             type: RecordType.C
                         },
                     },
