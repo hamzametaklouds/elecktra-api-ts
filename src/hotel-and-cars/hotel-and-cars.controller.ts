@@ -38,7 +38,7 @@ export class HotelAndCarsController {
     async planCarTrip(@ParamsHandler() pagination: IPaginationQuery, @Body() body: PlanCarTripDto, @Req() req: Request) {
         const { $rpp, $page, $filter, $orderBy } = pagination;
         const createBooking = await this.hotelAndCarsService.planCarTrip(body, req.user, $filter, $orderBy);
-        return { message: 'Hotels Data fetched successfully', data: createBooking };
+        return { message: 'Cars Data fetched successfully', data: createBooking };
     }
 
     @ApiBearerAuth(AuthorizationHeader)

@@ -203,15 +203,15 @@ export class HotelAndCarsService {
                         title: 1,
                         description: 1,
                         address: 1,
-                        bedrooms_available: '$total_rooms',
                         images: 1,
                         highlights: 1,
                         price: 1,
                         ratings: { $literal: 3.2 },
                         total_reviews: { $literal: 321 },
                         location: 1,
-                        hotel_type: 1,
-                        is_in_wishlist: { $literal: false }
+                        is_in_wishlist: { $literal: false },
+                        car_details: 1
+
                     }
                 }
             ]);
