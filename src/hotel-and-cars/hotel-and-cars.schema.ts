@@ -27,9 +27,9 @@ export interface ICarDetails {
     year: number;
     seats: number;
     mileage: string
-    fuel_type: string
-    make: string
-    transmission: string
+    fuel_type: Schema.Types.ObjectId
+    make: Schema.Types.ObjectId
+    transmission: Schema.Types.ObjectId
     duration_conditions: object[]
     owner_rules: string
 }
@@ -52,19 +52,22 @@ export const CarDetailSchema = new Schema<ICarDetails>(
             default: null
         },
         fuel_type: {
-            type: String,
+            type: Schema.Types.ObjectId,
             required: false,
+            ref: OPTIONS_COLLECTION,
             default: null
         },
 
         transmission: {
-            type: String,
+            type: Schema.Types.ObjectId,
             required: false,
+            ref: OPTIONS_COLLECTION,
             default: null
         },
         make: {
-            type: String,
+            type: Schema.Types.ObjectId,
             required: false,
+            ref: OPTIONS_COLLECTION,
             default: null
         },
         duration_conditions: {

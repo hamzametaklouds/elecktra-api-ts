@@ -24,6 +24,23 @@ export class OptionsService {
         }
     }
 
+    async getOptionsForCars() {
+        const fuel_types = await this.optionsModel
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.FT }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+
+        const car_makes = await this.optionsModel
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.M }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+
+        const transmission = await this.optionsModel
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.T }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+
+        return {
+            fuel_types: fuel_types,
+            car_makes: car_makes,
+            transmission: transmission
+        }
+    }
+
 
 
 

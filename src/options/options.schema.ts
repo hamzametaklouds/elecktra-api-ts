@@ -7,14 +7,20 @@ export enum OptionParentType {
     C = 'Car'
 }
 
+export enum O {
+    S = 'Stay',
+    C = 'Car'
+}
+
+
 export enum OptionSubType {
     VT = 'Vehicle Type',
     T = 'Transmission',
     FT = 'Fuel Type',
+    M = 'Car Make',
     A = 'Amenities',
     E = 'Essential',
     F = 'Feature'
-
 }
 
 

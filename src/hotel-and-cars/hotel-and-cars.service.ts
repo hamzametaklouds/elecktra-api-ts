@@ -211,6 +211,40 @@ export class HotelAndCarsService {
                     $match: $filter,
                 },
                 {
+                    $lookup: {
+                        from: 'options',
+                        localField: 'fuel_type',
+                        foreignField: '_id',
+                        as: 'fuel_type',
+                    },
+                },
+                {
+                    $unwind: '$fuel_type'
+
+                },
+                {
+                    $lookup: {
+                        from: 'options',
+                        localField: 'make',
+                        foreignField: '_id',
+                        as: 'make',
+                    },
+                },
+                {
+                    $unwind: '$make'
+                },
+                {
+                    $lookup: {
+                        from: 'options',
+                        localField: 'transmission',
+                        foreignField: '_id',
+                        as: 'transmission',
+                    },
+                },
+                {
+                    $unwind: '$transmission'
+                },
+                {
                     $project: {
                         _id: 1,
                         title: 1,
@@ -223,7 +257,16 @@ export class HotelAndCarsService {
                         total_reviews: { $literal: 321 },
                         location: 1,
                         is_in_wishlist: { $literal: false },
-                        car_details: 1
+                        car_details: {
+                            year: '$car_details.year',
+                            seats: '$car_details.seats',
+                            mileage: '$car_details.mileage',
+                            fuel_type: '$fuel_type.title',
+                            make: '$make.title',
+                            transmission: '$transmission.title',
+                            duration_conditions: '$car_details.duration_conditions',
+                            owner_rules: '$car_details.owner_rules'
+                        }
 
                     }
                 }

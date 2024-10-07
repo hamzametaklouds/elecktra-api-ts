@@ -25,6 +25,14 @@ export class OptionsController {
         return { message: 'Amenities essentials and features fetched successfully', data: options };
     }
 
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Get('car')
+    async detailCar() {
+        const options = await this.optionService.getOptionsForCars();
+        return { message: 'Car Options fetched successfully', data: options };
+    }
+
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
