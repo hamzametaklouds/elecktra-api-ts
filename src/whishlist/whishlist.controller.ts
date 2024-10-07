@@ -20,11 +20,9 @@ export class WhishlistController {
     @UseGuards(JWTAuthGuard)
     @Get()
     async get(@Req() req: Request) {
-
         const screens = await this.whishlistService.getWishlist(req.user)
 
         return screens;
-
     }
 
 

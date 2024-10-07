@@ -187,7 +187,6 @@ export class HotelAndCarsService {
                         spherical: true,
                         query: {
                             is_deleted: false,
-                            ...$filter,
                             availability_from: { $lte: endDate },
                             availability_till: { $gte: startDate },
                             type: RecordType.C
@@ -196,6 +195,20 @@ export class HotelAndCarsService {
                 },
                 {
                     $sort: { "dist.calculated": 1 }
+                },
+                {
+                    $addFields: {
+                        year: '$car_details.year',
+                        seats: '$car_details.seats',
+                        mileage: '$car_details.mileage',
+                        fuel_type: '$car_details.fuel_type',
+                        make: '$car_details.make',
+                        transmission: '$car_details.transmission'
+                    }
+
+                },
+                {
+                    $match: $filter,
                 },
                 {
                     $project: {

@@ -170,7 +170,7 @@ export class CreateHotelAndCarDto {
             mileage: '',
             fuel_type: '',
             transmission: '',
-            duration_conditions: [''],
+            duration_conditions: [{ detail: '', value: '' }],
             owner_rules: ''
         },
     })
