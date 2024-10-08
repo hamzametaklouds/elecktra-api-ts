@@ -7,6 +7,7 @@ import { CreateHotelAndCarDto } from './dtos/create-hotel-or-car.dto';
 import { matchFilters } from 'src/app/mongo.utils';
 import { WhishlistService } from 'src/whishlist/whishlist.service';
 import { PlanCarTripDto } from './dtos/book-car.dto';
+import { RecentSearchsService } from 'src/recent-searchs/recent-searchs.service';
 const moment = require('moment');
 
 @Injectable()
@@ -16,7 +17,8 @@ export class HotelAndCarsService {
         @Inject(HOTEL_AND_CARS_PROVIDER_TOKEN)
         private hotelAndCarsModel: Model<IHotelAndCars>,
         @Inject(forwardRef(() => WhishlistService))
-        private wishListService: WhishlistService
+        private wishListService: WhishlistService,
+        private recentSearchService: RecentSearchsService
     ) { }
 
 
@@ -28,6 +30,8 @@ export class HotelAndCarsService {
 
     async planTrip(body: PlanTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
         const {
+            place_title,
+            address,
             start_date,
             end_date,
             adults,
@@ -152,12 +156,31 @@ export class HotelAndCarsService {
             });
         }
 
+        this.recentSearchService.insertSearch(
+            {
+                title: place_title ? place_title : null,
+                address: address ? address : null,
+                adults: adults,
+                children: children,
+                infants: infants,
+                start_date: start_date,
+                end_date: end_date,
+                type: 'Stay',
+                lat: lat,
+                long: long
+
+            },
+            user
+        )
+
         console.log("Hotels found:", hotel);
         return hotel;
     }
 
     async planCarTrip(body: PlanCarTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
         const {
+            place_title,
+            address,
             start_date,
             end_date,
             lat,
@@ -283,6 +306,23 @@ export class HotelAndCarsService {
                 value.is_in_wishlist = userWishList.cars.includes(value._id);
             });
         }
+
+        this.recentSearchService.insertSearch(
+            {
+                title: place_title ? place_title : null,
+                address: address ? address : null,
+                adults: null,
+                children: null,
+                infants: null,
+                start_date: start_date,
+                end_date: end_date,
+                type: 'Stay',
+                lat: lat,
+                long: long
+
+            },
+            user
+        )
 
         console.log("Hotels found:", hotel);
         return hotel;
@@ -461,7 +501,6 @@ export class HotelAndCarsService {
                     ratings: 3.2,
                     total_reviews: 321,
                     location: 1,
-                    hotel_type: 1,
                     is_in_wishlist: { $literal: false },
                     car_options: 1,
                     reviews: [

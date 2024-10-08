@@ -4,6 +4,24 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class PlanCarTripDto {
 
     @ApiProperty({
+        description: 'place_title string e.g place_title=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    @IsOptional()
+    place_title: string;
+
+    @ApiProperty({
+        description: 'address string e.g address=xyzabc',
+        required: true,
+        default: 'Times square new york city',
+    })
+    @IsString()
+    @IsOptional()
+    address: string;
+
+    @ApiProperty({
         description: 'start_date string e.g start_date=xyzabc',
         required: true,
         default: '',

@@ -15,6 +15,7 @@ import { DestinationsModule } from './destinations/destinations.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { OptionsModule } from './options/options.module';
 import { WhishlistModule } from './whishlist/whishlist.module';
+import { RecentSearchsModule } from './recent-searchs/recent-searchs.module';
 
 
 
@@ -57,7 +58,8 @@ import { WhishlistModule } from './whishlist/whishlist.module';
     DestinationsModule,
     BookingsModule,
     OptionsModule,
-    WhishlistModule
+    WhishlistModule,
+    RecentSearchsModule
   ],
   controllers: [AppController],
   providers: [AppService],

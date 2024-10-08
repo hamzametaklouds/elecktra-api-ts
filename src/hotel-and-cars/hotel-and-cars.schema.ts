@@ -140,11 +140,8 @@ export interface IHotelAndCars {
     address: string;
     highlights: IHighlights[]
     amenities: Schema.Types.ObjectId[]
-    car_options: Schema.Types.ObjectId[]
     type: string;
     location: ILocation;
-    // lat: number;
-    // long: number;
     price: number;
     hotel_type?: string;
     total_rooms: number;
@@ -199,12 +196,6 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             default: null,
             ref: OPTIONS_COLLECTION
         },
-        car_options: {
-            type: [Schema.Types.ObjectId],
-            required: false,
-            default: null,
-            ref: OPTIONS_COLLECTION
-        },
         type: {
             type: String,
             required: false,
@@ -223,16 +214,6 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
                 required: true
             }
         },
-        // lat: {
-        //     type: Number,
-        //     required: true,
-        //     default: null
-        // },
-        // long: {
-        //     type: Number,
-        //     required: true,
-        //     default: null
-        // },
         price: {
             type: Number,
             required: false,
