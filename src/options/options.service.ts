@@ -34,10 +34,15 @@ export class OptionsService {
         const transmission = await this.optionsModel
             .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.T }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
 
+        const amenities = await this.optionsModel
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.A }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+
+
         return {
             fuel_types: fuel_types,
             car_makes: car_makes,
-            transmission: transmission
+            transmission: transmission,
+            amenities: amenities
         }
     }
 

@@ -289,7 +289,8 @@ export class HotelAndCarsService {
                             transmission: '$transmission.title',
                             duration_conditions: '$car_details.duration_conditions',
                             owner_rules: '$car_details.owner_rules'
-                        }
+                        },
+
 
                     }
                 }
@@ -489,6 +490,14 @@ export class HotelAndCarsService {
                 },
             },
             {
+                $lookup: {
+                    from: 'options',
+                    localField: 'amenities',
+                    foreignField: '_id',
+                    as: 'amenities',
+                },
+            },
+            {
                 $project: {
                     _id: 1,
                     title: 1,
@@ -517,8 +526,8 @@ export class HotelAndCarsService {
                     ],
                     owner_details: {
                         name: 'Hamza Sohail',
-
-                    }
+                    },
+                    amenities: 1
 
                 }
             }
