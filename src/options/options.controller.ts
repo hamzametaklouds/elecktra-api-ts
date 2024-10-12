@@ -31,6 +31,7 @@ export class OptionsController {
     async detailCar() {
         const options = await this.optionService.getOptionsForCars();
         return { message: 'Car Options fetched successfully', data: options };
+        //-------
     }
 
 
