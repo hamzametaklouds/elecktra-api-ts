@@ -67,9 +67,58 @@ export class WhishlistService {
         ])
 
 
-
-
         return hotels[0]?.hotels && hotels[0]?.hotels?.length !== 0 ? hotels[0]?.hotels : []
+
+    }
+
+    async getWishlistForCar(user: { userId?: ObjectId }) {
+        const userExists = await this.whishlistModel.findOne({ user_id: user.userId, is_deleted: false })
+
+        if (!userExists) {
+            throw new BadRequestException('Wishlist does not exist')
+        }
+
+        console.log()
+        const cars = await this.whishlistModel.aggregate([
+            {
+                $match: { user_id: userExists.user_id }
+            },
+            {
+                $lookup: {
+                    from: 'hotel_and_cars',
+                    localField: 'cars',
+                    foreignField: '_id',
+                    as: 'cars',
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    hotels: {
+                        $map: {
+                            input: '$cars',
+                            as: 'car',
+                            in: {
+                                _id: '$$car._id',
+                                title: '$$car.title',
+                                description: '$$car.description',
+                                address: '$$car.address',
+                                images: '$$car.images',
+                                highlights: '$$car.highlights',
+                                price: '$$car.price',
+                                ratings: { $literal: 3.2 },
+                                total_reviews: { $literal: 321 },
+                                location: '$$car.location',
+                                is_in_wishlist: { $literal: true }
+                            }
+                        }
+                    }
+                }
+            }
+        ])
+
+
+        return cars[0]?.cars && cars[0]?.cars?.length !== 0 ? cars[0]?.cars : []
 
     }
 

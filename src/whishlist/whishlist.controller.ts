@@ -18,9 +18,18 @@ export class WhishlistController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
-    @Get()
+    @Get('hotel')
     async get(@Req() req: Request) {
         const screens = await this.whishlistService.getWishlist(req.user)
+
+        return screens;
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Get('car')
+    async getCar(@Req() req: Request) {
+        const screens = await this.whishlistService.getWishlistForCar(req.user)
 
         return screens;
     }
