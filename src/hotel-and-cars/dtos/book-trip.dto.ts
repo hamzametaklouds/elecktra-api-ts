@@ -9,7 +9,6 @@ export class PlanTripDto {
         default: 'Times Square',
     })
     @IsString()
-    @IsOptional()
     place_title: string;
 
     @ApiProperty({

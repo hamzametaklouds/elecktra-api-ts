@@ -9,7 +9,6 @@ export class PlanCarTripDto {
         default: '',
     })
     @IsString()
-    @IsOptional()
     place_title: string;
 
     @ApiProperty({
