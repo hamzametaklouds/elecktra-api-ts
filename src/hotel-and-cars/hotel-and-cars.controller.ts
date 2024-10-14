@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Req, UseGuards, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, UseGuards, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiBearerAuth, ApiTags, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -23,6 +23,7 @@ export class HotelAndCarsController {
     @UseGuards(JWTAuthGuard)
     @ApiQuery({ type: QueryParamsDTO })
     @Post('plan')
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: PlanTripDto })
     async planTrip(@ParamsHandler() pagination: IPaginationQuery, @Body() body: PlanTripDto, @Req() req: Request) {
         const { $rpp, $page, $filter, $orderBy } = pagination;
@@ -34,6 +35,7 @@ export class HotelAndCarsController {
     @UseGuards(JWTAuthGuard)
     @ApiQuery({ type: QueryParamsDTO })
     @Post('plan/car')
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: PlanCarTripDto })
     async planCarTrip(@ParamsHandler() pagination: IPaginationQuery, @Body() body: PlanCarTripDto, @Req() req: Request) {
         const { $rpp, $page, $filter, $orderBy } = pagination;

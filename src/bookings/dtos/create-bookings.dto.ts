@@ -13,14 +13,6 @@ export class CreateBookingsDto {
     hotel_or_car: ObjectId;
 
     @ApiProperty({
-        description: 'rooms_reserved number e.g rooms_reserved=676',
-        required: true,
-        default: 0,
-    })
-    @IsNumber()
-    rooms_reserved: number;
-
-    @ApiProperty({
         description: 'start_date string e.g start_date=xyzabc',
         required: true,
         default: '',
@@ -59,15 +51,6 @@ export class CreateBookingsDto {
     })
     @IsNumber()
     infants: number;
-
-
-    @ApiProperty({
-        description: 'nights number e.g nights=xyzabc',
-        required: true,
-        default: 0,
-    })
-    @IsNumber()
-    nights: number;
 
 
 }

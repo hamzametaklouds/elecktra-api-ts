@@ -16,8 +16,8 @@ export class BookingsController {
 
     constructor(private bookingsService: BookingsService) { }
 
-    // @ApiBearerAuth(AuthorizationHeader)
-    // @UseGuards(JWTAuthGuard)
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
     @Post()
     @ApiBody({ type: CreateBookingsDto })
     async insert(@Body() body: CreateBookingsDto, @Req() req: Request) {

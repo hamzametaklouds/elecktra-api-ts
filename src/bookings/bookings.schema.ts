@@ -23,20 +23,14 @@ export interface IGuests {
 
 export interface ITaxAndFee {
     _id: Schema.Types.ObjectId;
-    platform_fee_percentage: number,
     tax_percentage: number,
     total_tax_applied: number
-    total_platform_fee_applied: number
 
 }
 
 export const TaxAndFeeSchema = new Schema<ITaxAndFee>(
     {
-        platform_fee_percentage: {
-            type: Number,
-            required: false,
-            default: 0,
-        },
+
         tax_percentage: {
             type: Number,
             required: false,
@@ -47,11 +41,7 @@ export const TaxAndFeeSchema = new Schema<ITaxAndFee>(
             required: false,
             default: 0
         },
-        total_platform_fee_applied: {
-            type: Number,
-            required: false,
-            default: 0,
-        },
+
     },
 );
 
@@ -81,7 +71,6 @@ export const GuestSchema = new Schema<IGuests>(
 export interface IBookings {
     _id?: Schema.Types.ObjectId;
     hotel_or_car: Schema.Types.ObjectId;
-    rooms_reserved: number;
     start_date: Date;
     end_date: Date;
     guests: IGuests;
@@ -101,11 +90,6 @@ export const BookingSchema = new Schema<IBookings>(
     {
         hotel_or_car: {
             type: Schema.Types.ObjectId,
-            required: true,
-            default: null
-        },
-        rooms_reserved: {
-            type: Number,
             required: true,
             default: null
         },
