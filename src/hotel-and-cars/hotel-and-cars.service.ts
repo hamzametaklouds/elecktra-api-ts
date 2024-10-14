@@ -29,32 +29,184 @@ export class HotelAndCarsService {
     }
 
     async planTrip(body: PlanTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
-        const {
-            place_title,
-            address,
-            start_date,
-            end_date,
-            adults,
-            children,
-            infants,
-            lat,
-            long
-        } = body;
 
-        let hotel = [];
+        try {
+            const {
+                place_title,
+                address,
+                start_date,
+                end_date,
+                adults,
+                children,
+                infants,
+                lat,
+                long
+            } = body;
 
-        $filter = matchFilters($filter);
+            let hotel = [];
 
-        const userWishList = await this.wishListService.getWishlistById(user.userId)
+            $filter = matchFilters($filter);
 
-        if ((start_date && start_date !== '') && (end_date && end_date !== '')) {
+            const userWishList = await this.wishListService.getWishlistById(user.userId)
+
+            if ((start_date && start_date !== '') && (end_date && end_date !== '')) {
+                const startDate = moment(start_date).utc().startOf('day').toDate();
+                const endDate = moment(end_date).utc().endOf('day').toDate();
+
+                console.log("Start Date:", startDate);
+                console.log("End Date:", endDate);
+                console.log("Longitude:", long);
+                console.log("Latitude:", lat);
+
+                try {
+                    hotel = await this.hotelAndCarsModel.aggregate([
+                        {
+                            $geoNear: {
+                                near: {
+                                    type: "Point",
+                                    coordinates: [long, lat]
+                                },
+                                distanceField: "dist.calculated",
+                                maxDistance: 50000, // Adjust distance as needed
+                                spherical: true,
+                                query: {
+                                    is_deleted: false,
+                                    ...$filter,
+                                    availability_from: { $lte: endDate },  // Ensure available from before or on endDate
+                                    availability_till: { $gte: startDate }, // Ensure available till after or on startDate,
+                                    type: RecordType.H
+                                },
+                            },
+                        },
+                        {
+                            $sort: { "dist.calculated": 1 }
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                title: 1,
+                                description: 1,
+                                address: 1,
+                                images: 1,
+                                highlights: 1,
+                                price: 1,
+                                ratings: { $literal: 3.2 },
+                                total_reviews: { $literal: 321 },
+                                location: 1,
+                                hotel_type: 1,
+                                is_in_wishlist: { $literal: false },
+                                distance: "$dist.calculated"
+                            }
+                        }
+                    ]);
+
+                } catch (error) {
+                    console.error("Error during aggregation:", error);
+                    throw new Error("Could not fetch hotels");
+                }
+            }
+            else {
+                try {
+                    hotel = await this.hotelAndCarsModel.aggregate([
+                        {
+                            $geoNear: {
+                                near: {
+                                    type: "Point",
+                                    coordinates: [long, lat]
+                                },
+                                distanceField: "dist.calculated",
+                                maxDistance: 50000, // Adjust distance as needed
+                                spherical: true,
+                                query: {
+                                    is_deleted: false,
+                                    ...$filter,
+                                    type: RecordType.H
+                                },
+                            },
+                        },
+                        {
+                            $sort: { "dist.calculated": 1 }
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                title: 1,
+                                description: 1,
+                                address: 1,
+                                bedrooms_available: '$total_rooms',
+                                images: 1,
+                                highlights: 1,
+                                price: 1,
+                                ratings: { $literal: 3.2 },
+                                total_reviews: { $literal: 321 },
+                                location: 1,
+                                hotel_type: 1,
+                                is_in_wishlist: { $literal: false }
+                            }
+                        }
+                    ]);
+                } catch (error) {
+                    console.error("Error during aggregation without date filters:", error);
+                    throw new Error("Could not fetch hotels");
+                }
+            }
+
+            if (userWishList) {
+                hotel.forEach((value) => {
+                    // Check if the hotel's _id exists in the userWishlist.hotels array
+                    value.is_in_wishlist = userWishList.hotels.includes(value._id);
+                });
+            }
+
+            this.recentSearchService.insertSearch(
+                {
+                    title: place_title ? place_title : null,
+                    address: address ? address : null,
+                    adults: adults,
+                    children: children,
+                    infants: infants,
+                    start_date: start_date,
+                    end_date: end_date,
+                    type: 'Stay',
+                    lat: lat,
+                    long: long
+
+                },
+                user
+            )
+
+            console.log("Hotels found:", hotel);
+            return hotel;
+
+        }
+        catch (err) {
+            throw new BadRequestException(err)
+        }
+
+    }
+
+    async planCarTrip(body: PlanCarTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
+
+        try {
+
+            const {
+                place_title,
+                address,
+                start_date,
+                end_date,
+                lat,
+                long
+            } = body;
+
+            let hotel = [];
+
+            $filter = matchFilters($filter);
+
+            const userWishList = await this.wishListService.getWishlistById(user.userId)
+
             const startDate = moment(start_date).utc().startOf('day').toDate();
             const endDate = moment(end_date).utc().endOf('day').toDate();
 
-            console.log("Start Date:", startDate);
-            console.log("End Date:", endDate);
-            console.log("Longitude:", long);
-            console.log("Latitude:", lat);
 
             try {
                 hotel = await this.hotelAndCarsModel.aggregate([
@@ -69,10 +221,9 @@ export class HotelAndCarsService {
                             spherical: true,
                             query: {
                                 is_deleted: false,
-                                ...$filter,
-                                availability_from: { $lte: endDate },  // Ensure available from before or on endDate
-                                availability_till: { $gte: startDate }, // Ensure available till after or on startDate,
-                                type: RecordType.H
+                                availability_from: { $lte: endDate },
+                                availability_till: { $gte: startDate },
+                                type: RecordType.C
                             },
                         },
                     },
@@ -80,50 +231,52 @@ export class HotelAndCarsService {
                         $sort: { "dist.calculated": 1 }
                     },
                     {
-                        $project: {
-                            _id: 1,
-                            title: 1,
-                            description: 1,
-                            address: 1,
-                            images: 1,
-                            highlights: 1,
-                            price: 1,
-                            ratings: { $literal: 3.2 },
-                            total_reviews: { $literal: 321 },
-                            location: 1,
-                            hotel_type: 1,
-                            is_in_wishlist: { $literal: false },
-                            distance: "$dist.calculated"
+                        $addFields: {
+                            year: '$car_details.year',
+                            seats: '$car_details.seats',
+                            mileage: '$car_details.mileage',
+                            fuel_type: '$car_details.fuel_type',
+                            make: '$car_details.make',
+                            transmission: '$car_details.transmission'
                         }
-                    }
-                ]);
 
-            } catch (error) {
-                console.error("Error during aggregation:", error);
-                throw new Error("Could not fetch hotels");
-            }
-        }
-        else {
-            try {
-                hotel = await this.hotelAndCarsModel.aggregate([
+                    },
                     {
-                        $geoNear: {
-                            near: {
-                                type: "Point",
-                                coordinates: [long, lat]
-                            },
-                            distanceField: "dist.calculated",
-                            maxDistance: 50000, // Adjust distance as needed
-                            spherical: true,
-                            query: {
-                                is_deleted: false,
-                                ...$filter,
-                                type: RecordType.H
-                            },
+                        $match: $filter,
+                    },
+                    {
+                        $lookup: {
+                            from: 'options',
+                            localField: 'fuel_type',
+                            foreignField: '_id',
+                            as: 'fuel_type',
                         },
                     },
                     {
-                        $sort: { "dist.calculated": 1 }
+                        $unwind: '$fuel_type'
+
+                    },
+                    {
+                        $lookup: {
+                            from: 'options',
+                            localField: 'make',
+                            foreignField: '_id',
+                            as: 'make',
+                        },
+                    },
+                    {
+                        $unwind: '$make'
+                    },
+                    {
+                        $lookup: {
+                            from: 'options',
+                            localField: 'transmission',
+                            foreignField: '_id',
+                            as: 'transmission',
+                        },
+                    },
+                    {
+                        $unwind: '$transmission'
                     },
                     {
                         $project: {
@@ -131,15 +284,25 @@ export class HotelAndCarsService {
                             title: 1,
                             description: 1,
                             address: 1,
-                            bedrooms_available: '$total_rooms',
                             images: 1,
                             highlights: 1,
                             price: 1,
                             ratings: { $literal: 3.2 },
                             total_reviews: { $literal: 321 },
                             location: 1,
-                            hotel_type: 1,
-                            is_in_wishlist: { $literal: false }
+                            is_in_wishlist: { $literal: false },
+                            car_details: {
+                                year: '$car_details.year',
+                                seats: '$car_details.seats',
+                                mileage: '$car_details.mileage',
+                                fuel_type: '$fuel_type.title',
+                                make: '$make.title',
+                                transmission: '$transmission.title',
+                                duration_conditions: '$car_details.duration_conditions',
+                                owner_rules: '$car_details.owner_rules'
+                            },
+
+
                         }
                     }
                 ]);
@@ -147,186 +310,40 @@ export class HotelAndCarsService {
                 console.error("Error during aggregation without date filters:", error);
                 throw new Error("Could not fetch hotels");
             }
+
+
+            if (userWishList) {
+                hotel.forEach((value) => {
+                    // Check if the hotel's _id exists in the userWishlist.hotels array
+                    value.is_in_wishlist = userWishList.cars.includes(value._id);
+                });
+            }
+
+            this.recentSearchService.insertSearch(
+                {
+                    title: place_title ? place_title : null,
+                    address: address ? address : null,
+                    adults: null,
+                    children: null,
+                    infants: null,
+                    start_date: start_date,
+                    end_date: end_date,
+                    type: 'Stay',
+                    lat: lat,
+                    long: long
+
+                },
+                user
+            )
+
+            console.log("Hotels found:", hotel);
+            return hotel;
+
+        }
+        catch (err) {
+            throw new BadRequestException(err)
         }
 
-        if (userWishList) {
-            hotel.forEach((value) => {
-                // Check if the hotel's _id exists in the userWishlist.hotels array
-                value.is_in_wishlist = userWishList.hotels.includes(value._id);
-            });
-        }
-
-        this.recentSearchService.insertSearch(
-            {
-                title: place_title ? place_title : null,
-                address: address ? address : null,
-                adults: adults,
-                children: children,
-                infants: infants,
-                start_date: start_date,
-                end_date: end_date,
-                type: 'Stay',
-                lat: lat,
-                long: long
-
-            },
-            user
-        )
-
-        console.log("Hotels found:", hotel);
-        return hotel;
-    }
-
-    async planCarTrip(body: PlanCarTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
-        const {
-            place_title,
-            address,
-            start_date,
-            end_date,
-            lat,
-            long
-        } = body;
-
-        let hotel = [];
-
-        $filter = matchFilters($filter);
-
-        const userWishList = await this.wishListService.getWishlistById(user.userId)
-
-        const startDate = moment(start_date).utc().startOf('day').toDate();
-        const endDate = moment(end_date).utc().endOf('day').toDate();
-
-
-        try {
-            hotel = await this.hotelAndCarsModel.aggregate([
-                {
-                    $geoNear: {
-                        near: {
-                            type: "Point",
-                            coordinates: [long, lat]
-                        },
-                        distanceField: "dist.calculated",
-                        maxDistance: 50000, // Adjust distance as needed
-                        spherical: true,
-                        query: {
-                            is_deleted: false,
-                            availability_from: { $lte: endDate },
-                            availability_till: { $gte: startDate },
-                            type: RecordType.C
-                        },
-                    },
-                },
-                {
-                    $sort: { "dist.calculated": 1 }
-                },
-                {
-                    $addFields: {
-                        year: '$car_details.year',
-                        seats: '$car_details.seats',
-                        mileage: '$car_details.mileage',
-                        fuel_type: '$car_details.fuel_type',
-                        make: '$car_details.make',
-                        transmission: '$car_details.transmission'
-                    }
-
-                },
-                {
-                    $match: $filter,
-                },
-                {
-                    $lookup: {
-                        from: 'options',
-                        localField: 'fuel_type',
-                        foreignField: '_id',
-                        as: 'fuel_type',
-                    },
-                },
-                {
-                    $unwind: '$fuel_type'
-
-                },
-                {
-                    $lookup: {
-                        from: 'options',
-                        localField: 'make',
-                        foreignField: '_id',
-                        as: 'make',
-                    },
-                },
-                {
-                    $unwind: '$make'
-                },
-                {
-                    $lookup: {
-                        from: 'options',
-                        localField: 'transmission',
-                        foreignField: '_id',
-                        as: 'transmission',
-                    },
-                },
-                {
-                    $unwind: '$transmission'
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        title: 1,
-                        description: 1,
-                        address: 1,
-                        images: 1,
-                        highlights: 1,
-                        price: 1,
-                        ratings: { $literal: 3.2 },
-                        total_reviews: { $literal: 321 },
-                        location: 1,
-                        is_in_wishlist: { $literal: false },
-                        car_details: {
-                            year: '$car_details.year',
-                            seats: '$car_details.seats',
-                            mileage: '$car_details.mileage',
-                            fuel_type: '$fuel_type.title',
-                            make: '$make.title',
-                            transmission: '$transmission.title',
-                            duration_conditions: '$car_details.duration_conditions',
-                            owner_rules: '$car_details.owner_rules'
-                        },
-
-
-                    }
-                }
-            ]);
-        } catch (error) {
-            console.error("Error during aggregation without date filters:", error);
-            throw new Error("Could not fetch hotels");
-        }
-
-
-        if (userWishList) {
-            hotel.forEach((value) => {
-                // Check if the hotel's _id exists in the userWishlist.hotels array
-                value.is_in_wishlist = userWishList.cars.includes(value._id);
-            });
-        }
-
-        this.recentSearchService.insertSearch(
-            {
-                title: place_title ? place_title : null,
-                address: address ? address : null,
-                adults: null,
-                children: null,
-                infants: null,
-                start_date: start_date,
-                end_date: end_date,
-                type: 'Stay',
-                lat: lat,
-                long: long
-
-            },
-            user
-        )
-
-        console.log("Hotels found:", hotel);
-        return hotel;
     }
 
 

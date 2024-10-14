@@ -38,7 +38,7 @@ export class RecentSearchsService {
 
         const screen = await new this.recentSearchModel(
             {
-                title,
+                title: title,
                 address,
                 adults,
                 children,

@@ -12,14 +12,49 @@ export enum BookingStatus {
     P = 'Pending',
     C = 'Completed',
     CN = 'Cancelled',
+    CR = 'Created',
 }
-
 export interface IGuests {
     _id?: Schema.Types.ObjectId;
     adults: number;
     children: number;
     infants: number;
 }
+
+export interface ITaxAndFee {
+    _id: Schema.Types.ObjectId;
+    platform_fee_percentage: number,
+    tax_percentage: number,
+    total_tax_applied: number
+    total_platform_fee_applied: number
+
+}
+
+export const TaxAndFeeSchema = new Schema<ITaxAndFee>(
+    {
+        platform_fee_percentage: {
+            type: Number,
+            required: false,
+            default: 0,
+        },
+        tax_percentage: {
+            type: Number,
+            required: false,
+            default: 0,
+        },
+        total_tax_applied: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        total_platform_fee_applied: {
+            type: Number,
+            required: false,
+            default: 0,
+        },
+    },
+);
+
 
 
 export const GuestSchema = new Schema<IGuests>(
@@ -50,10 +85,12 @@ export interface IBookings {
     start_date: Date;
     end_date: Date;
     guests: IGuests;
-    current_location: string;
     nights: number;
-    booking_type: string;
+    type: string;
     status: string;
+    sub_total: number;
+    taxes_and_fees: ITaxAndFee;
+    reference_number: string;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -87,8 +124,18 @@ export const BookingSchema = new Schema<IBookings>(
             required: false,
             default: null
         },
-        current_location: {
+        taxes_and_fees: {
+            type: TaxAndFeeSchema,
+            required: false,
+            default: null
+        },
+        reference_number: {
             type: String,
+            required: true,
+            default: null
+        },
+        sub_total: {
+            type: Number,
             required: true,
             default: null
         },
@@ -97,11 +144,17 @@ export const BookingSchema = new Schema<IBookings>(
             required: false,
             default: 0,
         },
-        booking_type: {
+        type: {
             type: String,
             required: false,
             enum: BookingType,
-            default: null,
+            default: BookingType.H,
+        },
+        status: {
+            type: String,
+            required: false,
+            enum: BookingStatus,
+            default: BookingStatus.CR,
         },
         is_disabled: {
             type: Boolean,

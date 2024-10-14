@@ -62,14 +62,6 @@ export class CreateBookingsDto {
 
 
     @ApiProperty({
-        description: 'current_location string e.g current_location=xyzabc',
-        required: true,
-        default: '',
-    })
-    @IsString()
-    current_location: string;
-
-    @ApiProperty({
         description: 'nights number e.g nights=xyzabc',
         required: true,
         default: 0,

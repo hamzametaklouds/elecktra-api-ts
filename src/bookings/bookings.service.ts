@@ -24,7 +24,6 @@ export class BookingsService {
             adults,
             children,
             infants,
-            current_location,
             nights,
         } = body;
 
@@ -39,7 +38,6 @@ export class BookingsService {
                     children: children,
                     infants: infants
                 },
-                current_location,
                 nights,
                 created_by: user.userId ? user.userId : null
             }).save();
