@@ -94,7 +94,7 @@ export class WhishlistService {
             {
                 $project: {
                     _id: 1,
-                    hotels: {
+                    cars: {
                         $map: {
                             input: '$cars',
                             as: 'car',
@@ -153,12 +153,14 @@ export class WhishlistService {
 
             else {
 
-                whishlist = await new this.whishlistModel(
-                    {
-                        user_id: user.userId,
-                        $push: { cars: hotel_and_car._id },
-                        created_by: user.userId
-                    }).save();
+                if (!whishlistExists.cars.includes(hotel_and_car._id)) {
+                    // If not present, push the car ID using $addToSet (avoids duplicates)
+                    whishlist = await this.whishlistModel.findOneAndUpdate(
+                        { user_id: user.userId },
+                        { $addToSet: { cars: hotel_and_car._id } }, // $addToSet adds the ID only if it's not already in the array
+                        { new: true } // Return the updated document
+                    );
+                }
 
             }
 
@@ -167,14 +169,15 @@ export class WhishlistService {
         else {
             if (hotel_and_car?.type === RecordType.H) {
 
-                whishlist = await this.whishlistModel.findByIdAndUpdate(
-                    { _id: whishlistExists._id },
-                    {
-                        $push: { hotels: hotel_and_car._id },
-                    },
-                    {
-                        new: true
-                    });
+                if (!whishlistExists.hotels.includes(hotel_and_car._id)) {
+                    // If not present, push the car ID using $addToSet (avoids duplicates)
+                    whishlist = await this.whishlistModel.findOneAndUpdate(
+                        { user_id: user.userId },
+                        { $addToSet: { hotels: hotel_and_car._id } }, // $addToSet adds the ID only if it's not already in the array
+                        { new: true } // Return the updated document
+                    );
+                }
+
 
 
 
@@ -182,15 +185,14 @@ export class WhishlistService {
 
             else {
 
-
-                whishlist = await this.whishlistModel.findByIdAndUpdate(
-                    { _id: whishlistExists._id },
-                    {
-                        $push: { cars: hotel_and_car._id },
-                    },
-                    {
-                        new: true
-                    });
+                if (!whishlistExists.cars.includes(hotel_and_car._id)) {
+                    // If not present, push the car ID using $addToSet (avoids duplicates)
+                    whishlist = await this.whishlistModel.findOneAndUpdate(
+                        { user_id: user.userId },
+                        { $addToSet: { cars: hotel_and_car._id } }, // $addToSet adds the ID only if it's not already in the array
+                        { new: true } // Return the updated document
+                    );
+                }
 
 
             }
