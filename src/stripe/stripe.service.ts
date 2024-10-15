@@ -40,6 +40,19 @@ export class StripeService {
         }
     }
 
+    async verifyPayment(paymentId: string): Promise<{ status: string }> {
+        try {
+            // Retrieve the PaymentIntent from Stripe using the paymentId
+            const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentId);
+
+            // Return the status of the PaymentIntent
+            return { status: paymentIntent.status };
+        } catch (error) {
+            throw new Error(`Error verifying payment: ${error.message}`);
+        }
+    }
+
+
 
 
 }

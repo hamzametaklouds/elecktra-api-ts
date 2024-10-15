@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsMongoId, IsNumber, IsString } from 'class-validator';
+import { IsMongoId, IsNumber, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
 
 export class CreateBookingsDto {
@@ -54,3 +54,4 @@ export class CreateBookingsDto {
 
 
 }
+

@@ -5,6 +5,7 @@ import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
 import { IBookings } from './bookings.schema';
 import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
+import { CreatePaymentIntentDto } from './dtos/create-payment-intent';
 
 @Injectable()
 export class BookingsService {
@@ -83,12 +84,20 @@ export class BookingsService {
             }).save();
 
 
-        const intent = await this.stripeService.createPaymentIntent((parseFloat((sub_total * 100).toFixed(2))), 'usd')
+        // const intent = await this.stripeService.createPaymentIntent((parseFloat((sub_total * 100).toFixed(2))), 'usd')
 
-        console.log('intent-----', intent)
+        // console.log('intent-----', intent)
 
-        return intent
+        return booking
 
     }
+
+    async verifyPayment(body: CreatePaymentIntentDto, user: { userId?: ObjectId }) {
+
+        const intent = await this.stripeService.verifyPayment(body.payment_intent)
+
+        return intent
+    }
+
 
 }
