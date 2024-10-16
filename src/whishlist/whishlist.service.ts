@@ -109,6 +109,7 @@ export class WhishlistService {
                                 ratings: { $literal: 3.2 },
                                 total_reviews: { $literal: 321 },
                                 location: '$$car.location',
+                                car_details: '$$car.car_details',
                                 is_in_wishlist: { $literal: true }
                             }
                         }
