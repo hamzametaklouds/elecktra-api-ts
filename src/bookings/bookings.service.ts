@@ -1,11 +1,12 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { CreateBookingsDto } from './dtos/create-bookings.dto';
 import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
-import { IBookings } from './bookings.schema';
+import { BookingStatus, IBookings, IPayment } from './bookings.schema';
 import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
 import { CreatePaymentIntentDto } from './dtos/create-payment-intent';
+import { CreatePaymentDto } from './dtos/create-payment';
 
 @Injectable()
 export class BookingsService {
@@ -13,9 +14,23 @@ export class BookingsService {
     constructor(
         @Inject(BOOKINGS_PROVIDER_TOKEN)
         private bookingModel: Model<IBookings>,
+        @Inject(forwardRef(() => StripeService))
         private stripeService: StripeService,
         private hotelAndCarService: HotelAndCarsService
     ) { }
+
+
+    async getBookingById(id) {
+
+        return await this.bookingModel.findOne({ _id: id, is_deleted: false })
+
+    }
+
+    async updateBooking(body: IPayment, booking_id) {
+
+        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, status: BookingStatus.C })
+
+    }
 
 
     async insertBooking(body: CreateBookingsDto, user: { userId?: ObjectId }) {
@@ -92,11 +107,19 @@ export class BookingsService {
 
     }
 
-    async verifyPayment(body: CreatePaymentIntentDto, user: { userId?: ObjectId }) {
+    async verifyPayment(body: CreatePaymentDto, user: { userId?: ObjectId }) {
 
-        const intent = await this.stripeService.verifyPayment(body.payment_intent)
+        try {
+            const intent = await this.stripeService.createPaymentIntentPro(body, user)
 
-        return intent
+            return intent
+
+        }
+        catch (err) {
+            throw new BadRequestException(err)
+        }
+
+
     }
 
 

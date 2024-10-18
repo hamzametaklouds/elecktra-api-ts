@@ -8,6 +8,7 @@ import { PlanTripDto } from '../hotel-and-cars/dtos/book-trip.dto';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { CreatePaymentIntentDto } from './dtos/create-payment-intent';
+import { CreatePaymentDto } from './dtos/create-payment';
 
 const { RESOURCE_CREATED } = getMessages('boking(s)');
 
@@ -29,10 +30,10 @@ export class BookingsController {
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
     @Post('payment')
-    @ApiBody({ type: CreatePaymentIntentDto })
-    async intent(@Body() body: CreatePaymentIntentDto, @Req() req: Request) {
+    @ApiBody({ type: CreatePaymentDto })
+    async intent(@Body() body: CreatePaymentDto, @Req() req: Request) {
         const createBooking = await this.bookingsService.verifyPayment(body, req.user);
-        return { message: RESOURCE_CREATED, data: createBooking };
+        return { message: 'Payment Successful', data: createBooking };
     }
 
 }

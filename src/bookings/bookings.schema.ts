@@ -14,12 +14,65 @@ export enum BookingStatus {
     CN = 'Cancelled',
     CR = 'Created',
 }
+
+//   paymentId: paymentIntent.id,
+//   customerId: customer.id,
+//   paymentMethodId,
+//   amount: paymentIntent.amount,
+//   currency: paymentIntent.currency,
+//   status: paymentIntent.status,
+//   paymentStatus,
 export interface IGuests {
     _id?: Schema.Types.ObjectId;
     adults: number;
     children: number;
     infants: number;
 }
+
+export interface IPayment {
+
+    customer_id: string;
+    payment_method_id: string;
+    payment_id: string;
+    amount: number;
+    currency: string;
+    payment_status: string;
+}
+
+export const PaymentSchema = new Schema<IPayment>(
+    {
+        customer_id: {
+            type: String,
+            required: false,
+            default: null
+        },
+        payment_method_id: {
+            type: String,
+            required: false,
+            default: null
+        },
+        payment_id: {
+            type: String,
+            required: false,
+            default: null
+        },
+        amount: {
+            type: Number,
+            required: false,
+            default: null
+        },
+        currency: {
+            type: String,
+            required: false,
+            default: null
+        },
+        payment_status: {
+            type: String,
+            required: false,
+            default: null
+        },
+    }
+)
 
 export interface ITaxAndFee {
     _id: Schema.Types.ObjectId;
@@ -78,6 +131,7 @@ export interface IBookings {
     type: string;
     status: string;
     sub_total: number;
+    payment: IPayment;
     taxes_and_fees: ITaxAndFee;
     reference_number: string;
     created_by?: Schema.Types.ObjectId;
@@ -100,6 +154,11 @@ export const BookingSchema = new Schema<IBookings>(
         },
         end_date: {
             type: Date,
+            required: true,
+            default: null
+        },
+        payment: {
+            type: PaymentSchema,
             required: true,
             default: null
         },
