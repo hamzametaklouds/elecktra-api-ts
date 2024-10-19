@@ -159,7 +159,7 @@ export const BookingSchema = new Schema<IBookings>(
         },
         payment: {
             type: PaymentSchema,
-            required: true,
+            required: false,
             default: null
         },
         guests: {
