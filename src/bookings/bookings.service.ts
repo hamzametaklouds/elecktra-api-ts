@@ -53,6 +53,7 @@ export class BookingsService {
                     description: '$hotel.description',
                     address: '$hotel.address',
                     price: '$hotel.price',
+                    images: '$hotel.images',
                     start_date: 1,
                     end_date: 1,
                     created_at: 1,
