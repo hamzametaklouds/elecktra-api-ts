@@ -2,11 +2,12 @@ import { Injectable, Inject, BadRequestException, forwardRef } from '@nestjs/com
 import { Model, ObjectId } from 'mongoose';
 import { CreateBookingsDto } from './dtos/create-bookings.dto';
 import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
-import { BookingStatus, IBookings, IPayment } from './bookings.schema';
+import { BookingStatus, BookingType, IBookings, IPayment } from './bookings.schema';
 import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
 import { CreatePaymentIntentDto } from './dtos/create-payment-intent';
 import { CreatePaymentDto } from './dtos/create-payment';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class BookingsService {
@@ -16,7 +17,8 @@ export class BookingsService {
         private bookingModel: Model<IBookings>,
         @Inject(forwardRef(() => StripeService))
         private stripeService: StripeService,
-        private hotelAndCarService: HotelAndCarsService
+        private hotelAndCarService: HotelAndCarsService,
+        private userService: UsersService
     ) { }
 
 
@@ -25,6 +27,83 @@ export class BookingsService {
         return await this.bookingModel.findOne({ _id: id, is_deleted: false })
 
     }
+
+    async getBookingsForUser(user: { userId?: ObjectId }) {
+        const userExists = await this.userService.getUserById(user.userId);
+
+        const currentDate = new Date();
+
+        const hotels = await this.bookingModel.aggregate([
+            {
+                $match: { created_by: userExists._id, type: BookingType.H, status: BookingStatus.C }
+            },
+            {
+                $lookup: {
+                    from: 'hotel_and_cars',
+                    localField: 'hotel_or_car',
+                    foreignField: '_id',
+                    as: 'hotel',
+                },
+            },
+            { $unwind: '$hotel' },
+            {
+                $project: {
+                    _id: 1,
+                    title: '$hotel.title',
+                    description: '$hotel.description',
+                    address: '$hotel.address',
+                    price: '$hotel.price',
+                    start_date: 1,
+                    end_date: 1,
+                    created_at: 1,
+                    status: {
+                        $cond: {
+                            if: { $eq: ['$status', 'cancelled'] },  // If booking is cancelled
+                            then: 'Cancelled',
+                            else: {
+                                $cond: [
+                                    {
+                                        $and: [
+                                            { $lte: ['$start_date', currentDate] },   // start_date <= currentDate
+                                            { $gte: ['$end_date', currentDate] }      // end_date >= currentDate
+                                        ]
+                                    },
+                                    'Live',  // If current date is between start_date and end_date
+                                    {
+                                        $cond: [
+                                            { $lt: ['$end_date', currentDate] },  // end_date < currentDate
+                                            'Past',  // Booking is past
+                                            {
+                                                $cond: [
+                                                    {
+                                                        $lte: [
+                                                            {
+                                                                $dateDiff: {
+                                                                    startDate: currentDate,
+                                                                    endDate: '$start_date',
+                                                                    unit: 'day'
+                                                                }
+                                                            },
+                                                            2
+                                                        ]
+                                                    },
+                                                    'Upcoming',  // If booking starts within 2 days
+                                                    'Pending'   // Default case if booking is more than 2 days away
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        return hotels;
+    }
+
 
     async updateBooking(body: IPayment, booking_id) {
 

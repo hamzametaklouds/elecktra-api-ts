@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiBearerAuth, ApiTags, ApiBody } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -17,6 +17,17 @@ const { RESOURCE_CREATED } = getMessages('boking(s)');
 export class BookingsController {
 
     constructor(private bookingsService: BookingsService) { }
+
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Get('hotel')
+    async getCar(@Req() req: Request) {
+        const screens = await this.bookingsService.getBookingsForUser(req.user)
+
+        return screens;
+    }
+
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
