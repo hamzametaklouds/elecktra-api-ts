@@ -17,6 +17,7 @@ import { OptionsModule } from './options/options.module';
 import { WhishlistModule } from './whishlist/whishlist.module';
 import { RecentSearchsModule } from './recent-searchs/recent-searchs.module';
 import { StripeModule } from './stripe/stripe.module';
+import { RatingReviewsModule } from './rating-reviews/rating-reviews.module';
 
 
 
@@ -61,7 +62,8 @@ import { StripeModule } from './stripe/stripe.module';
     OptionsModule,
     WhishlistModule,
     RecentSearchsModule,
-    StripeModule
+    StripeModule,
+    RatingReviewsModule
   ],
   controllers: [AppController],
   providers: [AppService],

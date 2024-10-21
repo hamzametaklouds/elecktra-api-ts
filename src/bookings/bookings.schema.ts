@@ -15,13 +15,7 @@ export enum BookingStatus {
     CR = 'Created',
 }
 
-//   paymentId: paymentIntent.id,
-//   customerId: customer.id,
-//   paymentMethodId,
-//   amount: paymentIntent.amount,
-//   currency: paymentIntent.currency,
-//   status: paymentIntent.status,
-//   paymentStatus,
+
 export interface IGuests {
     _id?: Schema.Types.ObjectId;
     adults: number;

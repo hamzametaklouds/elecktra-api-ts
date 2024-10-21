@@ -49,12 +49,18 @@ export class BookingsService {
             {
                 $project: {
                     _id: 1,
+                    hotel_or_car: 1,
                     title: '$hotel.title',
                     description: '$hotel.description',
                     address: '$hotel.address',
                     price: '$hotel.price',
                     images: '$hotel.images',
+                    guests: 1,
                     start_date: 1,
+                    taxes_and_fees: 1,
+                    reference_number: 1,
+                    nights: 1,
+                    type: 1,
                     end_date: 1,
                     created_at: 1,
                     status: {
@@ -89,7 +95,7 @@ export class BookingsService {
                                                         ]
                                                     },
                                                     'Upcoming',  // If booking starts within 2 days
-                                                    'Pending'   // Default case if booking is more than 2 days away
+                                                    'Upcoming'   // Default case if booking is more than 2 days away
                                                 ]
                                             }
                                         ]
@@ -102,7 +108,83 @@ export class BookingsService {
             }
         ]);
 
-        return hotels;
+        const cars = await this.bookingModel.aggregate([
+            {
+                $match: { created_by: userExists._id, type: BookingType.C, status: BookingStatus.C }
+            },
+            {
+                $lookup: {
+                    from: 'hotel_and_cars',
+                    localField: 'hotel_or_car',
+                    foreignField: '_id',
+                    as: 'car',
+                },
+            },
+            { $unwind: '$car' },
+            {
+                $project: {
+                    _id: 1,
+                    hotel_or_car: 1,
+                    title: '$car.title',
+                    description: '$car.description',
+                    address: '$car.address',
+                    price: '$car.price',
+                    images: '$car.images',
+                    highlights: '$car.highlights',
+                    guests: 1,
+                    start_date: 1,
+                    taxes_and_fees: 1,
+                    reference_number: 1,
+                    nights: 1,
+                    type: 1,
+                    end_date: 1,
+                    created_at: 1,
+                    status: {
+                        $cond: {
+                            if: { $eq: ['$status', 'cancelled'] },  // If booking is cancelled
+                            then: 'Cancelled',
+                            else: {
+                                $cond: [
+                                    {
+                                        $and: [
+                                            { $lte: ['$start_date', currentDate] },   // start_date <= currentDate
+                                            { $gte: ['$end_date', currentDate] }      // end_date >= currentDate
+                                        ]
+                                    },
+                                    'Live',  // If current date is between start_date and end_date
+                                    {
+                                        $cond: [
+                                            { $lt: ['$end_date', currentDate] },  // end_date < currentDate
+                                            'Past',  // Booking is past
+                                            {
+                                                $cond: [
+                                                    {
+                                                        $lte: [
+                                                            {
+                                                                $dateDiff: {
+                                                                    startDate: currentDate,
+                                                                    endDate: '$start_date',
+                                                                    unit: 'day'
+                                                                }
+                                                            },
+                                                            2
+                                                        ]
+                                                    },
+                                                    'Upcoming',  // If booking starts within 2 days
+                                                    'Upcoming'   // Default case if booking is more than 2 days away
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        return { hotels: hotels, cars: cars };
     }
 
 
@@ -163,6 +245,7 @@ export class BookingsService {
                 hotel_or_car,
                 start_date,
                 end_date,
+                type: hotelExists?.type,
                 reference_number: reference_number,
                 guests: {
                     adults: adults,
