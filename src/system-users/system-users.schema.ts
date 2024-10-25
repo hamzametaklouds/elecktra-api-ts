@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from './system-users.constant';
 import { UserRoles } from 'src/app/global-enums';
+import { Role } from 'src/roles/roles.schema';
 
 
 export interface IAdditionalInfo {
@@ -32,7 +33,7 @@ export interface ISystemUsers {
   country_code: string;
   phone_no: string;
   password: string;
-  role: string;
+  roles: string[];
   additional_info: IAdditionalInfo
   email_verified: boolean;
   email_verified_at: Date;
@@ -85,10 +86,10 @@ export const SystemUsersSchema = new Schema<ISystemUsers>(
       required: false,
       default: false
     },
-    role: {
-      type: String,
+    roles: {
+      type: [String],
       required: false,
-      enum: UserRoles,
+      enum: Role,
       default: null
     },
     additional_info:

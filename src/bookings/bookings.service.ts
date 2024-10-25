@@ -1,4 +1,4 @@
-import { Injectable, Inject, BadRequestException, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, forwardRef, UnauthorizedException } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { CreateBookingsDto } from './dtos/create-bookings.dto';
 import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
@@ -47,6 +47,15 @@ export class BookingsService {
             },
             { $unwind: '$hotel' },
             {
+                $lookup: {
+                    from: 'rating_reviews',
+                    localField: '_id',
+                    foreignField: 'booking_id',
+                    as: 'review',
+                },
+            },
+            { $unwind: '$review' },
+            {
                 $project: {
                     _id: 1,
                     hotel_or_car: 1,
@@ -61,6 +70,7 @@ export class BookingsService {
                     reference_number: 1,
                     nights: 1,
                     type: 1,
+                    review: 1,
                     end_date: 1,
                     created_at: 1,
                     status: {
@@ -122,6 +132,15 @@ export class BookingsService {
             },
             { $unwind: '$car' },
             {
+                $lookup: {
+                    from: 'rating_reviews',
+                    localField: '_id',
+                    foreignField: 'booking_id',
+                    as: 'review',
+                },
+            },
+            { $unwind: '$review' },
+            {
                 $project: {
                     _id: 1,
                     hotel_or_car: 1,
@@ -133,6 +152,7 @@ export class BookingsService {
                     highlights: '$car.highlights',
                     guests: 1,
                     start_date: 1,
+                    review: 1,
                     taxes_and_fees: 1,
                     reference_number: 1,
                     nights: 1,
@@ -191,6 +211,57 @@ export class BookingsService {
     async updateBooking(body: IPayment, booking_id) {
 
         return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, status: BookingStatus.C })
+
+    }
+
+    async cancelBooking(booking_id, user: { userId?: ObjectId }) {
+
+        const bookingExists = await this.bookingModel.findOne({ _id: booking_id, is_deleted: false })
+
+        if (!bookingExists) {
+            throw new BadRequestException('Invalid booking id')
+        }
+
+        if (bookingExists?.created_by?.toString() !== user.userId.toString()) {
+            throw new UnauthorizedException('Unauthorized to cancel this booking')
+        }
+
+        const currentDate = new Date();
+        const startsAtDate = new Date(bookingExists.start_date);
+
+        if (startsAtDate <= currentDate) {
+            throw new BadRequestException('Booking cannot be cancelled as it has already started or passed');
+        }
+
+        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.CN }, { new: true })
+
+    }
+
+    async checkoutBooking(booking_id, user: { userId?: ObjectId }) {
+
+        const bookingExists = await this.bookingModel.findOne({ _id: booking_id, is_deleted: false })
+
+        if (!bookingExists) {
+            throw new BadRequestException('Invalid booking id')
+        }
+
+        if (bookingExists?.created_by?.toString() !== user.userId.toString()) {
+            throw new UnauthorizedException('Unauthorized to checkout this booking')
+        }
+
+        const currentDate = new Date();
+        const startsAtDate = new Date(bookingExists.start_date);
+        const endsAtDate = new Date(bookingExists.end_date);
+
+        if (startsAtDate > currentDate) {
+            throw new BadRequestException('Booking cannot be checked out as it has not yet started');
+        }
+
+        if (endsAtDate <= currentDate) {
+            throw new BadRequestException('Booking cannot be checked out as it has already ended');
+        }
+
+        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.C }, { new: true })
 
     }
 

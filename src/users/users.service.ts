@@ -46,43 +46,35 @@ export class UsersService {
   }
 
 
-
-  /**
-   * The purpose of this method is to return paginated users based on received arguments
-   * @param rpp recieves record per page as an argument
-   * @param page receives page number as an argument
-   * @param filter receives filter object as an argument
-   * @param orderBy receives order by as an argument
-   * @returns Page out of total pages, total number of documents received and filtered paginated user data
-   */
   async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy): Promise<IPageinatedDataTable> {
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.userModel.countDocuments(filter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
     page = page > totalPages ? totalPages : page;
 
-    const users = await this.userModel
-      .find(filter)
+    const bandCategorySection = await this.userModel
+      .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp)
 
-
-    return { pages: `Page ${page} of ${totalPages}`, total: totalDocuments, data: users };
+    return { pages: `Page ${page} of ${totalPages}`, total: totalDocuments, data: bandCategorySection };
   }
 
   /**
-   *The purpose of this method is to return users based on filter
+   *The purpose of this method is to return bandCategory based on filter
    * @param $filter filter query as an argument
    * @param $orderBy orderby as an argument
-   * @returns users based on filter
+   * @returns bandCategory based on filter
    */
   async getFilteredUsers($filter: Object, $orderBy) {
     return await this.userModel
-      .find($filter)
+      .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy)
 
   }
+
+
 
   async createGoogleUser(userObject) {
     const {

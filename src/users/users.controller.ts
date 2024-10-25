@@ -7,6 +7,9 @@ import { UpdateUserDto } from './dtos/update-users.dto';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { Request } from 'express';
+import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
+import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
+import { IPaginationQuery } from 'src/app/interfaces';
 
 
 UseFilters(HttpExceptionFilter);
@@ -30,50 +33,32 @@ export class UsersController {
     return await this.userService.getUserData(req.user)
   }
 
-  //   /**
-  //    * The purpose of this method is to create user
-  //    * @param body receives the body of the type CreateUserDto that validates the post request
-  //    * according to the rules defined in validation pipe i.e CreateUserDto
-  //    * @returns the created user object and success message along with
-  //    */
-  //   @Post('sign-up')
-  //   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  //   @ApiBody({ type: CreateUserDto })
-  //   async insert(@Body() body: CreateUserDto) {
-  //     const createdUser = await this.userService.insertUser(body);
-  //     return createdUser;
-  //   }
 
-  //   /**
-  //    * The purpose of this method is to create user
-  //    * @param body receives the body of the type CreateUserDto that validates the post request
-  //    * according to the rules defined in validation pipe i.e CreateUserDto
-  //    * @returns the created user object and success message along with
-  //    */
-  //   @Post('change-password')
-  //   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  //   @ApiBody({ type: ChnagePasswordDto })
-  //   async changePassword(@Query('user_id') datasetId: string, @Body() body: ChnagePasswordDto) {
-  //     const createdUser = await this.userService.changePassword(datasetId, body);
-  //     return createdUser;
-  //   }
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard)
+  @Get('list')
+  @ApiQuery({ type: QueryParamsDTO })
+  async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
+    const { $rpp, $page, $filter, $orderBy } = pagination;
+    if ($rpp && $page) {
+      const result = await this.userService.getPaginatedUsers($rpp, $page, $filter, $orderBy);
+      return {
+        status: result ? true : false,
+        statusCode: result ? 200 : 400,
+        message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+        data: result ? result : null
+      }
+    }
+    const result = await this.userService.getFilteredUsers($filter, $orderBy);
+    return {
+      status: result ? true : false,
+      statusCode: result ? 200 : 400,
+      message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+      data: result ? result : null
+    }
+  }
 
 
-
-  //   /**
-  //    * The purpose of this method is to create user
-  //    * @param body receives the body of the type CreateUserDto that validates the post request
-  //    * according to the rules defined in validation pipe i.e CreateUserDto
-  //    * @returns the created user object and success message along with
-  //    */
-  //   @ApiBearerAuth(AuthorizationHeader)
-  //   @UseGuards(JWTAuthGuard)
-  //   @Get('auth')
-  //   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  //   async auth(@Req() req: Request) {
-  //     const createdUser = await this.userService.userData(req.user);
-  //     return createdUser;
-  //   }
 
   //   /**
   //   * The purpose of this method is to update user

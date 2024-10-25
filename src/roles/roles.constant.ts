@@ -1,0 +1,2 @@
+export const ROLES_PROVIDER_TOKEN = 'ROLES_PROVIDER_TOKEN';
+export const ROLES_COLLECTION = 'roles';

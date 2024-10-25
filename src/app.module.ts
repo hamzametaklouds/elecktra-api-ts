@@ -18,6 +18,7 @@ import { WhishlistModule } from './whishlist/whishlist.module';
 import { RecentSearchsModule } from './recent-searchs/recent-searchs.module';
 import { StripeModule } from './stripe/stripe.module';
 import { RatingReviewsModule } from './rating-reviews/rating-reviews.module';
+import { RolesModule } from './roles/roles.module';
 
 
 
@@ -63,7 +64,8 @@ import { RatingReviewsModule } from './rating-reviews/rating-reviews.module';
     WhishlistModule,
     RecentSearchsModule,
     StripeModule,
-    RatingReviewsModule
+    RatingReviewsModule,
+    RolesModule
   ],
   controllers: [AppController],
   providers: [AppService],
