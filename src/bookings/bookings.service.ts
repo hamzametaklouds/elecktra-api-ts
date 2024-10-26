@@ -230,12 +230,12 @@ export class BookingsService {
             throw new UnauthorizedException('Unauthorized to cancel this booking')
         }
 
-        const currentDate = new Date();
-        const startsAtDate = new Date(bookingExists.start_date);
+        // const currentDate = new Date();
+        // const startsAtDate = new Date(bookingExists.start_date);
 
-        if (startsAtDate <= currentDate) {
-            throw new BadRequestException('Booking cannot be cancelled as it has already started or passed');
-        }
+        // if (startsAtDate <= currentDate) {
+        //     throw new BadRequestException('Booking cannot be cancelled as it has already started or passed');
+        // }
 
         return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.CN }, { new: true })
 
@@ -257,13 +257,13 @@ export class BookingsService {
         const startsAtDate = new Date(bookingExists.start_date);
         const endsAtDate = new Date(bookingExists.end_date);
 
-        if (startsAtDate > currentDate) {
-            throw new BadRequestException('Booking cannot be checked out as it has not yet started');
-        }
+        // if (startsAtDate > currentDate) {
+        //     throw new BadRequestException('Booking cannot be checked out as it has not yet started');
+        // }
 
-        if (endsAtDate <= currentDate) {
-            throw new BadRequestException('Booking cannot be checked out as it has already ended');
-        }
+        // if (endsAtDate <= currentDate) {
+        //     throw new BadRequestException('Booking cannot be checked out as it has already ended');
+        // }
 
         return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.C }, { new: true })
 
