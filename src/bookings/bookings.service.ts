@@ -29,7 +29,11 @@ export class BookingsService {
     }
 
     async getBookingsForUser(user: { userId?: ObjectId }) {
+
+        console.log('user-------', user)
         const userExists = await this.userService.getUserById(user.userId);
+
+        console.log('userExists-----', userExists)
 
         const currentDate = new Date();
 
@@ -54,7 +58,7 @@ export class BookingsService {
                     as: 'review',
                 },
             },
-            { $unwind: '$review' },
+            { $unwind: { path: '$review', preserveNullAndEmptyArrays: true } },
             {
                 $project: {
                     _id: 1,
@@ -70,7 +74,7 @@ export class BookingsService {
                     reference_number: 1,
                     nights: 1,
                     type: 1,
-                    review: 1,
+                    review: { $ifNull: ['$review', null] },
                     end_date: 1,
                     created_at: 1,
                     status: {
@@ -139,7 +143,7 @@ export class BookingsService {
                     as: 'review',
                 },
             },
-            { $unwind: '$review' },
+            { $unwind: { path: '$review', preserveNullAndEmptyArrays: true } },
             {
                 $project: {
                     _id: 1,
@@ -152,7 +156,7 @@ export class BookingsService {
                     highlights: '$car.highlights',
                     guests: 1,
                     start_date: 1,
-                    review: 1,
+                    review: { $ifNull: ['$review', null] },
                     taxes_and_fees: 1,
                     reference_number: 1,
                     nights: 1,
