@@ -48,7 +48,7 @@ export class BookingsController {
     @UseGuards(JWTAuthGuard)
     @Post('checkout')
     async checkoutBooking(@Query('booking_id') booking_id: string, @Req() req: Request) {
-        const cancelBooking = await this.bookingsService.cancelBooking(booking_id, req.user);
+        const cancelBooking = await this.bookingsService.checkoutBooking(booking_id, req.user);
         return { message: 'Booking checkout successfully', data: cancelBooking };
     }
 

@@ -29,17 +29,12 @@ export class BookingsService {
     }
 
     async getBookingsForUser(user: { userId?: ObjectId }) {
-
-        console.log('user-------', user)
         const userExists = await this.userService.getUserById(user.userId);
-
-        console.log('userExists-----', userExists)
-
         const currentDate = new Date();
 
         const hotels = await this.bookingModel.aggregate([
             {
-                $match: { created_by: userExists._id, type: BookingType.H, status: BookingStatus.C }
+                $match: { created_by: userExists._id, type: BookingType.H }
             },
             {
                 $lookup: {
@@ -79,42 +74,48 @@ export class BookingsService {
                     created_at: 1,
                     status: {
                         $cond: {
-                            if: { $eq: ['$status', 'cancelled'] },  // If booking is cancelled
+                            if: { $eq: ['$status', 'Cancelled'] },
                             then: 'Cancelled',
                             else: {
-                                $cond: [
-                                    {
-                                        $and: [
-                                            { $lte: ['$start_date', currentDate] },   // start_date <= currentDate
-                                            { $gte: ['$end_date', currentDate] }      // end_date >= currentDate
-                                        ]
-                                    },
-                                    'Live',  // If current date is between start_date and end_date
-                                    {
+                                $cond: {
+                                    if: { $eq: ['$status', 'Checkout'] },
+                                    then: 'Past',
+                                    else: {
                                         $cond: [
-                                            { $lt: ['$end_date', currentDate] },  // end_date < currentDate
-                                            'Past',  // Booking is past
+                                            {
+                                                $and: [
+                                                    { $lte: ['$start_date', currentDate] },
+                                                    { $gte: ['$end_date', currentDate] }
+                                                ]
+                                            },
+                                            'Live',
                                             {
                                                 $cond: [
+                                                    { $lt: ['$end_date', currentDate] },
+                                                    'Past',
                                                     {
-                                                        $lte: [
+                                                        $cond: [
                                                             {
-                                                                $dateDiff: {
-                                                                    startDate: currentDate,
-                                                                    endDate: '$start_date',
-                                                                    unit: 'day'
-                                                                }
+                                                                $lte: [
+                                                                    {
+                                                                        $dateDiff: {
+                                                                            startDate: currentDate,
+                                                                            endDate: '$start_date',
+                                                                            unit: 'day'
+                                                                        }
+                                                                    },
+                                                                    2
+                                                                ]
                                                             },
-                                                            2
+                                                            'Upcoming',
+                                                            'Upcoming'
                                                         ]
-                                                    },
-                                                    'Upcoming',  // If booking starts within 2 days
-                                                    'Upcoming'   // Default case if booking is more than 2 days away
+                                                    }
                                                 ]
                                             }
                                         ]
                                     }
-                                ]
+                                }
                             }
                         }
                     }
@@ -124,7 +125,7 @@ export class BookingsService {
 
         const cars = await this.bookingModel.aggregate([
             {
-                $match: { created_by: userExists._id, type: BookingType.C, status: BookingStatus.C }
+                $match: { created_by: userExists._id, type: BookingType.C }
             },
             {
                 $lookup: {
@@ -165,42 +166,48 @@ export class BookingsService {
                     created_at: 1,
                     status: {
                         $cond: {
-                            if: { $eq: ['$status', 'cancelled'] },  // If booking is cancelled
+                            if: { $eq: ['$status', 'Cancelled'] },
                             then: 'Cancelled',
                             else: {
-                                $cond: [
-                                    {
-                                        $and: [
-                                            { $lte: ['$start_date', currentDate] },   // start_date <= currentDate
-                                            { $gte: ['$end_date', currentDate] }      // end_date >= currentDate
-                                        ]
-                                    },
-                                    'Live',  // If current date is between start_date and end_date
-                                    {
+                                $cond: {
+                                    if: { $eq: ['$status', 'Checkout'] },
+                                    then: 'Past',
+                                    else: {
                                         $cond: [
-                                            { $lt: ['$end_date', currentDate] },  // end_date < currentDate
-                                            'Past',  // Booking is past
+                                            {
+                                                $and: [
+                                                    { $lte: ['$start_date', currentDate] },
+                                                    { $gte: ['$end_date', currentDate] }
+                                                ]
+                                            },
+                                            'Live',
                                             {
                                                 $cond: [
+                                                    { $lt: ['$end_date', currentDate] },
+                                                    'Past',
                                                     {
-                                                        $lte: [
+                                                        $cond: [
                                                             {
-                                                                $dateDiff: {
-                                                                    startDate: currentDate,
-                                                                    endDate: '$start_date',
-                                                                    unit: 'day'
-                                                                }
+                                                                $lte: [
+                                                                    {
+                                                                        $dateDiff: {
+                                                                            startDate: currentDate,
+                                                                            endDate: '$start_date',
+                                                                            unit: 'day'
+                                                                        }
+                                                                    },
+                                                                    2
+                                                                ]
                                                             },
-                                                            2
+                                                            'Upcoming',
+                                                            'Upcoming'
                                                         ]
-                                                    },
-                                                    'Upcoming',  // If booking starts within 2 days
-                                                    'Upcoming'   // Default case if booking is more than 2 days away
+                                                    }
                                                 ]
                                             }
                                         ]
                                     }
-                                ]
+                                }
                             }
                         }
                     }
@@ -265,7 +272,7 @@ export class BookingsService {
         //     throw new BadRequestException('Booking cannot be checked out as it has already ended');
         // }
 
-        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.C }, { new: true })
+        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.CK }, { new: true })
 
     }
 

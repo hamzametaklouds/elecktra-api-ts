@@ -13,6 +13,7 @@ export enum BookingStatus {
     C = 'Completed',
     CN = 'Cancelled',
     CR = 'Created',
+    CK = 'Checkout',
 }
 
 
