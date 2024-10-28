@@ -112,15 +112,19 @@ export class StripeService {
         // Determine if payment succeeded
         const paymentStatus = paymentIntent.status === "succeeded";
 
+        let updatedBooking;
 
-        const updatedBooking = await this.bookingService.updateBooking({
-            customer_id: customer.id,
-            payment_method_id: payment_method_id,
-            payment_id: paymentIntent.id,
-            amount: paymentIntent.amount,
-            currency: paymentIntent.currency,
-            payment_status: paymentIntent.status,
-        }, bookingExists._id)
+        if (paymentIntent.status === "succeeded") {
+            updatedBooking = await this.bookingService.updateBooking({
+                customer_id: customer.id,
+                payment_method_id: payment_method_id,
+                payment_id: paymentIntent.id,
+                amount: paymentIntent.amount,
+                currency: paymentIntent.currency,
+                payment_status: paymentIntent.status,
+            }, bookingExists._id)
+        }
+
 
         // Save the payment details to your database
         // const userPayment = new Payment({
