@@ -70,6 +70,7 @@ export class BookingsService {
                     nights: 1,
                     type: 1,
                     review: { $ifNull: ['$review', null] },
+                    rating: { $ifNull: ['$review.rating', null] },
                     end_date: 1,
                     created_at: 1,
                     status: {
@@ -158,6 +159,7 @@ export class BookingsService {
                     guests: 1,
                     start_date: 1,
                     review: { $ifNull: ['$review', null] },
+                    rating: { $ifNull: ['$review.rating', null] },
                     taxes_and_fees: 1,
                     reference_number: 1,
                     nights: 1,
