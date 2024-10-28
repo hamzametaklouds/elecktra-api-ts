@@ -19,6 +19,7 @@ import { RecentSearchsModule } from './recent-searchs/recent-searchs.module';
 import { StripeModule } from './stripe/stripe.module';
 import { RatingReviewsModule } from './rating-reviews/rating-reviews.module';
 import { RolesModule } from './roles/roles.module';
+import { CompaniesModule } from './companies/companies.module';
 
 
 
@@ -65,7 +66,8 @@ import { RolesModule } from './roles/roles.module';
     RecentSearchsModule,
     StripeModule,
     RatingReviewsModule,
-    RolesModule
+    RolesModule,
+    CompaniesModule
   ],
   controllers: [AppController],
   providers: [AppService],

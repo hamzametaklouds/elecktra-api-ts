@@ -299,6 +299,16 @@ export class BookingsService {
         const reference_number = Array.from({ length: 15 }, () => 'abcdefghijk123455678990lmnopqr0928340483stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 62)]).join('').toLowerCase();
 
 
+        // const start = new Date(start_date);
+        // const end = new Date(end_date);
+
+        // if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        //     throw new Error('Invalid date format');
+        // }
+
+        // const diffInMs = end.getTime() - start.getTime();
+        // const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+
         const start = new Date(start_date);
         const end = new Date(end_date);
 
@@ -306,13 +316,13 @@ export class BookingsService {
             throw new Error('Invalid date format');
         }
 
-        // Get the difference in time (milliseconds) between the two dates
+        // Set both dates to midnight
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
         const diffInMs = end.getTime() - start.getTime();
+        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
 
-        // Convert milliseconds to days
-        const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-
-        console.log(diffInDays)
 
         let sub_total = hotelExists?.price * diffInDays
 
