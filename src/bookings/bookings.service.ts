@@ -324,7 +324,7 @@ export class BookingsService {
         console.log()
 
 
-        const booking = await new this.bookingModel(
+        let booking = await new this.bookingModel(
             {
                 hotel_or_car,
                 start_date,
@@ -344,6 +344,9 @@ export class BookingsService {
                 nights: diffInDays,
                 created_by: user.userId ? user.userId : null
             }).save();
+
+
+        booking['rating'] = 4.3
 
 
         // const intent = await this.stripeService.createPaymentIntent((parseFloat((sub_total * 100).toFixed(2))), 'usd')
