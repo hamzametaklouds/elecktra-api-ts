@@ -2,9 +2,10 @@ import { Body, Controller, Post, UseFilters, UsePipes, ValidationPipe } from '@n
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dtos/log-in.dto';
 import { SignUpUserDto } from './dtos/sign-up.dto';
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
+import { LoginDto } from './dtos/log-in.dto';
+import { AdminLoginDto } from './dtos/admin-log-in.dto';
 
 UseFilters(HttpExceptionFilter);
 @Controller('auth')
@@ -26,6 +27,16 @@ export class AuthController {
         const createAuth = await this.authService.validateUser(body.uuid);
         return createAuth;
     }
+
+
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    @ApiBody({ type: AdminLoginDto })
+    @Post('admin/log-in')
+    async loginSystemUser(@Body() body: AdminLoginDto) {
+        const createAuth = await this.authService.validateSystemUser(body.email, body.password);
+        return createAuth;
+    }
+
 
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: GoogleLoginDto })

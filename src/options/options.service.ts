@@ -68,4 +68,23 @@ export class OptionsService {
 
     }
 
+    async updateOption(id, body: CreateOptionDto, user: { userId?: ObjectId }) {
+
+        const { title, description, parent_type, icon, sub_type } = body;
+
+        const screen = await new this.optionsModel(
+            {
+                title,
+                description,
+                icon,
+                parent_type,
+                sub_type,
+                created_by: user?.userId || null
+            }).save();
+
+
+        return screen
+
+    }
+
 }

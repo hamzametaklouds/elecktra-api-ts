@@ -5,6 +5,8 @@ import { SignUpUserDto } from './dtos/sign-up.dto';
 import { SystemUsersService } from 'src/system-users/system-users.service';
 import admin from "firebase-admin"
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
+import * as bcrypt from 'bcrypt'
+
 
 
 
@@ -31,6 +33,37 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successful', user: user
     };
+
+  }
+
+  async validateSystemUser(email: string, pass: string): Promise<any> {
+    const user = await this.systemUsersService.getUserByEmail(email.toLocaleLowerCase());
+
+    console.log(user)
+
+    if (!user) {
+      throw new BadRequestException('Invalid Credentials')
+    }
+
+    const passwordCorrect = await bcrypt.compare(pass, user.password);
+
+    if (!passwordCorrect) {
+      throw new BadRequestException('Invalid Credentials')
+    }
+
+    if (user.is_disabled) {
+      throw new BadRequestException('Restricted User')
+    }
+
+    if (passwordCorrect) {
+      const { password, ...result } = user;
+
+      const payload = { username: user.first_name, sub: user._id, roles: user.roles };
+      return {
+        status: true, statusCode: 200, access_token: this.jwtService.sign(payload), message: 'Login Successful', user: result
+      };
+    }
+
 
   }
 

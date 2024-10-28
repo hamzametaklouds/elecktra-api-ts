@@ -21,10 +21,7 @@ export class SystemUsersService {
 
   async getUserByEmail(email: string): Promise<ISystemUsers> {
     return await this.userModel
-      .findOne({ email: email, is_deleted: false }).populate({
-        path: 'created_by updated_by',
-        match: { is_deleted: false },
-      })
+      .findOne({ email: email, is_deleted: false, is_disabled: false })
 
   }
 

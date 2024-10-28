@@ -331,9 +331,6 @@ export class BookingsService {
         sub_total = sub_total + tax
 
 
-        console.log()
-
-
         let booking = await new this.bookingModel(
             {
                 hotel_or_car,
@@ -357,11 +354,6 @@ export class BookingsService {
 
 
         booking['rating'] = 4.3
-
-
-        // const intent = await this.stripeService.createPaymentIntent((parseFloat((sub_total * 100).toFixed(2))), 'usd')
-
-        // console.log('intent-----', intent)
 
         return booking
 

@@ -1,4 +1,93 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { CreateCompanyDto } from './dtos/create-company.dto';
+import { Model, ObjectId } from 'mongoose';
+import { UpdateCompanyDto } from './dtos/update-company.dto';
+import { COMPANIES_PROVIDER_TOKEN } from './companies.constant';
+import { ICompanies } from './companies.schema';
+import { IPageinatedDataTable } from 'src/app/interfaces';
 
 @Injectable()
-export class CompaniesService {}
+export class CompaniesService {
+
+    constructor(
+        @Inject(COMPANIES_PROVIDER_TOKEN)
+        private companyModel: Model<ICompanies>
+    ) { }
+
+
+    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy): Promise<IPageinatedDataTable> {
+        const skip: number = (page - 1) * rpp;
+        const totalDocuments: number = await this.companyModel.countDocuments(filter);
+        const totalPages: number = Math.ceil(totalDocuments / rpp);
+        page = page > totalPages ? totalPages : page;
+
+        const bandCategorySection = await this.companyModel
+            .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .sort(orderBy)
+            .skip(skip)
+            .limit(rpp)
+
+        return { pages: `Page ${page} of ${totalPages}`, total: totalDocuments, data: bandCategorySection };
+    }
+
+    /**
+     *The purpose of this method is to return bandCategory based on filter
+     * @param $filter filter query as an argument
+     * @param $orderBy orderby as an argument
+     * @returns bandCategory based on filter
+     */
+    async getFilteredUsers($filter: Object, $orderBy) {
+        return await this.companyModel
+            .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .sort($orderBy)
+
+    }
+
+
+    async insertCompany(body: CreateCompanyDto, user: { userId?: ObjectId }) {
+
+        const { title, description, icon } = body;
+
+        const screen = await new this.companyModel(
+            {
+                title,
+                description,
+                icon,
+                created_by: user?.userId || null
+            }).save();
+
+
+        return screen
+
+    }
+
+
+
+    async updateComapny(id, body: UpdateCompanyDto, user: { userId?: ObjectId }) {
+
+
+        const companyExists = await this.companyModel.findOne({ _id: id, is_deleted: false, is_disabled: false })
+
+
+        if (!companyExists) {
+            throw new BadRequestException('Invalid id')
+        }
+
+        const { title, description, icon } = body;
+
+        const screen = await new this.companyModel(
+            {
+                title,
+                description,
+                icon,
+                created_by: user?.userId || null
+            }).save();
+
+
+        return screen
+
+    }
+
+
+
+}

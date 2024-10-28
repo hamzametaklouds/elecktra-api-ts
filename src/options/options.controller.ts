@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Req, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Req, BadRequestException, UseGuards, Put } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -6,6 +6,7 @@ import { OptionsService } from './options.service';
 import { CreateOptionDto } from './dtos/create-options.dto';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { UpdateOptionDto } from './dtos/update-options.dto';
 
 const { RESOURCE_CREATED } = getMessages('options(s)');
 
@@ -42,6 +43,15 @@ export class OptionsController {
     async insert(@Body() body: CreateOptionDto, @Req() req: Request) {
         const createOption = await this.optionService.insertOption(body, req.user);
         return { message: RESOURCE_CREATED, data: createOption };
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Put()
+    @ApiBody({ type: UpdateOptionDto })
+    async update(@Query('id') id: string, @Body() body: UpdateOptionDto, @Req() req: Request) {
+        const createOption = await this.optionService.updateOption(id, body, req.user);
+        return { message: 'Option updated successfully', data: createOption };
     }
 
 

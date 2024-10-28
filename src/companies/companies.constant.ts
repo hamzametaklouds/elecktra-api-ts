@@ -1,0 +1,2 @@
+export const COMPANIES_PROVIDER_TOKEN = 'COMPANIES_PROVIDER_TOKEN';
+export const COMPANIES_COLLECTION = 'companies';
