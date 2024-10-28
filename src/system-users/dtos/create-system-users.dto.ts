@@ -62,13 +62,5 @@ export class CreateSystemUserDto {
   @IsOptional()
   invitation_id?: ObjectId;
 
-  @ApiProperty({
-    description: 'created_by mongo id e.g created_by=624ea2841cd832e0db8466da',
-    required: false,
-    default: null,
-  })
-  @IsMongoId()
-  @IsOptional()
-  created_by?: ObjectId;
 
 }

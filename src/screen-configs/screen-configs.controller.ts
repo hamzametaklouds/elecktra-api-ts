@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Query, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Req, BadRequestException, UseGuards, Put } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { ScreenConfigsService } from './screen-configs.service';
 import { CreateScreenConfigDto } from './dtos/create-screen-configs.dto';
 import { Request } from 'express';
 import { ScreenType } from './screen-configs.schema';
+import { AuthorizationHeader } from 'src/app/swagger.constant';
+import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { UpdateScreenConfigDto } from './dtos/update-screen-config.dto';
 
 const { RESOURCE_CREATED } = getMessages('screen(s)');
 
@@ -46,13 +49,22 @@ export class ScreenConfigsController {
     }
 
 
-    // @ApiBearerAuth(AuthorizationHeader)
-    // @UseGuards(JWTAuthGuard)
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
     @Post()
     @ApiBody({ type: CreateScreenConfigDto })
     async insert(@Body() body: CreateScreenConfigDto, @Req() req: Request) {
         const createScreenConfig = await this.screenConfigService.insertScreen(body, req.user);
         return { message: RESOURCE_CREATED, data: createScreenConfig };
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
+    @Put()
+    @ApiBody({ type: UpdateScreenConfigDto })
+    async update(@Query('id') id: string, @Body() body: UpdateScreenConfigDto, @Req() req: Request) {
+        const updateScreenConfig = await this.screenConfigService.updateScreen(id, body, req.user);
+        return { message: 'Screen config updated', data: updateScreenConfig };
     }
 
 }

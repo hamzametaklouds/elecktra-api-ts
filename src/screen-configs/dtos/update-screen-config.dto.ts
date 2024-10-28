@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ScreenType } from '../screen-configs.schema';
 
 export class UpdateScreenConfigDto {
@@ -49,4 +49,13 @@ export class UpdateScreenConfigDto {
     @IsNumber()
     @IsOptional()
     order_number: number;
+
+    @ApiProperty({
+        description: 'is_deleted boolean e.g is_deleted=true',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_deleted?: boolean;
 }

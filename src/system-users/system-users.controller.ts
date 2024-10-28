@@ -8,6 +8,7 @@ import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorato
 import { SystemUsersService } from './system-users.service';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
+import { CreateSystemUserDto } from './dtos/create-system-users.dto';
 
 const { RESOURCE_CREATED } = getMessages('user(s)');
 
@@ -49,6 +50,14 @@ export class SystemUsersController {
   // }
 
   // }
+
+  @Post('sign-up')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBody({ type: CreateSystemUserDto })
+  async insert(@Body() body: CreateSystemUserDto) {
+    const createdUser = await this.systemUserService.insertUser(body);
+    return createdUser;
+  }
 
 
 }
