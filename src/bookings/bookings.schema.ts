@@ -25,7 +25,6 @@ export interface IGuests {
 }
 
 export interface IPayment {
-
     customer_id: string;
     payment_method_id: string;
     payment_id: string;

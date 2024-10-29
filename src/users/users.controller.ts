@@ -10,9 +10,13 @@ import { Request } from 'express';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
 import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
 import { IPaginationQuery } from 'src/app/interfaces';
+import { Roles } from 'src/app/dtos/roles-decorator';
+import { Role } from 'src/roles/roles.schema';
+import { RolesGuard } from 'src/app/guards/role-guard';
 
 
 UseFilters(HttpExceptionFilter);
+
 
 @Controller('users')
 @ApiTags('users')
@@ -35,7 +39,8 @@ export class UsersController {
 
 
   @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN)
   @Get('list')
   @ApiQuery({ type: QueryParamsDTO })
   async getUserList(@ParamsHandler() pagination: IPaginationQuery) {

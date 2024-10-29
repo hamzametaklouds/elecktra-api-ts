@@ -20,22 +20,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-
-    const userExists = await this.userService.getUserById(payload.sub)
+    const userExists = await this.userService.getUserById(payload.sub);
 
     if (userExists) {
       return { userId: userExists._id, username: userExists.first_name };
     }
 
-    const systemUserExists = await this.systemUserService.getUserById(payload?.sub)
+    const systemUserExists = await this.systemUserService.getUserById(payload.sub);
 
     if (!systemUserExists) {
-      throw new UnauthorizedException('Invalid Token')
+      throw new UnauthorizedException('Invalid Token');
     }
 
-    return { userId: systemUserExists._id, username: systemUserExists.first_name, roles: systemUserExists.roles };
+    // Define modules based on roles
 
 
-
+    return {
+      userId: systemUserExists._id,
+      username: systemUserExists.first_name,
+      roles: systemUserExists.roles,
+    };
   }
+
 }

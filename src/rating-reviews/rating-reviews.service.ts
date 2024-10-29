@@ -35,9 +35,9 @@ export class RatingReviewsService {
         const currentDate = new Date();
         const endsDate = new Date(bookingExists.end_date);
 
-        if (endsDate >= currentDate) {
-            throw new BadRequestException('Review cannot be placed as the booking has not yet ended');
-        }
+        // if (endsDate >= currentDate) {
+        //     throw new BadRequestException('Review cannot be placed as the booking has not yet ended');
+        // }
 
         const screen = await new this.ratingAndReviewsModel(
             {
