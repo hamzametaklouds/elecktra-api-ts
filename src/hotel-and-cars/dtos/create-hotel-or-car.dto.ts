@@ -61,6 +61,14 @@ export class CreateHotelAndCarDto {
     highlights: object[];
 
     @ApiProperty({
+        description: 'company_id string e.g company_id=[{icon:,detail:}]',
+        required: true,
+        default: [{ icon: '', detail: '' }],
+    })
+    @IsMongoId()
+    company_id: ObjectId;
+
+    @ApiProperty({
         description: 'amenities string e.g amenities=xyzabc',
         required: true,
         default: [''],

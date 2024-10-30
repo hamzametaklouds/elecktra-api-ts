@@ -69,6 +69,7 @@ export class BookingsService {
                     reference_number: 1,
                     nights: 1,
                     type: 1,
+                    sub_total: 1,
                     review: { $ifNull: ['$review', null] },
                     rating: { $ifNull: ['$review.rating', null] },
                     end_date: 1,
@@ -165,6 +166,7 @@ export class BookingsService {
                     nights: 1,
                     type: 1,
                     end_date: 1,
+                    sub_total: 1,
                     created_at: 1,
                     status: {
                         $cond: {

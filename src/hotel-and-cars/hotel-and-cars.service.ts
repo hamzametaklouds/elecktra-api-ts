@@ -328,7 +328,7 @@ export class HotelAndCarsService {
                     infants: null,
                     start_date: start_date,
                     end_date: end_date,
-                    type: 'Stay',
+                    type: 'Car',
                     lat: lat,
                     long: long
 
@@ -645,6 +645,7 @@ export class HotelAndCarsService {
             total_rooms,
             rooms_reserved,
             hotel_type,
+            company_id,
             availability_from,
             availability_till,
             host_or_owner,
@@ -672,6 +673,7 @@ export class HotelAndCarsService {
                 long,
                 price,
                 total_rooms,
+                company_id,
                 rooms_reserved,
                 availability_from: availability_from ? new Date(availability_from) : null,
                 availability_till: availability_till ? new Date(availability_till) : null,

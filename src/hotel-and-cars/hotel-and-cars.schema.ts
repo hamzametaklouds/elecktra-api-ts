@@ -3,6 +3,7 @@ import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant'
 import { HOTEL_AND_CARS_COLLECTION } from './hotel-and-cars.constants';
 import { OPTIONS_COLLECTION } from 'src/options/options.constants';
 import { ILocation } from 'src/app/interfaces';
+import { COMPANIES_COLLECTION } from 'src/companies/companies.constant';
 
 
 export enum RecordType {
@@ -141,6 +142,7 @@ export interface IHotelAndCars {
     highlights: IHighlights[]
     amenities: Schema.Types.ObjectId[]
     type: string;
+    company_id?: Schema.Types.ObjectId;
     location: ILocation;
     price: number;
     hotel_type?: string;
@@ -195,6 +197,12 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             required: false,
             default: null,
             ref: OPTIONS_COLLECTION
+        },
+        company_id: {
+            type: Schema.Types.ObjectId,
+            required: false,
+            default: null,
+            ref: COMPANIES_COLLECTION
         },
         type: {
             type: String,
