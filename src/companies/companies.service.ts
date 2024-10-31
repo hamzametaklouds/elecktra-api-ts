@@ -75,13 +75,16 @@ export class CompaniesService {
 
         const { title, description, icon } = body;
 
-        const screen = await new this.companyModel(
+        const screen = await this.companyModel.findByIdAndUpdate({ _id: companyExists._id },
             {
                 title,
                 description,
                 icon,
                 created_by: user?.userId || null
-            }).save();
+            },
+            {
+                new: true
+            })
 
 
         return screen
