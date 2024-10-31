@@ -8,6 +8,9 @@ import { ScreenType } from './screen-configs.schema';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { UpdateScreenConfigDto } from './dtos/update-screen-config.dto';
+import { RolesGuard } from 'src/app/guards/role-guard';
+import { Roles } from 'src/app/dtos/roles-decorator';
+import { Role } from 'src/roles/roles.schema';
 
 const { RESOURCE_CREATED } = getMessages('screen(s)');
 
@@ -50,7 +53,8 @@ export class ScreenConfigsController {
 
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
     @Post()
     @ApiBody({ type: CreateScreenConfigDto })
     async insert(@Body() body: CreateScreenConfigDto, @Req() req: Request) {
@@ -59,7 +63,8 @@ export class ScreenConfigsController {
     }
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
     @Put()
     @ApiBody({ type: UpdateScreenConfigDto })
     async update(@Query('id') id: string, @Body() body: UpdateScreenConfigDto, @Req() req: Request) {

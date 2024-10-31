@@ -20,6 +20,7 @@ import { StripeModule } from './stripe/stripe.module';
 import { RatingReviewsModule } from './rating-reviews/rating-reviews.module';
 import { RolesModule } from './roles/roles.module';
 import { CompaniesModule } from './companies/companies.module';
+import { InvitationsModule } from './invitations/invitations.module';
 
 
 
@@ -63,6 +64,7 @@ import { CompaniesModule } from './companies/companies.module';
     BookingsModule,
     OptionsModule,
     WhishlistModule,
+    InvitationsModule,
     RecentSearchsModule,
     StripeModule,
     RatingReviewsModule,
