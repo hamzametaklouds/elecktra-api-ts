@@ -46,7 +46,7 @@ export class UsersService {
   }
 
 
-  async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy): Promise<IPageinatedDataTable> {
+  async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy) {
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.userModel.countDocuments(filter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
@@ -58,7 +58,8 @@ export class UsersService {
       .skip(skip)
       .limit(rpp)
 
-    return { pages: `Page ${page} of ${totalPages}`, total: totalDocuments, data: bandCategorySection };
+    return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
+
   }
 
   /**
