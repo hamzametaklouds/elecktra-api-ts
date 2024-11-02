@@ -168,8 +168,10 @@ export class HotelAndCarsService {
                     start_date: start_date,
                     end_date: end_date,
                     type: 'Stay',
-                    lat: lat,
-                    long: long
+                    location: {
+                        type: 'Point',
+                        coordinates: [long, lat]
+                    }
 
                 },
                 user
@@ -329,8 +331,11 @@ export class HotelAndCarsService {
                     start_date: start_date,
                     end_date: end_date,
                     type: 'Car',
-                    lat: lat,
-                    long: long
+                    location: {
+                        type: 'Point',
+                        coordinates: [long, lat]
+                    }
+
 
                 },
                 user

@@ -21,8 +21,7 @@ export class RecentSearchsService {
         start_date: string,
         end_date: string,
         type: string,
-        lat: number,
-        long: number,
+        location: object
     }, user: { userId?: ObjectId }) {
 
         const {
@@ -33,7 +32,8 @@ export class RecentSearchsService {
             infants,
             start_date,
             end_date,
-            type
+            type,
+            location
         } = body;
 
         const screen = await new this.recentSearchModel(
@@ -46,6 +46,7 @@ export class RecentSearchsService {
                 start_date,
                 end_date,
                 type: type,
+                location: location,
                 created_by: user?.userId || null
             }).save();
 
