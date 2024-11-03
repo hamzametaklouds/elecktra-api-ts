@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsString } from 'class-validator';
 import { ScreenType } from '../screen-configs.schema';
 
 export class CreateScreenConfigDto {
@@ -25,7 +25,7 @@ export class CreateScreenConfigDto {
         required: true,
         default: [''],
     })
-    @IsString({ each: true })
+    @IsArray()
     images: string[];
 
     @ApiProperty({
