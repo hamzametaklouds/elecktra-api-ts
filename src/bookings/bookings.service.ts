@@ -370,7 +370,8 @@ export class BookingsService {
 
         }
         catch (err) {
-            throw new BadRequestException('Something went wrong with payments')
+
+            throw new BadRequestException(err?.message)
         }
 
 

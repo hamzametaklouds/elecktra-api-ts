@@ -100,7 +100,7 @@ export class StripeService {
 
         // Create a PaymentIntent for a one-time payment
         const paymentIntent = await this.stripe.paymentIntents.create({
-            amount: amount,
+            amount: Math.round(amount * 100),
             currency: currency,
             customer: customer.id,
             payment_method: payment_method_id,

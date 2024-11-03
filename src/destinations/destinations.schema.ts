@@ -11,8 +11,6 @@ export interface IDestinations {
     description: string;
     images: string[]
     location: ILocation
-    // lat: number;
-    // long: number;
     is_popular: boolean;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
