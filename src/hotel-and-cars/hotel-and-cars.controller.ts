@@ -67,6 +67,7 @@ export class HotelAndCarsController {
     @ApiBody({ type: PlanCarTripDto })
     async planCarTrip(@ParamsHandler() pagination: IPaginationQuery, @Body() body: PlanCarTripDto, @Req() req: Request) {
         const { $rpp, $page, $filter, $orderBy } = pagination;
+        console.log(req.user)
         const createBooking = await this.hotelAndCarsService.planCarTrip(body, req.user, $filter, $orderBy);
         return { message: 'Cars Data fetched successfully', data: createBooking };
     }
