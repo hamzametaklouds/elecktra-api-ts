@@ -1,5 +1,5 @@
-import { Injectable, ConflictException, Inject, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
-import { Model, ObjectId, Types } from 'mongoose';
+import { Injectable, Inject, BadRequestException, forwardRef } from '@nestjs/common';
+import { Model, ObjectId } from 'mongoose';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import getMessages from 'src/app/api-messages';
 import { IInvitations, InvitationStatus } from './invitations.schema';
@@ -7,21 +7,18 @@ import { INVITATIONS_PROVIDER_TOKEN } from './invitations.constants';
 import { CreateInvitationDto } from './dtos/create-invitations.dto';
 import * as SendGrid from '@sendgrid/mail';
 import { ConfigService } from '@nestjs/config';
-import { ValidateInvitationDto } from './dtos/validate-invitation.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { SystemUsersService } from 'src/system-users/system-users.service';
+import { CompaniesService } from 'src/companies/companies.service';
 const postmark = require("postmark");
 
-
-
-const { RESOURCE_NOT_FOUND } = getMessages('invitations(s)');
 
 @Injectable()
 export class InvitationsService {
   constructor(
     @Inject(INVITATIONS_PROVIDER_TOKEN)
     private invitationModel: Model<IInvitations>,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private companiesService: CompaniesService
   ) {
     SendGrid.setApiKey(this.configService.get('sendGridEmail.sendGridApiKey'));
   }
@@ -133,7 +130,7 @@ export class InvitationsService {
       role
     } = invitationObject
 
-    const companyExists = await this.getinvitationById(company_id)
+    const companyExists = await this.companiesService.getCompanyById(company_id)
 
     if (!companyExists) {
       throw new BadRequestException('Invalid company id')

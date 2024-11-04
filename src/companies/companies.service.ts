@@ -43,6 +43,12 @@ export class CompaniesService {
 
     }
 
+    async getCompanyById(id) {
+
+        return await this.companyModel.findOne({ _id: id, is_deleted: false })
+
+    }
+
 
     async insertCompany(body: CreateCompanyDto, user: { userId?: ObjectId }) {
 
