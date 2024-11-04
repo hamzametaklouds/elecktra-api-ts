@@ -11,7 +11,7 @@ import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { UpdateDestinationDto } from './dtos/update-destination.dto';
 
-const { RESOURCE_CREATED } = getMessages('screen(s)');
+const { RESOURCE_CREATED } = getMessages('Destination(s)');
 
 @ApiTags('destinations')
 @Controller('destinations')
@@ -22,7 +22,7 @@ export class DestinationsController {
     @Get()
     async detail() {
         const hotels = await this.destinationsService.destinations();
-        return { message: 'Hotels Data fetched successfully', data: hotels };
+        return { message: 'Destinations fetched successfully', data: hotels };
     }
 
     @ApiBearerAuth(AuthorizationHeader)
@@ -43,7 +43,7 @@ export class DestinationsController {
     @ApiBody({ type: UpdateDestinationDto })
     async update(@Query('id') id: string, @Body() body: UpdateDestinationDto, @Req() req: Request) {
         const createDestination = await this.destinationsService.updateScreen(id, body, req.user);
-        return { message: RESOURCE_CREATED, data: createDestination };
+        return { message: 'Destination updated successfully', data: createDestination };
     }
 
 }
