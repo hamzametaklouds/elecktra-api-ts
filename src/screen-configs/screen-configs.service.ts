@@ -49,6 +49,9 @@ export class ScreenConfigsService {
 
         const { title, description, type, order_number, images, is_deleted } = body;
 
+
+        console.log(images)
+
         const screen = await this.screenModel.findByIdAndUpdate(
             {
                 _id: configExists._id
@@ -61,7 +64,7 @@ export class ScreenConfigsService {
                 images,
                 is_deleted,
                 created_by: user.userId
-            });
+            }, { new: true });
 
 
         return screen

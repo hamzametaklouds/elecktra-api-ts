@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { OPTIONS_PROVIDER_TOKEN } from './options.constants';
 import { IOptions, OptionParentType, OptionSubType } from './options.schema';
@@ -68,11 +68,18 @@ export class OptionsService {
 
     }
 
+
     async updateOption(id, body: CreateOptionDto, user: { userId?: ObjectId }) {
 
         const { title, description, parent_type, icon, sub_type } = body;
 
-        const screen = await new this.optionsModel(
+        const screenExits = await this.optionsModel.findOne({ _id: id, is_deleted: false })
+
+        if (!screenExits) {
+            throw new BadRequestException('Invalid screen id')
+        }
+
+        const screen = await this.optionsModel.findByIdAndUpdate({ _id: screenExits._id },
             {
                 title,
                 description,
@@ -80,7 +87,7 @@ export class OptionsService {
                 parent_type,
                 sub_type,
                 created_by: user?.userId || null
-            }).save();
+            }, { new: true })
 
 
         return screen

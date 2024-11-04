@@ -1,13 +1,8 @@
-import { Controller, Get, Post, Put, Query, Body, ValidationPipe, UsePipes, UseFilters, UseInterceptors, Headers, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, UsePipes, UseFilters, UseInterceptors, Headers, UseGuards } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import getMessages from 'src/app/api-messages';
-import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
-import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { IPaginationQuery } from 'src/app/interfaces';
-import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { SystemUsersService } from './system-users.service';
-import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
-import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { CreateSystemUserDto } from './dtos/create-system-users.dto';
 
 const { RESOURCE_CREATED } = getMessages('user(s)');

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Get, Query, UseGuards, } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get, Query, UseGuards, Put, } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -9,6 +9,7 @@ import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
+import { UpdateDestinationDto } from './dtos/update-destination.dto';
 
 const { RESOURCE_CREATED } = getMessages('screen(s)');
 
@@ -34,5 +35,15 @@ export class DestinationsController {
         return { message: RESOURCE_CREATED, data: createDestination };
     }
 
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @Put()
+    @ApiBody({ type: UpdateDestinationDto })
+    async update(@Query('id') id: string, @Body() body: UpdateDestinationDto, @Req() req: Request) {
+        const createDestination = await this.destinationsService.updateScreen(id, body, req.user);
+        return { message: RESOURCE_CREATED, data: createDestination };
+    }
 
 }

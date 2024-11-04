@@ -187,6 +187,37 @@ export class HotelAndCarsService {
 
     }
 
+    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy) {
+        const skip: number = (page - 1) * rpp;
+        const totalDocuments: number = await this.hotelAndCarsModel.countDocuments(filter);
+        const totalPages: number = Math.ceil(totalDocuments / rpp);
+        page = page > totalPages ? totalPages : page;
+
+        const bandCategorySection = await this.hotelAndCarsModel
+            .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .sort(orderBy)
+            .skip(skip)
+            .limit(rpp)
+            .populate('company_id');
+
+        return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
+
+    }
+
+    /**
+     *The purpose of this method is to return bandCategory based on filter
+     * @param $filter filter query as an argument
+     * @param $orderBy orderby as an argument
+     * @returns bandCategory based on filter
+     */
+    async getFilteredUsers($filter: Object, $orderBy) {
+        return await this.hotelAndCarsModel
+            .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .sort($orderBy)
+            .populate('company_id');
+
+    }
+
     async planCarTrip(body: PlanCarTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
 
         try {
@@ -562,69 +593,7 @@ export class HotelAndCarsService {
 
 
 
-        // const hotels = {
-        //     title: 'Hotel 1 in times square',
-        //     description: '3 star hotel',
-        //     address: 'Central New York City',
-        //     bedrooms_available: 45,
-        //     images: [
-        //         'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png',
-        //         'https://s3.amazonaws.com/staging.carnivalist-images/11a7dbd9-3c5c-4316-8671-ffb2d26f1c4b.png',
-        //         'https://s3.amazonaws.com/staging.carnivalist-images/c588e25b-c20a-472a-af9f-6ae9335933d2.png'
-        //     ],
-        //     highlights: [{
-        //         icon: 'https://s3.amazonaws.com/staging.carnivalist-images/dced58d8-b9fb-48d2-8847-2aac82618817.png',
-        //         detail: 'Hot tub'
-        //     },
-        //     {
-        //         icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
-        //         detail: 'Washer and Dryer'
-        //     }],
-        //     price: 12,
-        //     ratings: 3.2,
-        //     total_reviews: 321,
-        //     lat: 36.98,
-        //     long: 38.76,
-        //     amenities: [
-        //         {
-        //             icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
-        //             detail: 'Wifi'
-        //         },
-        //         {
-        //             icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
-        //             detail: 'Kitchen'
-        //         },
-        //         {
-        //             icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
-        //             detail: 'Refrigerator'
-        //         },
-        //         {
-        //             icon: 'https://s3.amazonaws.com/staging.carnivalist-images/581496a5-ec3f-4e0b-afd2-1fe5018f7385.png',
-        //             detail: 'Dryer'
-        //         }
-        //     ],
-        //     reviews: [
-        //         {
-        //             name: 'John doe',
-        //             rating: 3.4,
-        //             review: 'Exellent place'
-        //         },
-        //         {
-        //             name: 'Muhammad Junaid',
-        //             rating: 4,
-        //             review: 'There is still room for improvement'
-        //         }
-        //     ],
-        //     availablity_from: '',
-        //     availablity_till: '',
-        //     cancellation_policy: 'jnfskj jk ttkje kjkj kjs fkjs kjf skj fkj sfkjfs dfkjd skjs skj skjs kj ',
-        //     host_details: {
-        //         name: 'Hamza Sohail',
-        //         years_of_experience: 7,
 
-        //     }
-
-        // }
 
 
         return hotel

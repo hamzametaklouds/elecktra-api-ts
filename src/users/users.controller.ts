@@ -1,4 +1,4 @@
-import { Controller, Put, Body, ValidationPipe, UsePipes, UseFilters, UseGuards, Req, Get } from '@nestjs/common';
+import { Controller, Put, Body, ValidationPipe, UsePipes, UseFilters, UseGuards, Req, Get, Query } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import getMessages from 'src/app/api-messages';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -72,13 +72,14 @@ export class UsersController {
   //   * @returns the updated user object and success message
   //   */
   @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN)
   @Put()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: UpdateUserDto })
-  async update(@Body() body: UpdateUserDto, @Req() req: Request) {
+  async update(@Query('id') id: string, @Body() body: UpdateUserDto, @Req() req: Request) {
 
-    const user = await this.userService.updateUser(body, req.user);
+    const user = await this.userService.updateUser(id, body, req.user);
     return user;
   }
 

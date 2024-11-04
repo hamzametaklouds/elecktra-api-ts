@@ -35,7 +35,6 @@ export class OptionsController {
 
     }
 
-
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
     @Post()

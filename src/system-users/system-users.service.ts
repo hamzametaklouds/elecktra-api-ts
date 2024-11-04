@@ -7,6 +7,7 @@ import { SYSTEM_USERS_PROVIDER_TOKEN } from './system-users.constant';
 import { ConfigService } from '@nestjs/config';
 import { CreateSystemUserDto } from './dtos/create-system-users.dto';
 import { Role } from 'src/roles/roles.schema';
+import { InvitationsService } from 'src/invitations/invitations.service';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -16,7 +17,8 @@ export class SystemUsersService {
   constructor(
     @Inject(SYSTEM_USERS_PROVIDER_TOKEN)
     private userModel: Model<ISystemUsers>,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private invitationsService: InvitationsService
   ) { }
 
   async getUserByEmail(email: string): Promise<ISystemUsers> {
@@ -88,72 +90,50 @@ export class SystemUsersService {
     if (ifEmailExists) {
       throw new ConflictException('Email already exists')
 
-      //return {status:false,statusCode:409,message:'Email already exists',data:null}       
     }
     const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
     if (ifPhoneExists) {
       throw new ConflictException('Phone number already exists')
-      //return {status:false,statusCode:409,message:'Phone number already exists',data:null}  
     }
 
 
     let invitation;
 
-    //If Invitation id is received in parameters the logic below will be followed for checks of invitation validity
-    if (invitation_id) {
-      //  invitation = await this.invitationsService.getInvitationById(invitation_id);
 
-      if (!invitation) {
-        throw new NotFoundException('Invalid invitation id')
-        //return {status:false,statusCode:404,message:'Invalid invitation id',data:null}
-      }
-      else {
-        var diff = (invitation.created_at.getTime() - new Date().getTime()) / 1000;
-        diff /= 60;
-        const difference = Math.abs(Math.round(diff));
-        const daysInSeconds = 86400 * parseInt(this.configService.get('platformInvitationExpiryInDays.platformInvitationExpiryInDays'))
+    invitation = await this.invitationsService.getInvitationById(invitation_id);
 
-        if (difference > daysInSeconds) {
-          throw new BadRequestException('The invitation has been expired, try requesting invitation again!')
-          //return { status:false,statusCode:400,message:'The invitation has been expired, try requesting invitation again!',data:null};
-        }
+    if (!invitation) {
+      throw new NotFoundException('Invalid invitation id')
+    }
+    else {
+      var diff = (invitation.created_at.getTime() - new Date().getTime()) / 1000;
+      diff /= 60;
+      const difference = Math.abs(Math.round(diff));
+      const daysInSeconds = 86400 * parseInt(this.configService.get('platformInvitationExpiryInDays.platformInvitationExpiryInDays'))
+
+      if (difference > daysInSeconds) {
+        throw new BadRequestException('The invitation has been expired, try requesting invitation again!')
       }
     }
+
 
     const hashPassword = await bcrypt.hash(password, 10);
 
     let createdUser;
 
-    if (invitation_id) {
-      createdUser = await this.userModel.findByIdAndUpdate(
-        invitation.user,
-        {
-          image,
-          first_name,
-          last_name,
-          email: email?.toLocaleLowerCase(),
-          phone_no,
-          password: hashPassword,
 
-        },
-        { new: true }
-      );
-      //   this.invitationsService.updateInvitationUser(invitation_id, createdUser._id);
-    }
-    else {
-      //let allBandPermissions=await this.modulesService.getmoduleAndPermissions(ModuleType.B,false)
 
-      createdUser = await new this.userModel({
-        image,
-        first_name,
-        last_name,
-        email,
-        phone_no,
-        password: hashPassword,
-        roles: [Role.COMPANY_ADMIN],
+    createdUser = await new this.userModel({
+      image,
+      first_name,
+      last_name,
+      email: email?.toLocaleLowerCase(),
+      phone_no,
+      password: hashPassword,
+      roles: [Role.COMPANY_ADMIN],
 
-      }).save();
-    }
+    }).save();
+
 
     return {
       status: true, statusCode: 201, message: 'System User created successfully', data: {

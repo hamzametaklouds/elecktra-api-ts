@@ -23,6 +23,31 @@ export class HotelAndCarsController {
     constructor(private hotelAndCarsService: HotelAndCarsService) { }
 
     @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN, Role.COMPANY_ADMIN)
+    @Get()
+    @ApiQuery({ type: QueryParamsDTO })
+    async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
+        const { $rpp, $page, $filter, $orderBy } = pagination;
+        if ($rpp && $page) {
+            const result = await this.hotelAndCarsService.getPaginatedUsers($rpp, $page, $filter, $orderBy);
+            return {
+                status: result ? true : false,
+                statusCode: result ? 200 : 400,
+                message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+                data: result ? result : null
+            }
+        }
+        const result = await this.hotelAndCarsService.getFilteredUsers($filter, $orderBy);
+        return {
+            status: result ? true : false,
+            statusCode: result ? 200 : 400,
+            message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+            data: result ? result : null
+        }
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
     @ApiQuery({ type: QueryParamsDTO })
     @Post('plan')

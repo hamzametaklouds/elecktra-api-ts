@@ -19,6 +19,7 @@ export class CreateInvitationDto {
     default: null,
   })
   @IsMongoId()
+  @IsOptional()
   company_id?: ObjectId;
 
   @ApiProperty({

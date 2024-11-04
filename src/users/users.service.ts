@@ -220,9 +220,9 @@ export class UsersService {
    * @param userObject receives the user object that contains data that we want to update as an argument
    * @returns the updated user object
    */
-  async updateUser(userObject: UpdateUserDto, user: { userId?: ObjectId }) {
+  async updateUser(id, userObject: UpdateUserDto, user: { userId?: ObjectId }) {
 
-    const userExists = await this.userModel.findOne({ _id: user.userId })
+    const userExists = await this.userModel.findOne({ _id: id })
 
     if (!userExists) {
       throw new BadRequestException('Invalid token')

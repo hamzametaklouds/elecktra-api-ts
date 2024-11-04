@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidateInvitationDto } from './dtos/validate-invitation.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { SystemUsersService } from 'src/system-users/system-users.service';
+const postmark = require("postmark");
 
 
 
@@ -28,6 +29,23 @@ export class InvitationsService {
   async getinvitationById(id): Promise<IInvitations> {
     return await this.invitationModel
       .findOne({ _id: id, is_deleted: false });
+  }
+
+  async sendEmail(to, subject, message) {
+    try {
+      const client = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
+
+      const result = await client.sendEmail({
+        From: "armel@voyagevite.com",  // Replace with your verified sender email
+        To: to,
+        Subject: subject,
+        HtmlBody: message,
+        MessageStream: "outbound", // Use "outbound" for regular emails; "broadcast" for newsletters
+      });
+      console.log("Email sent successfully:", result);
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
   }
 
   async getinvitationByBandId(id: string): Promise<IInvitations> {
@@ -54,9 +72,11 @@ export class InvitationsService {
    */
   async getPaginatedInvitations(rpp: number, page: number, filter: object, orderBy): Promise<IPageinatedDataTable> {
 
-    if (!filter['company_id']) {
-      throw new BadRequestException('Company Id must be provided in the filters')
-    }
+    await this.sendEmail('raoarsalanlatif@gmail.com', 'Voyagevite Invitation', 'Invitation sent')
+
+    // if (!filter['company_id']) {
+    //   throw new BadRequestException('Company Id must be provided in the filters')
+    // }
 
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.invitationModel.countDocuments(filter);
@@ -85,9 +105,9 @@ export class InvitationsService {
    */
   async getFilteredInvitations($filter: Object, $orderBy) {
 
-    if (!$filter['company_id']) {
-      throw new BadRequestException('Company Id must be provided in the filters')
-    }
+    // if (!$filter['company_id']) {
+    //   throw new BadRequestException('Company Id must be provided in the filters')
+    // }
 
 
     return await this.invitationModel

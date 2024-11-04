@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from './system-users.constant';
 import { UserRoles } from 'src/app/global-enums';
 import { Role } from 'src/roles/roles.schema';
+import { COMPANIES_COLLECTION } from 'src/companies/companies.constant';
 
 
 export interface IAdditionalInfo {
@@ -39,6 +40,8 @@ export interface ISystemUsers {
   email_verified_at: Date;
   phone_verified: boolean;
   phone_verifed_at: Date;
+  companies?: Schema.Types.ObjectId[];
+  created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
   is_deleted?: boolean;
@@ -113,6 +116,12 @@ export const SystemUsersSchema = new Schema<ISystemUsers>(
       required: false,
       default: new Date()
     },
+    companies: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      ref: COMPANIES_COLLECTION,
+      default: null
+    },
     is_disabled: {
       type: Boolean,
       required: false,
@@ -122,6 +131,11 @@ export const SystemUsersSchema = new Schema<ISystemUsers>(
       type: Boolean,
       required: false,
       default: false,
+    },
+    created_by: {
+      type: Schema.Types.ObjectId,
+      required: false,
+      ref: SYSTEM_USERS_COLLECTION,
     },
     updated_by: {
       type: Schema.Types.ObjectId,

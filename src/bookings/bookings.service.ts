@@ -5,7 +5,6 @@ import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
 import { BookingStatus, BookingType, IBookings, IPayment } from './bookings.schema';
 import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
-import { CreatePaymentIntentDto } from './dtos/create-payment-intent';
 import { CreatePaymentDto } from './dtos/create-payment';
 import { UsersService } from 'src/users/users.service';
 
@@ -25,6 +24,42 @@ export class BookingsService {
     async getBookingById(id) {
 
         return await this.bookingModel.findOne({ _id: id, is_deleted: false })
+
+    }
+
+    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy) {
+        const skip: number = (page - 1) * rpp;
+        const totalDocuments: number = await this.bookingModel.countDocuments(filter);
+        const totalPages: number = Math.ceil(totalDocuments / rpp);
+        page = page > totalPages ? totalPages : page;
+
+        filter['status'] = { $ne: BookingStatus.CR }
+
+        const bandCategorySection = await this.bookingModel
+            .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .sort(orderBy)
+            .skip(skip)
+            .limit(rpp)
+            .populate('hotel_or_car');
+
+        return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
+
+    }
+
+    /**
+     *The purpose of this method is to return bandCategory based on filter
+     * @param $filter filter query as an argument
+     * @param $orderBy orderby as an argument
+     * @returns bandCategory based on filter
+     */
+    async getFilteredUsers($filter: Object, $orderBy) {
+
+        $filter['status'] = { $ne: BookingStatus.CR }
+
+        return await this.bookingModel
+            .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .sort($orderBy)
+            .populate('hotel_or_car');
 
     }
 
