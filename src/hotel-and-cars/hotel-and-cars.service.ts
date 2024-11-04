@@ -579,6 +579,7 @@ export class HotelAndCarsService {
                     ],
                     owner_details: {
                         name: 'Hamza Sohail',
+                        image: 'https://thumbnail.staging.carnivalist.com/fit-in/1000x1000/ac04720e-c222-4ece-b0f2-6102dbb15d00.jpg'
                     },
                     amenities: 1
 
