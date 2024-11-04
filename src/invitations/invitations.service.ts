@@ -9,11 +9,13 @@ import * as SendGrid from '@sendgrid/mail';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { CompaniesService } from 'src/companies/companies.service';
+import { ValidateInvitationDto } from './dtos/validate-invitation.dto';
 const postmark = require("postmark");
 
 
 @Injectable()
 export class InvitationsService {
+
   constructor(
     @Inject(INVITATIONS_PROVIDER_TOKEN)
     private invitationModel: Model<IInvitations>,
@@ -28,16 +30,19 @@ export class InvitationsService {
       .findOne({ _id: id, is_deleted: false });
   }
 
-  async sendEmail(to, subject, message) {
+  async validateInvitation(body: ValidateInvitationDto) {
+
+  }
+
+  async sendEmail(to: string, subject: string, message: string) {
     try {
       const client = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
-
       const result = await client.sendEmail({
-        From: "armel@voyagevite.com",  // Replace with your verified sender email
+        From: "armel@voyagevite.com", // Verified sender email
         To: to,
         Subject: subject,
         HtmlBody: message,
-        MessageStream: "outbound", // Use "outbound" for regular emails; "broadcast" for newsletters
+        MessageStream: "outbound", // Use "outbound" for transactional emails
       });
       console.log("Email sent successfully:", result);
     } catch (error) {
@@ -69,7 +74,7 @@ export class InvitationsService {
    */
   async getPaginatedInvitations(rpp: number, page: number, filter: object, orderBy): Promise<IPageinatedDataTable> {
 
-    // await this.sendEmail('raoarsalanlatif@gmail.com', 'Voyagevite Invitation', 'Invitation sent')
+
 
     // if (!filter['company_id']) {
     //   throw new BadRequestException('Company Id must be provided in the filters')
@@ -123,66 +128,47 @@ export class InvitationsService {
   * @param datasetObject receives invitation object of interface type IInvitations as an argument
   * @returns the created invitation object
   */
+
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
-    let {
-      email,
-      company_id,
-      role
-    } = invitationObject
+    const { email, company_id, role } = invitationObject;
 
-    const companyExists = await this.companiesService.getCompanyById(company_id)
-
+    const companyExists = await this.companiesService.getCompanyById(company_id);
     if (!companyExists) {
-      throw new BadRequestException('Invalid company id')
+      throw new BadRequestException('Invalid company id');
     }
 
+    // Generate unique invitation link
     const generatedLinkId = uuidv4();
+    const invitationLink = `https://voyagevite.com/invite/${generatedLinkId}`;
 
+    // Save invitation in database
+    const invitation = await new this.invitationModel({
+      email,
+      company_id,
+      link_id: generatedLinkId,
+      role,
+      invitation_status: InvitationStatus.P,
+      created_by: user.userId ?? null,
+    }).save();
 
-    const invitation = await new this.invitationModel(
-      {
-        email,
-        company_id,
-        link_id: generatedLinkId,
-        role,
-        invitation_status: InvitationStatus.P,
-        created_by: user.userId ? user.userId : null
-      }).save();
+    // Define a simple template for the invitation email
+    const emailSubject = "You're Invited to Join VoyageVite!";
+    const emailMessage = `
+      <html>
+          <body>
+              <h1>Welcome to VoyageVite!</h1>
+              <p>You have been invited to join our platform. Click the link below to accept your invitation:</p>
+              <a href="${invitationLink}" style="color: blue; text-decoration: underline;">Accept Invitation</a>
+              <p>Thank you,<br>VoyageVite Team</p>
+          </body>
+      </html>
+  `;
 
-
+    // Send the invitation email
+    await this.sendEmail(email, emailSubject, emailMessage);
 
     return invitation;
-
   }
-
-  // async validateInvitation(body: ValidateInvitationDto) {
-
-
-  //   const validatedInvitation = await this.invitationModel.findOne({ link_id: body.link_id, band_id: body.band_id, is_disabled: false, is_deleted: false })
-
-  //   if (!validatedInvitation) {
-  //     throw new BadRequestException('The invitation with the following link id does not exist');
-  //   }
-
-  //   if (validatedInvitation) {
-  //     var diff = (validatedInvitation.created_at.getTime() - new Date().getTime()) / 1000;
-  //     diff /= 60;
-  //     const difference = Math.abs(Math.round(diff));
-  //     const daysInSeconds = 86400 * parseInt(this.configService.get('platformInvitationExpiryInDays.platformInvitationExpiryInDays'))
-
-  //     if (difference > daysInSeconds) {
-  //       throw new BadRequestException('The invitation has been expired,try requesting again!');
-  //     }
-  //   }
-  //   this.invitationModel.findByIdAndUpdate({ _id: validatedInvitation._id }, { is_used: true, invitation_status: InvitationStatus.O })
-
-  //   const user = await this.systemUsersService.getUserById(validatedInvitation.user);
-
-  //   const { password, ...data } = user;
-
-  //   return { status: true, statusCode: 200, message: 'link id validated successfully!', data: { invitation_id: validatedInvitation._id, sent_to: validatedInvitation.email, permissions: validatedInvitation.permissions, role: validatedInvitation.role, band_id: validatedInvitation.band_id ? validatedInvitation.band_id : null, section: validatedInvitation.section ? validatedInvitation.section : null, user: data } };
-
-  // }
 
   async updateInvitationUser(invitationId: ObjectId, user_id: ObjectId) {
     return await this.invitationModel.findByIdAndUpdate({ _id: invitationId }, { invitation_status: InvitationStatus.A, is_used: true })

@@ -13,6 +13,7 @@ import { Request } from 'express';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { RolesGuard } from 'src/app/guards/role-guard';
+import { ValidateInvitationDto } from './dtos/validate-invitation.dto';
 
 UseFilters(HttpExceptionFilter);
 @Controller('invitations')
@@ -78,12 +79,12 @@ export class InvitationsController {
    * according to the rules defined in validation pipe i.e ValidateInvitationDto
    * @returns the validated invitation object and success message along with
    */
-  // @Post('validate-invitation')
-  // @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  // @ApiBody({ type: ValidateInvitationDto })
-  // async validate(@Body() body: ValidateInvitationDto) {
-  //   const validatedInvitation = await this.invitationService.validateInvitation(body);
-  //   return validatedInvitation;
-  // }
+  @Post('validate-invitation')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBody({ type: ValidateInvitationDto })
+  async validate(@Body() body: ValidateInvitationDto) {
+    const validatedInvitation = await this.invitationService.validateInvitation(body);
+    return validatedInvitation;
+  }
 
 }

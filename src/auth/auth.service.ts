@@ -36,6 +36,15 @@ export class AuthService {
 
   }
 
+  async validateGuestUser() {
+
+
+    return {
+      access_token: this.jwtService.sign({ userName: 'Guest', sub: '66d065e1guest0339427e4f8' }), message: 'Login Successful', user: { _id: '66d065e1guest0339427e4f8', first_name: 'Guest User' }
+    };
+
+  }
+
   async validateSystemUser(email: string, pass: string): Promise<any> {
     const user = await this.systemUsersService.getUserByEmail(email.toLocaleLowerCase());
 

@@ -28,6 +28,14 @@ export class AuthController {
         return createAuth;
     }
 
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    @Post('guest/log-in')
+    async guestLogin() {
+        const createAuth = await this.authService.validateGuestUser();
+        return createAuth;
+    }
+
+
 
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: AdminLoginDto })

@@ -20,6 +20,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
+
+    if (payload.sub === '66d065e1guest0339427e4f8') {
+      return { userId: '66d065e1guest0339427e4f8', username: 'Guest' };
+    }
     const userExists = await this.userService.getUserById(payload.sub);
 
     if (userExists) {
