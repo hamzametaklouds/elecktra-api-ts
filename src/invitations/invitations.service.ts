@@ -72,7 +72,7 @@ export class InvitationsService {
    */
   async getPaginatedInvitations(rpp: number, page: number, filter: object, orderBy): Promise<IPageinatedDataTable> {
 
-    await this.sendEmail('raoarsalanlatif@gmail.com', 'Voyagevite Invitation', 'Invitation sent')
+    // await this.sendEmail('raoarsalanlatif@gmail.com', 'Voyagevite Invitation', 'Invitation sent')
 
     // if (!filter['company_id']) {
     //   throw new BadRequestException('Company Id must be provided in the filters')
