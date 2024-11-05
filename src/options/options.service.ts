@@ -14,10 +14,10 @@ export class OptionsService {
 
     async getOptionsForAmenities() {
         const essentials = await this.optionsModel
-            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.E }, { title: 1, description: 1, sub_type: 1, icon: 1 })
+            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.E, is_deleted: false }, { title: 1, description: 1, sub_type: 1, icon: 1 })
 
         const features = await this.optionsModel
-            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.F }, { title: 1, description: 1, sub_type: 1, icon: 1 })
+            .find({ parent_type: OptionParentType.S, sub_type: OptionSubType.F, is_deleted: false }, { title: 1, description: 1, sub_type: 1, icon: 1 })
 
         return {
             essentials: essentials,
@@ -27,16 +27,16 @@ export class OptionsService {
 
     async getOptionsForCars() {
         const fuel_types = await this.optionsModel
-            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.FT }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.FT, is_deleted: false }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
 
         const car_makes = await this.optionsModel
-            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.M }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.M, is_deleted: false }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
 
         const transmission = await this.optionsModel
-            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.T }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.T, is_deleted: false }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
 
         const amenities = await this.optionsModel
-            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.A }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
+            .find({ parent_type: OptionParentType.C, sub_type: OptionSubType.A, is_deleted: false }, { _id: 1, title: 1, description: 1, sub_type: 1, icon: 1 })
 
 
         return {
