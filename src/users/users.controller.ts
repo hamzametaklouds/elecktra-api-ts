@@ -73,12 +73,25 @@ export class UsersController {
   //   */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN)
   @Put()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: UpdateUserDto })
   async update(@Query('id') id: string, @Body() body: UpdateUserDto, @Req() req: Request) {
 
     const user = await this.userService.updateUser(id, body, req.user);
+    return user;
+  }
+
+
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Put('mobile')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBody({ type: UpdateUserDto })
+  async updateMobileUser(@Body() body: UpdateUserDto, @Req() req: Request) {
+
+    const user = await this.userService.updateUserMobile(body, req.user);
     return user;
   }
 

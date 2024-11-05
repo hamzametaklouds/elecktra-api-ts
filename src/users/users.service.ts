@@ -214,6 +214,67 @@ export class UsersService {
 
   }
 
+
+  async updateUserMobile(userObject: UpdateUserDto, user: { userId?: ObjectId }) {
+
+    const userExists = await this.userModel.findOne({ _id: user.userId })
+
+    if (!userExists) {
+      throw new BadRequestException('Invalid token')
+    }
+
+    const {
+      image,
+      first_name,
+      last_name,
+      email,
+      phone_no,
+      is_disabled,
+      fcm_token,
+      is_deleted,
+      country_code,
+      gender,
+      biography,
+      emergency_contact,
+      country,
+      street,
+      suite,
+      city,
+      post_code,
+      dob
+
+    } = userObject;
+
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      { _id: userExists._id },
+      {
+        image,
+        first_name,
+        last_name,
+        email,
+        phone_no,
+        fcm_token,
+        is_deleted,
+        country_code,
+        gender,
+        biography,
+        is_disabled,
+        emergency_contact,
+        country,
+        street,
+        suite,
+        city,
+        post_code,
+        dob
+      },
+      { new: true }
+    );
+
+    return { status: true, statusCode: 204, message: `User ${is_deleted ? 'deleted' : is_deleted ? 'deleted' : 'updated'} successfully`, data: updatedUser };
+  }
+
+
   /**
    * The purpose of this method is to update user data
    * @param userId receives userId of the user that we want to update
