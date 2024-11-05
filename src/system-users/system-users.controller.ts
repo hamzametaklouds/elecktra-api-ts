@@ -73,6 +73,9 @@ export class SystemUsersController {
     return createdUser;
   }
 
+
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard)
   @Put()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: DeleteSystemUserDto })
