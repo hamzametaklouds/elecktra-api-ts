@@ -14,7 +14,7 @@ export class ScreenConfigsService {
 
     async getScreens(screen) {
         return await this.screenModel
-            .find({ type: screen })
+            .find({ type: screen, is_deleted: false })
             .sort({ order_number: 1 })
     }
 
