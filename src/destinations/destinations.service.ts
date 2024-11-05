@@ -67,11 +67,9 @@ export class DestinationsService {
 
     async destinations() {
 
-
-        const destination = await this.destinationModel.find({ is_deleted: false })
-
-        return destination
-
+        return await this.destinationModel
+            .find({ is_popular: true, is_deleted: false, is_disabled: false }, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .sort({ created_at: -1 })
     }
 
 }

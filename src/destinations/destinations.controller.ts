@@ -25,6 +25,12 @@ export class DestinationsController {
         return { message: 'Destinations fetched successfully', data: hotels };
     }
 
+    @Get('popular')
+    async destinations() {
+        const hotels = await this.destinationsService.destinations();
+        return { message: 'Destinations fetched successfully', data: hotels };
+    }
+
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
     @Roles(Role.SUPER_ADMIN)
