@@ -29,7 +29,7 @@ export interface ISystemUsers {
   _id?: Schema.Types.ObjectId;
   image: string;
   first_name: string;
-  sure_name: string;
+  last_name: string;
   email: string;
   country_code: string;
   phone_no: string;
@@ -59,7 +59,7 @@ export const SystemUsersSchema = new Schema<ISystemUsers>(
       required: false,
       default: ''
     },
-    sure_name: {
+    last_name: {
       type: String,
       required: false,
       default: ''

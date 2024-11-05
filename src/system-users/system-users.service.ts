@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, Inject, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { Model, ObjectId, Types } from 'mongoose';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import getMessages from 'src/app/api-messages';
@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { CreateSystemUserDto } from './dtos/create-system-users.dto';
 import { Role } from 'src/roles/roles.schema';
 import { InvitationsService } from 'src/invitations/invitations.service';
+import { DeleteSystemUserDto } from './dtos/delete-system-users.dto';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -33,10 +34,19 @@ export class SystemUsersService {
 
 
     return await this.userModel
-      .find({ created_by: userExist._id, roles: ['internal_admin'] }, { created_at: 0, updated_at: 0, password: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+      .find({ created_by: userExist._id, roles: ['internal_admin'], is_deleted: false }, { created_at: 0, updated_at: 0, password: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
 
   }
 
+  async getUserDataSuper(user: { userId?: ObjectId }) {
+    const userExist = await this.userModel
+      .findOne({ _id: user.userId, is_deleted: false })
+
+
+    return await this.userModel
+      .find({ created_by: userExist._id, roles: ['super_admin'], is_deleted: false }, { created_at: 0, updated_at: 0, password: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+
+  }
 
   async getUserByPhoneNumber(phone_no: string): Promise<ISystemUsers> {
     return await this.userModel
@@ -155,6 +165,39 @@ export class SystemUsersService {
         phone_no: createdUser.phone_no,
         email_verified: createdUser.email_verified,
         phone_verified: createdUser.phone_verified,
+      }
+    }
+
+  }
+
+  async updateUser(id, userObject: DeleteSystemUserDto, user: { userId?: ObjectId }) {
+    const {
+      is_deleted,
+      is_disabled
+    } = userObject;
+
+    const systemUserExists = await this.userModel.findOne({ _id: id, is_deleted: false })
+
+    if (!systemUserExists) {
+      throw new BadRequestException('Invalid User Id')
+    }
+
+    if (systemUserExists?.created_by?.toString() !== user?.userId?.toString()) {
+      throw new UnauthorizedException('Operation not authorized')
+    }
+
+    const updatedUser = await this.userModel.findByIdAndUpdate({ _id: systemUserExists._id }, { is_deleted: is_deleted, is_disabled: is_disabled }, { new: true })
+
+
+    return {
+      status: true, statusCode: 201, message: 'System User updated successfully', data: {
+        _id: updatedUser._id,
+        first_name: updatedUser.first_name,
+        last_name: updatedUser.last_name,
+        email: updatedUser.email,
+        phone_no: updatedUser.phone_no,
+        is_deleted: updatedUser.is_deleted,
+        is_disabled: updatedUser.is_disabled
       }
     }
 

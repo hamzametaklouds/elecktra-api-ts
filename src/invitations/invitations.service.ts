@@ -132,10 +132,14 @@ export class InvitationsService {
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
     const { email, company_id, role } = invitationObject;
 
-    const companyExists = await this.companiesService.getCompanyById(company_id);
-    if (!companyExists) {
-      throw new BadRequestException('Invalid company id');
+    let companyExists
+    if (company_id) {
+      companyExists = await this.companiesService.getCompanyById(company_id);
+      if (!companyExists) {
+        throw new BadRequestException('Invalid company id');
+      }
     }
+
 
     // Generate unique invitation link
     const generatedLinkId = uuidv4();
@@ -144,7 +148,7 @@ export class InvitationsService {
     // Save invitation in database
     const invitation = await new this.invitationModel({
       email,
-      company_id,
+      company_id: company_id ? company_id : null,
       link_id: generatedLinkId,
       role,
       invitation_status: InvitationStatus.P,

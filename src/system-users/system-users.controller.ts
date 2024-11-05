@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ValidationPipe, UsePipes, UseFilters, UseInterceptors, Headers, UseGuards, Get, Req } from '@nestjs/common';
+import { Controller, Post, Put, Body, ValidationPipe, UsePipes, UseFilters, UseInterceptors, Headers, UseGuards, Get, Req, Query } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import getMessages from 'src/app/api-messages';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
@@ -7,6 +7,7 @@ import { CreateSystemUserDto } from './dtos/create-system-users.dto';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { Request } from 'express';
+import { DeleteSystemUserDto } from './dtos/delete-system-users.dto';
 
 const { RESOURCE_CREATED } = getMessages('user(s)');
 
@@ -57,6 +58,12 @@ export class SystemUsersController {
     return await this.systemUserService.getUserData(req.user)
   }
 
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard)
+  @Get('super-admins')
+  async getSuperAdmin(@Req() req: Request) {
+    return await this.systemUserService.getUserDataSuper(req.user)
+  }
 
   @Post('sign-up')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -66,5 +73,12 @@ export class SystemUsersController {
     return createdUser;
   }
 
+  @Put()
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBody({ type: DeleteSystemUserDto })
+  async update(@Query('id') id: string, @Body() body: DeleteSystemUserDto, @Req() req: Request) {
+    const createdUser = await this.systemUserService.updateUser(id, body, req.user);
+    return createdUser;
+  }
 
 }
