@@ -3,6 +3,7 @@ import { Model, ObjectId } from 'mongoose';
 import { OPTIONS_PROVIDER_TOKEN } from './options.constants';
 import { IOptions, OptionParentType, OptionSubType } from './options.schema';
 import { CreateOptionDto } from './dtos/create-options.dto';
+import { UpdateOptionDto } from './dtos/update-options.dto';
 
 @Injectable()
 export class OptionsService {
@@ -69,9 +70,9 @@ export class OptionsService {
     }
 
 
-    async updateOption(id, body: CreateOptionDto, user: { userId?: ObjectId }) {
+    async updateOption(id, body: UpdateOptionDto, user: { userId?: ObjectId }) {
 
-        const { title, description, parent_type, icon, sub_type } = body;
+        const { title, description, parent_type, icon, is_deleted, sub_type } = body;
 
         const screenExits = await this.optionsModel.findOne({ _id: id, is_deleted: false })
 
@@ -86,6 +87,7 @@ export class OptionsService {
                 icon,
                 parent_type,
                 sub_type,
+                is_deleted,
                 created_by: user?.userId || null
             }, { new: true })
 

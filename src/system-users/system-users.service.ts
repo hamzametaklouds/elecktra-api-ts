@@ -27,6 +27,17 @@ export class SystemUsersService {
 
   }
 
+  async getUserData(user: { userId?: ObjectId }) {
+    const userExist = await this.userModel
+      .findOne({ _id: user.userId, is_deleted: false })
+
+
+    return await this.userModel
+      .find({ created_by: userExist._id, roles: ['internal_admin'] }, { created_at: 0, updated_at: 0, password: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+
+  }
+
+
   async getUserByPhoneNumber(phone_no: string): Promise<ISystemUsers> {
     return await this.userModel
       .findOne({ phone_no: phone_no, is_deleted: false })
