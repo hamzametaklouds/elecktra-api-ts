@@ -252,7 +252,7 @@ export class UsersService {
 
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
-      userExists._id,
+      { _id: userExists._id },
       {
         image,
         first_name,
