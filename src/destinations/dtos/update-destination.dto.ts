@@ -58,5 +58,14 @@ export class UpdateDestinationDto {
     @IsOptional()
     is_popular: boolean;
 
+    @ApiProperty({
+        description: 'is_deleted boolean e.g is_deleted=xyzabc',
+        required: true,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_deleted: boolean;
+
 
 }

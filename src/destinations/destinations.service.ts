@@ -37,7 +37,7 @@ export class DestinationsService {
 
     async updateScreen(id, body: UpdateDestinationDto, user: { userId?: ObjectId }) {
 
-        const { title, description, lat, long, images, is_popular } = body;
+        const { title, description, lat, long, images, is_popular, is_deleted } = body;
 
         const screenExist = await this.destinationModel.findOne({ _id: id, is_deleted: false })
 
@@ -56,6 +56,7 @@ export class DestinationsService {
                 },
                 is_popular,
                 images,
+                is_deleted,
                 created_by: user.userId ? user.userId : null
             }, { new: true })
 
