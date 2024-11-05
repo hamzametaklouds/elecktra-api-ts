@@ -1,7 +1,6 @@
 import { Injectable, Inject, BadRequestException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { IPageinatedDataTable } from 'src/app/interfaces';
-import getMessages from 'src/app/api-messages';
 import { IInvitations, InvitationStatus } from './invitations.schema';
 import { INVITATIONS_PROVIDER_TOKEN } from './invitations.constants';
 import { CreateInvitationDto } from './dtos/create-invitations.dto';
@@ -9,8 +8,8 @@ import * as SendGrid from '@sendgrid/mail';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { CompaniesService } from 'src/companies/companies.service';
-import { ValidateInvitationDto } from './dtos/validate-invitation.dto';
 const postmark = require("postmark");
+import * as jwt from 'jsonwebtoken';
 
 
 @Injectable()
@@ -30,9 +29,45 @@ export class InvitationsService {
       .findOne({ _id: id, is_deleted: false });
   }
 
-  async validateInvitation(body: ValidateInvitationDto) {
+  async validateInvitationLink(token: string) {
+    try {
+      // Decode the token to get the `link_id`
+      const decoded = jwt.verify(token, process.env.JWT_SECRET) as { link_id: string };
+      const { link_id } = decoded;
 
+      console.log('link id----', link_id)
+
+      // Find the invitation by `link_id` with additional conditions
+      const invitation = await this.invitationModel.findOne({
+        link_id: link_id,
+        is_deleted: false,
+        is_used: false,
+        invitation_status: InvitationStatus.P
+      });
+
+      if (!invitation) {
+        throw new BadRequestException('Invalid or expired invitation link');
+      }
+
+      // Check if the invitation is older than 2 days
+      const twoDaysInMillis = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
+      const currentTime = new Date().getTime();
+      const createdTime = new Date(invitation.created_at).getTime();
+
+      if (currentTime - createdTime > twoDaysInMillis) {
+        throw new BadRequestException('Invitation has expired');
+
+      }
+
+      const updatedInvitation = await this.invitationModel.findByIdAndUpdate({ _id: invitation._id }, { invitation_status: InvitationStatus.O }, { new: true })
+
+      return updatedInvitation;
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired invitation link');
+    }
   }
+
+
 
   async sendEmail(to: string, subject: string, message: string) {
     try {
@@ -129,10 +164,11 @@ export class InvitationsService {
   * @returns the created invitation object
   */
 
+
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
     const { email, company_id, role } = invitationObject;
 
-    let companyExists
+    let companyExists;
     if (company_id) {
       companyExists = await this.companiesService.getCompanyById(company_id);
       if (!companyExists) {
@@ -140,12 +176,14 @@ export class InvitationsService {
       }
     }
 
-
-    // Generate unique invitation link
+    // Generate unique invitation link ID
     const generatedLinkId = uuidv4();
-    const invitationLink = `https://voyagevite.com/invite/${generatedLinkId}`;
 
-    // Save invitation in database
+    // Generate a JWT token with the `link_id`
+    const token = jwt.sign({ link_id: generatedLinkId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const invitationLink = `https://voyage-vite-admi-panel.vercel.app/signup/${token}`;
+
+    // Save the invitation in the database
     const invitation = await new this.invitationModel({
       email,
       company_id: company_id ? company_id : null,
@@ -155,7 +193,7 @@ export class InvitationsService {
       created_by: user.userId ?? null,
     }).save();
 
-    // Define a simple template for the invitation email
+    // Define a template for the invitation email
     const emailSubject = "You're Invited to Join VoyageVite!";
     const emailMessage = `
       <html>
@@ -173,7 +211,6 @@ export class InvitationsService {
 
     return invitation;
   }
-
   async updateInvitationUser(invitationId: ObjectId, user_id: ObjectId) {
     return await this.invitationModel.findByIdAndUpdate({ _id: invitationId }, { invitation_status: InvitationStatus.A, is_used: true })
   }

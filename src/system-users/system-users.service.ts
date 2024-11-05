@@ -34,7 +34,7 @@ export class SystemUsersService {
 
 
     return await this.userModel
-      .find({ created_by: userExist._id, roles: ['internal_admin'], is_deleted: false }, { created_at: 0, updated_at: 0, password: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+      .find({ created_by: userExist._id, roles: ['internal_admin'] }, { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 })
 
   }
 
@@ -44,7 +44,7 @@ export class SystemUsersService {
 
 
     return await this.userModel
-      .find({ created_by: userExist._id, roles: ['super_admin'], is_deleted: false }, { created_at: 0, updated_at: 0, password: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+      .find({ created_by: userExist._id, roles: ['super_admin'] }, { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 })
 
   }
 

@@ -81,9 +81,8 @@ export class InvitationsController {
    */
   @Post('validate-invitation')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiBody({ type: ValidateInvitationDto })
-  async validate(@Body() body: ValidateInvitationDto) {
-    const validatedInvitation = await this.invitationService.validateInvitation(body);
+  async validate(@Query('invitation_token') link_id: string) {
+    const validatedInvitation = await this.invitationService.validateInvitationLink(link_id);
     return validatedInvitation;
   }
 
