@@ -204,6 +204,15 @@ export class UpdateHotelAndCarDto {
     @IsOptional()
     is_available: boolean
 
+    @ApiProperty({
+        description: 'is_ideal number e.g is_ideal=676',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_ideal: boolean
+
 
 
 

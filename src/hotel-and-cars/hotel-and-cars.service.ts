@@ -417,8 +417,9 @@ export class HotelAndCarsService {
 
         const userWishList = await this.wishListService.getWishlistById(user.userId)
 
-        hotel[0].is_in_wishlist = userWishList.hotels.includes(hotel[0]._id);
-
+        if (user?.userId?.toString() !== '67272691b1673e7c1353639a') {
+            hotel[0].is_in_wishlist = userWishList?.hotels?.includes(hotel[0]._id);
+        }
 
 
 
@@ -559,7 +560,10 @@ export class HotelAndCarsService {
 
         const userWishList = await this.wishListService.getWishlistById(user.userId)
 
-        hotel[0].is_in_wishlist = userWishList.cars.includes(hotel[0]._id);
+        if (user?.userId?.toString() !== '67272691b1673e7c1353639a') {
+            hotel[0].is_in_wishlist = userWishList.cars.includes(hotel[0]._id);
+        }
+
 
 
 
@@ -627,6 +631,73 @@ export class HotelAndCarsService {
                 hotel_details,
                 created_by: user?.userId || null
             }).save();
+
+
+        return screen
+
+    }
+
+    async updateOption(id, body: CreateHotelAndCarDto, user: { userId?: ObjectId }) {
+
+
+        const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false })
+
+        if (!optionExist) {
+            throw new BadRequestException('Invalid Id')
+        }
+
+        const {
+            title,
+            description,
+            images,
+            address,
+            highlights,
+            amenities,
+            car_options,
+            type,
+            lat,
+            long,
+            price,
+            total_rooms,
+            rooms_reserved,
+            hotel_type,
+            company_id,
+            availability_from,
+            availability_till,
+            host_or_owner,
+            car_details,
+            hotel_details,
+
+        } = body;
+
+        const screen = await this.hotelAndCarsModel.findByIdAndUpdate({ _id: optionExist._id },
+            {
+                title,
+                description,
+                images,
+                address,
+                highlights,
+                amenities,
+                hotel_type,
+                car_options,
+                type,
+                location: {
+                    type: 'Point',
+                    coordinates: [long, lat]
+                },
+                lat,
+                long,
+                price,
+                total_rooms,
+                company_id,
+                rooms_reserved,
+                availability_from: availability_from ? new Date(availability_from) : null,
+                availability_till: availability_till ? new Date(availability_till) : null,
+                host_or_owner,
+                car_details,
+                hotel_details,
+                created_by: user?.userId || null
+            }, { new: true })
 
 
         return screen

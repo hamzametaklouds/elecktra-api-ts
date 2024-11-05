@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Req, UseGuards, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, UseGuards, Query, UsePipes, ValidationPipe, Put } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiBearerAuth, ApiTags, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -96,6 +96,17 @@ export class HotelAndCarsController {
     async insert(@Body() body: CreateHotelAndCarDto, @Req() req: Request) {
         const createOption = await this.hotelAndCarsService.insertOption(body, req.user);
         return { message: RESOURCE_CREATED, data: createOption };
+    }
+
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @Put()
+    @ApiBody({ type: CreateHotelAndCarDto })
+    async update(@Query('id') id: string, @Body() body: CreateHotelAndCarDto, @Req() req: Request) {
+        const createOption = await this.hotelAndCarsService.updateOption(id, body, req.user);
+        return { message: 'Updated Successfully', data: createOption };
     }
 
 

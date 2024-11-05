@@ -156,6 +156,7 @@ export interface IHotelAndCars {
     is_available?: boolean;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
+    is_ideal?: boolean;
     is_disabled?: boolean;
     is_deleted?: boolean;
 }
@@ -268,6 +269,11 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             default: false,
         },
         is_disabled: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        is_ideal: {
             type: Boolean,
             required: false,
             default: false,
