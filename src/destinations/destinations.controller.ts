@@ -21,7 +21,7 @@ export class DestinationsController {
 
     @Get()
     async detail() {
-        const hotels = await this.destinationsService.destinations();
+        const hotels = await this.destinationsService.destinationsWithoutPopular();
         return { message: 'Destinations fetched successfully', data: hotels };
     }
 
