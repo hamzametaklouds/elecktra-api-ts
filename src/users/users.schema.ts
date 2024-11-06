@@ -10,7 +10,6 @@ export interface IUsers {
   country_code: string;
   phone_no: string;
   gender?: string
-  biography?: string
   emergency_contact?: string;
   country?: string
   street?: string
@@ -58,11 +57,6 @@ export const UsersSchema = new Schema<IUsers>(
       default: ''
     },
     gender: {
-      type: String,
-      required: false,
-      default: ''
-    },
-    biography: {
       type: String,
       required: false,
       default: ''

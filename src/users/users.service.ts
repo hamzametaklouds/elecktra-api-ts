@@ -223,6 +223,7 @@ export class UsersService {
       throw new BadRequestException('Invalid token')
     }
 
+
     const {
       image,
       first_name,
