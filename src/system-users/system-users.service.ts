@@ -171,6 +171,10 @@ export class SystemUsersService {
 
   async updateUser(id, userObject: DeleteSystemUserDto, user: { userId?: ObjectId }) {
     const {
+      email,
+      phone_no,
+      first_name,
+      last_name,
       is_deleted,
       is_disabled
     } = userObject;
@@ -185,7 +189,17 @@ export class SystemUsersService {
       throw new UnauthorizedException('Operation not authorized')
     }
 
-    const updatedUser = await this.userModel.findByIdAndUpdate({ _id: systemUserExists._id }, { is_deleted: is_deleted, is_disabled: is_disabled }, { new: true })
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      { _id: systemUserExists._id },
+      {
+        email,
+        phone_no,
+        first_name,
+        last_name,
+        is_deleted,
+        is_disabled
+      },
+      { new: true })
 
 
     return {
