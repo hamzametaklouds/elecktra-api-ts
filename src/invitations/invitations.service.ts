@@ -1,5 +1,5 @@
 import { Injectable, Inject, BadRequestException, forwardRef } from '@nestjs/common';
-import { Model, ObjectId } from 'mongoose';
+import { Model, ObjectId, ObjectIdSchemaDefinition } from 'mongoose';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import { IInvitations, InvitationStatus } from './invitations.schema';
 import { INVITATIONS_PROVIDER_TOKEN } from './invitations.constants';
@@ -212,7 +212,7 @@ export class InvitationsService {
 
     return invitation;
   }
-  async updateInvitationUser(invitationId: ObjectId, user_id: ObjectId) {
+  async updateInvitationUser(invitationId) {
     return await this.invitationModel.findByIdAndUpdate({ _id: invitationId }, { invitation_status: InvitationStatus.A, is_used: true })
   }
 

@@ -162,6 +162,8 @@ export class SystemUsersService {
 
     let createdUser;
 
+    await this.invitationsService.updateInvitationUser(invitation_id);
+
 
 
     createdUser = await new this.userModel({
