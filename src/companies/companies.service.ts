@@ -1,17 +1,20 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { CreateCompanyDto } from './dtos/create-company.dto';
 import { Model, ObjectId } from 'mongoose';
 import { UpdateCompanyDto } from './dtos/update-company.dto';
 import { COMPANIES_PROVIDER_TOKEN } from './companies.constant';
 import { ICompanies } from './companies.schema';
 import { IPageinatedDataTable } from 'src/app/interfaces';
+import { SystemUsersService } from 'src/system-users/system-users.service';
 
 @Injectable()
 export class CompaniesService {
 
     constructor(
         @Inject(COMPANIES_PROVIDER_TOKEN)
-        private companyModel: Model<ICompanies>
+        private companyModel: Model<ICompanies>,
+        @Inject(forwardRef(() => SystemUsersService))
+        private systemUserService: SystemUsersService
     ) { }
 
 
@@ -46,6 +49,20 @@ export class CompaniesService {
     async getCompanyById(id) {
 
         return await this.companyModel.findOne({ _id: id, is_deleted: false })
+
+    }
+
+    async getCompanyAdminsForCompanyById(id) {
+
+        const company = await this.companyModel.findOne({ _id: id, is_deleted: false, is_disabled: false })
+
+        if (!company) {
+            throw new BadRequestException('Invalid Id')
+        }
+
+
+        return await this.systemUserService.getCompanyAdmins(company._id)
+
 
     }
 

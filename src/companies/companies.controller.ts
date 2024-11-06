@@ -10,6 +10,9 @@ import { UpdateCompanyDto } from './dtos/update-company.dto';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
 import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
 import { IPaginationQuery } from 'src/app/interfaces';
+import { RolesGuard } from 'src/app/guards/role-guard';
+import { Role } from 'src/roles/roles.schema';
+import { Roles } from 'src/app/dtos/roles-decorator';
 
 const { RESOURCE_CREATED } = getMessages('Company(s)');
 
@@ -43,6 +46,16 @@ export class CompaniesController {
             message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
             data: result ? result : null
         }
+    }
+
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN)
+    @Get('admins')
+    async getCompanyAdmins(@Query('company_id') company_id: string) {
+        return await this.companiesService.getCompanyAdminsForCompanyById(company_id)
+
     }
 
 

@@ -53,6 +53,27 @@ export class SystemUsersService {
       .findOne({ phone_no: phone_no, is_deleted: false })
   }
 
+  async getCompanyAdmins(id) {
+    return await this.userModel.aggregate([
+      {
+        $match: { is_disabled: false, is_deleted: false, companies: id }
+      },
+      {
+        $project: {
+          _id: 1,
+          first_name: 1,
+          last_name: 1,
+          email: 1,
+          country_code: 1,
+          phone_no: 1,
+          companies: 1
+
+        }
+      }
+
+    ])
+  }
+
   async getUserById(id: ObjectId): Promise<ISystemUsers> {
     return await this.userModel
       .findOne({ _id: id, is_deleted: false })
