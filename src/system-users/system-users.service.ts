@@ -173,7 +173,8 @@ export class SystemUsersService {
       email: email?.toLocaleLowerCase(),
       phone_no,
       password: hashPassword,
-      roles: [Role.COMPANY_ADMIN],
+      companies: invitation?.company_id ? [invitation?.company_id] : null,
+      roles: [invitation?.role],
 
     }).save();
 
