@@ -181,7 +181,8 @@ export class InvitationsService {
 
     // Generate a JWT token with the `link_id`
     const token = jwt.sign({ link_id: generatedLinkId }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    const invitationLink = `https://voyage-vite-admi-panel.vercel.app/signup/${token}`;
+    // const invitationLink = `https://voyage-vite-admi-panel.vercel.app/signup/${token}`;
+    const invitationLink = `http://localhost:5173/signup/${token}`;
 
     // Save the invitation in the database
     const invitation = await new this.invitationModel({
