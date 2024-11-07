@@ -43,6 +43,8 @@ export class HotelAndCarsService {
             } = body;
 
             let hotel = [];
+
+            $filter['is_available'] = true
             $filter = matchFilters($filter);
 
             const userWishList = await this.wishListService.getWishlistById(user.userId);
