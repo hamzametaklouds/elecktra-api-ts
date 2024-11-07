@@ -56,7 +56,7 @@ export class SystemUsersService {
   async getCompanyAdmins(id) {
     return await this.userModel.aggregate([
       {
-        $match: { is_disabled: false, is_deleted: false, companies: id }
+        $match: { companies: id }
       },
       {
         $project: {
@@ -66,7 +66,7 @@ export class SystemUsersService {
           email: 1,
           country_code: 1,
           phone_no: 1,
-          companies: 1
+          companies: 1, is_disabled: 1, is_deleted: 1
 
         }
       }
