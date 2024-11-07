@@ -53,7 +53,7 @@ export class UsersService {
     page = page > totalPages ? totalPages : page;
 
     const bandCategorySection = await this.userModel
-      .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+      .find(filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp)
@@ -70,7 +70,7 @@ export class UsersService {
    */
   async getFilteredUsers($filter: Object, $orderBy) {
     return await this.userModel
-      .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+      .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy)
 
   }
