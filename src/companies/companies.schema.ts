@@ -27,7 +27,7 @@ export const CompaniesSchema = new Schema<ICompanies>(
         },
         icon: {
             type: String,
-            required: true,
+            required: false,
             default: null
         },
         is_disabled: {

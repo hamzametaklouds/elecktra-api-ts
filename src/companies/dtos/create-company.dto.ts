@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 
 export class CreateCompanyDto {
@@ -26,6 +26,7 @@ export class CreateCompanyDto {
         default: '',
     })
     @IsString()
+    @IsOptional()
     icon: string;
 
 
