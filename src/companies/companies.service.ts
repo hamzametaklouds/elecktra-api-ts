@@ -89,7 +89,7 @@ export class CompaniesService {
     async updateComapny(id, body: UpdateCompanyDto, user: { userId?: ObjectId }) {
 
 
-        const companyExists = await this.companyModel.findOne({ _id: id, is_deleted: false, is_disabled: false })
+        const companyExists = await this.companyModel.findOne({ _id: id, is_deleted: false })
 
 
         if (!companyExists) {
