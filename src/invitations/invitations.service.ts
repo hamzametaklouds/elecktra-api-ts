@@ -42,7 +42,7 @@ export class InvitationsService {
         link_id: link_id,
         is_deleted: false,
         is_used: false,
-        invitation_status: InvitationStatus.P
+        invitation_status: { $ne: InvitationStatus.A }
       });
 
       if (!invitation) {
