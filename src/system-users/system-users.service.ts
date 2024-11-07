@@ -173,6 +173,7 @@ export class SystemUsersService {
       email: email?.toLocaleLowerCase(),
       phone_no,
       password: hashPassword,
+      is_disabled: false,
       companies: invitation?.company_id ? [invitation?.company_id] : null,
       roles: [invitation?.role],
 
