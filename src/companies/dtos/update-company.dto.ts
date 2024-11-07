@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 
 export class UpdateCompanyDto {
@@ -30,6 +30,27 @@ export class UpdateCompanyDto {
     @IsString()
     @IsOptional()
     icon: string;
+
+
+    @ApiProperty({
+        description: 'is_disabled boolean e.g is_deleted=true',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_disabled?: boolean;
+
+
+    @ApiProperty({
+        description: 'is_deleted boolean e.g is_deleted=true',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_deleted?: boolean;
+
 
 
 }

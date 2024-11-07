@@ -96,13 +96,14 @@ export class CompaniesService {
             throw new BadRequestException('Invalid id')
         }
 
-        const { title, description, icon } = body;
+        const { title, description, icon, is_deleted, is_disabled } = body;
 
         const screen = await this.companyModel.findByIdAndUpdate({ _id: companyExists._id },
             {
                 title,
                 description,
                 icon,
+                is_deleted, is_disabled,
                 created_by: user?.userId || null
             },
             {
