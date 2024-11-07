@@ -209,9 +209,9 @@ export class SystemUsersService {
       throw new BadRequestException('Invalid User Id')
     }
 
-    if (systemUserExists?.created_by?.toString() !== user?.userId?.toString()) {
-      throw new UnauthorizedException('Operation not authorized')
-    }
+    // if (systemUserExists?.created_by?.toString() !== user?.userId?.toString()) {
+    //   throw new UnauthorizedException('Operation not authorized')
+    // }
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
       { _id: systemUserExists._id },
