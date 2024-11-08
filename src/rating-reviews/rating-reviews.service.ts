@@ -67,6 +67,7 @@ export class RatingReviewsService {
             rating,
             image,
             name,
+            user_type,
             designation
         } = body;
 
@@ -77,6 +78,7 @@ export class RatingReviewsService {
                 rating,
                 image,
                 name,
+                user_type,
                 designation,
                 custom_review: true,
                 created_by: user?.userId || null

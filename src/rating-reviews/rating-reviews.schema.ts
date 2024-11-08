@@ -2,6 +2,14 @@ import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { RATING_REVIWS_COLLECTION } from './rating-reviews.constant';
 
+
+
+
+export enum UserType {
+    H = 'Host',
+    U = 'User'
+}
+
 export interface IReviewAndRatings {
     _id?: Schema.Types.ObjectId;
     review: string;
@@ -12,6 +20,7 @@ export interface IReviewAndRatings {
     name: string;
     image: string;
     designation: string
+    user_type: string;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -54,6 +63,12 @@ export const ReviewAndRatingSchema = new Schema<IReviewAndRatings>(
             type: String,
             required: true,
             default: null
+        },
+        user_type: {
+            type: String,
+            required: true,
+            enum: UserType,
+            default: UserType.U
         },
         designation: {
             type: String,

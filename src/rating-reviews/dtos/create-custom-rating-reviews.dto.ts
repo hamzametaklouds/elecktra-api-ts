@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { UserType } from '../rating-reviews.schema';
 
 export class CreateCustomRatingReviewDto {
 
@@ -42,6 +43,14 @@ export class CreateCustomRatingReviewDto {
     })
     @IsString()
     designation: string;
+
+    @ApiProperty({
+        description: 'review string e.g review=jknkjn54545jkj',
+        required: true,
+        default: '',
+    })
+    @IsEnum(UserType)
+    user_type: string;
 
 
 
