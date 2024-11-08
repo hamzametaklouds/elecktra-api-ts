@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Req, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Req, BadRequestException, UseGuards, Put } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -48,7 +48,7 @@ export class RatingReviewsController {
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
     @Roles(Role.SUPER_ADMIN)
-    @Post('custom')
+    @Put('custom')
     @ApiBody({ type: UpdateCustomRatingReviewDto })
     async updateCustomReview(@Query('id') id: string, @Body() body: UpdateCustomRatingReviewDto, @Req() req: Request) {
         const createRatingReview = await this.ratingReviewsService.updateCustomRatingReview(id, body, req.user);
