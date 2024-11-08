@@ -18,7 +18,7 @@ export class RatingReviewsService {
 
     async getCustomeReviews() {
         return await this.ratingAndReviewsModel
-            .find({ custom_review: true, is_deleted: false }, { custom_review: 0, is_deleted: 0, __v: 0, updatedAt: 0, is_disabled: 0, booking_id: 0, hotel_or_car: 0, created_by: 0, updated_at: 0, updated_by: 0 })
+            .find({ custom_review: true, is_disabled: false, is_deleted: false }, { custom_review: 0, is_deleted: 0, __v: 0, updatedAt: 0, is_disabled: 0, booking_id: 0, hotel_or_car: 0, created_by: 0, updated_at: 0, updated_by: 0 })
     }
 
 
@@ -83,6 +83,47 @@ export class RatingReviewsService {
                 custom_review: true,
                 created_by: user?.userId || null
             }).save();
+
+        return screen
+
+    }
+
+    async updateCustomRatingReview(id, body: CreateCustomRatingReviewDto, user: { userId?: ObjectId }) {
+
+        const customReview = await this.ratingAndReviewsModel.findOne({ _id: id, is_deleted: false })
+
+        if (!customReview) {
+            throw new BadRequestException('Invalid Id')
+        }
+
+        const {
+            review,
+            rating,
+            image,
+            name,
+            user_type,
+            designation
+        } = body;
+
+
+        const screen = await this.ratingAndReviewsModel.findByIdAndUpdate(
+            {
+                _id: customReview._id
+            },
+            {
+                review,
+                rating,
+                image,
+                name,
+                user_type,
+                designation,
+                custom_review: true,
+                updated_by: user?.userId || null
+            },
+            {
+                new: true
+            }
+        )
 
         return screen
 

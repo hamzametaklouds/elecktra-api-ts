@@ -10,6 +10,7 @@ import { CreateCustomRatingReviewDto } from './dtos/create-custom-rating-reviews
 import { RolesGuard } from 'src/app/guards/role-guard';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
+import { UpdateCustomRatingReviewDto } from './dtos/update-custom-rating-reviews.dto';
 
 const { RESOURCE_CREATED } = getMessages('review(s)');
 
@@ -41,6 +42,16 @@ export class RatingReviewsController {
     @ApiBody({ type: CreateCustomRatingReviewDto })
     async insertCustomReview(@Body() body: CreateCustomRatingReviewDto, @Req() req: Request) {
         const createRatingReview = await this.ratingReviewsService.insertCustomRatingReview(body, req.user);
+        return { message: RESOURCE_CREATED, data: createRatingReview };
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @Post('custom')
+    @ApiBody({ type: UpdateCustomRatingReviewDto })
+    async updateCustomReview(@Query('id') id: string, @Body() body: UpdateCustomRatingReviewDto, @Req() req: Request) {
+        const createRatingReview = await this.ratingReviewsService.updateCustomRatingReview(id, body, req.user);
         return { message: RESOURCE_CREATED, data: createRatingReview };
     }
 
