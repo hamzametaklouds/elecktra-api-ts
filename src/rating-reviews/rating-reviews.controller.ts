@@ -52,7 +52,7 @@ export class RatingReviewsController {
     @ApiBody({ type: UpdateCustomRatingReviewDto })
     async updateCustomReview(@Query('id') id: string, @Body() body: UpdateCustomRatingReviewDto, @Req() req: Request) {
         const createRatingReview = await this.ratingReviewsService.updateCustomRatingReview(id, body, req.user);
-        return { message: RESOURCE_CREATED, data: createRatingReview };
+        return { message: 'Custom review updated, successfully', data: createRatingReview };
     }
 
 

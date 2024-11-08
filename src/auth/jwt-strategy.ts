@@ -4,6 +4,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { ConfigService } from '@nestjs/config';
 import { SystemUsersService } from 'src/system-users/system-users.service';
 import { UsersService } from 'src/users/users.service';
+import { Role } from 'src/roles/roles.schema';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -27,7 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const userExists = await this.userService.getUserById(payload.sub);
 
     if (userExists) {
-      return { userId: userExists._id, username: userExists.first_name };
+      return { userId: userExists._id, username: userExists.first_name, roles: [Role.USER] };
     }
 
     const systemUserExists = await this.systemUserService.getUserById(payload.sub);

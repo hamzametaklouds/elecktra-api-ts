@@ -25,7 +25,8 @@ export class CompaniesController {
 
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.COMPANY_ADMIN, Role.INTERNAL_ADMIN)
     @Get()
     @ApiQuery({ type: QueryParamsDTO })
     async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
@@ -58,10 +59,9 @@ export class CompaniesController {
 
     }
 
-
-
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.COMPANY_ADMIN, Role.INTERNAL_ADMIN)
     @Post()
     @ApiBody({ type: CreateCompanyDto })
     async insert(@Body() body: CreateCompanyDto, @Req() req: Request) {
@@ -70,7 +70,8 @@ export class CompaniesController {
     }
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.COMPANY_ADMIN, Role.INTERNAL_ADMIN)
     @Put()
     @ApiBody({ type: UpdateCompanyDto })
     async update(@Query('id') id: string, @Body() body: UpdateCompanyDto, @Req() req: Request) {

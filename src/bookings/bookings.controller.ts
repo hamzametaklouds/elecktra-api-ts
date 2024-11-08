@@ -50,7 +50,8 @@ export class BookingsController {
 
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.USER)
     @Get()
     async getCar(@Req() req: Request) {
         const screens = await this.bookingsService.getBookingsForUser(req.user)
@@ -59,8 +60,21 @@ export class BookingsController {
     }
 
 
+
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.USER)
+    @Get()
+    async getBookings(@Req() req: Request) {
+        const screens = await this.bookingsService.getBookingsForUser(req.user)
+
+        return screens;
+    }
+
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.USER)
     @Post()
     @ApiBody({ type: CreateBookingsDto })
     async insert(@Body() body: CreateBookingsDto, @Req() req: Request) {
@@ -69,7 +83,8 @@ export class BookingsController {
     }
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.USER)
     @Post('cancellation')
     async bookingCancel(@Query('booking_id') booking_id: string, @Req() req: Request) {
         const cancelBooking = await this.bookingsService.cancelBooking(booking_id, req.user);
@@ -77,7 +92,8 @@ export class BookingsController {
     }
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.USER)
     @Post('checkout')
     async checkoutBooking(@Query('booking_id') booking_id: string, @Req() req: Request) {
         const cancelBooking = await this.bookingsService.checkoutBooking(booking_id, req.user);
@@ -85,7 +101,8 @@ export class BookingsController {
     }
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.USER)
     @Post('payment')
     @ApiBody({ type: CreatePaymentDto })
     async intent(@Body() body: CreatePaymentDto, @Req() req: Request) {

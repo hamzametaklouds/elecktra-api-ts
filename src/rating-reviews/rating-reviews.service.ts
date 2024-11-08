@@ -5,6 +5,7 @@ import { RATING_REVIEWS_PROVIDER_TOKEN } from './rating-reviews.constant';
 import { IReviewAndRatings } from './rating-reviews.schema';
 import { BookingsService } from 'src/bookings/bookings.service';
 import { CreateCustomRatingReviewDto } from './dtos/create-custom-rating-reviews.dto';
+import { UpdateCustomRatingReviewDto } from './dtos/update-custom-rating-reviews.dto';
 
 @Injectable()
 export class RatingReviewsService {
@@ -88,7 +89,7 @@ export class RatingReviewsService {
 
     }
 
-    async updateCustomRatingReview(id, body: CreateCustomRatingReviewDto, user: { userId?: ObjectId }) {
+    async updateCustomRatingReview(id, body: UpdateCustomRatingReviewDto, user: { userId?: ObjectId }) {
 
         const customReview = await this.ratingAndReviewsModel.findOne({ _id: id, is_deleted: false })
 
@@ -102,7 +103,10 @@ export class RatingReviewsService {
             image,
             name,
             user_type,
-            designation
+            designation,
+            is_deleted,
+            is_disabled
+
         } = body;
 
 
@@ -118,6 +122,8 @@ export class RatingReviewsService {
                 user_type,
                 designation,
                 custom_review: true,
+                is_deleted,
+                is_disabled,
                 updated_by: user?.userId || null
             },
             {
