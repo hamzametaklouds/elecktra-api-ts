@@ -8,6 +8,10 @@ export interface IReviewAndRatings {
     rating: number;
     hotel_or_car?: Schema.Types.ObjectId;
     booking_id?: Schema.Types.ObjectId;
+    custom_review: boolean;
+    name: string;
+    image: string;
+    designation: string
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -28,15 +32,34 @@ export const ReviewAndRatingSchema = new Schema<IReviewAndRatings>(
         },
         hotel_or_car: {
             type: Schema.Types.ObjectId,
-            required: true,
+            required: false,
             default: null
         },
         booking_id: {
             type: Schema.Types.ObjectId,
+            required: false,
+            default: null
+        },
+        custom_review: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        name: {
+            type: String,
             required: true,
             default: null
         },
-
+        image: {
+            type: String,
+            required: true,
+            default: null
+        },
+        designation: {
+            type: String,
+            required: true,
+            default: null
+        },
         is_disabled: {
             type: Boolean,
             required: false,
