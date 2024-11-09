@@ -27,11 +27,16 @@ export class BookingsService {
 
     }
 
-    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy) {
+    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user) {
         const skip: number = (page - 1) * rpp;
         const totalDocuments: number = await this.bookingModel.countDocuments(filter);
         const totalPages: number = Math.ceil(totalDocuments / rpp);
         page = page > totalPages ? totalPages : page;
+
+
+        if (user?.company_id) {
+            filter['company_id'] = user?.company_id
+        }
 
         filter['status'] = { $ne: BookingStatus.CR }
 
@@ -52,9 +57,16 @@ export class BookingsService {
      * @param $orderBy orderby as an argument
      * @returns bandCategory based on filter
      */
-    async getFilteredUsers($filter: Object, $orderBy) {
+    async getFilteredUsers($filter: Object, $orderBy, user) {
+
 
         $filter['status'] = { $ne: BookingStatus.CR }
+
+
+        if (user?.company_id) {
+            $filter['company_id'] = user?.company_id
+        }
+
 
         return await this.bookingModel
             .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
@@ -374,6 +386,7 @@ export class BookingsService {
                 start_date,
                 end_date,
                 type: hotelExists?.type,
+                company_id: hotelExists.company_id,
                 reference_number: reference_number,
                 guests: {
                     adults: adults,

@@ -21,6 +21,8 @@ import { RatingReviewsModule } from './rating-reviews/rating-reviews.module';
 import { RolesModule } from './roles/roles.module';
 import { CompaniesModule } from './companies/companies.module';
 import { InvitationsModule } from './invitations/invitations.module';
+import { LandingPageConfigsModule } from './landing-page-configs/landing-page-configs.module';
+import { QueriesModule } from './queries/queries.module';
 
 
 
@@ -69,7 +71,9 @@ import { InvitationsModule } from './invitations/invitations.module';
     StripeModule,
     RatingReviewsModule,
     RolesModule,
-    CompaniesModule
+    CompaniesModule,
+    LandingPageConfigsModule,
+    QueriesModule
   ],
   controllers: [AppController],
   providers: [AppService],

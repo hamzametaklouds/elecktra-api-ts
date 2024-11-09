@@ -28,10 +28,10 @@ export class BookingsController {
     @Roles(Role.SUPER_ADMIN, Role.COMPANY_ADMIN)
     @Get('list')
     @ApiQuery({ type: QueryParamsDTO })
-    async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
+    async getUserList(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
         const { $rpp, $page, $filter, $orderBy } = pagination;
         if ($rpp && $page) {
-            const result = await this.bookingsService.getPaginatedUsers($rpp, $page, $filter, $orderBy);
+            const result = await this.bookingsService.getPaginatedUsers($rpp, $page, $filter, $orderBy, req.user);
             return {
                 status: result ? true : false,
                 statusCode: result ? 200 : 400,
@@ -39,7 +39,7 @@ export class BookingsController {
                 data: result ? result : null
             }
         }
-        const result = await this.bookingsService.getFilteredUsers($filter, $orderBy);
+        const result = await this.bookingsService.getFilteredUsers($filter, $orderBy, req.user);
         return {
             status: result ? true : false,
             statusCode: result ? 200 : 400,

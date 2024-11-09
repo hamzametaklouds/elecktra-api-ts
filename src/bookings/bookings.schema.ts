@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { BOOKINGS_COLLECTION } from './bookings.constants';
+import { COMPANIES_COLLECTION } from 'src/companies/companies.constant';
 
 
 export enum BookingType {
@@ -128,6 +129,7 @@ export interface IBookings {
     payment: IPayment;
     taxes_and_fees: ITaxAndFee;
     reference_number: string;
+    company_id?: Schema.Types.ObjectId;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -202,6 +204,11 @@ export const BookingSchema = new Schema<IBookings>(
             type: Boolean,
             required: false,
             default: false,
+        },
+        company_id: {
+            type: Schema.Types.ObjectId,
+            required: false,
+            ref: COMPANIES_COLLECTION,
         },
         created_by: {
             type: Schema.Types.ObjectId,
