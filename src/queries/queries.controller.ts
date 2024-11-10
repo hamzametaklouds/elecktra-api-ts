@@ -51,7 +51,8 @@ export class QueriesController {
 
 
     @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN, Role.USER)
     @Post()
     @ApiBody({ type: CreateQueryDto })
     async insert(@Body() body: CreateQueryDto, @Req() req: Request) {
