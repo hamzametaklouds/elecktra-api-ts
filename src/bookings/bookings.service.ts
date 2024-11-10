@@ -41,7 +41,7 @@ export class BookingsService {
         filter['status'] = { $ne: BookingStatus.CR }
 
         const bandCategorySection = await this.bookingModel
-            .find(filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1 })
+            .find(filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
@@ -68,7 +68,7 @@ export class BookingsService {
 
 
         return await this.bookingModel
-            .find($filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1 })
+            .find($filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
             .sort($orderBy)
 
     }
