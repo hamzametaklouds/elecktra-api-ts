@@ -17,6 +17,12 @@ export enum BookingStatus {
     CK = 'Checkout',
 }
 
+export enum CompanyPaymentStatus {
+    P = 'Pending',
+    C = 'Completed',
+    CN = 'Cancelled',
+}
+
 
 export interface IGuests {
     _id?: Schema.Types.ObjectId;
@@ -127,6 +133,7 @@ export interface IBookings {
     status: string;
     sub_total: number;
     payment: IPayment;
+    company_payment: string;
     taxes_and_fees: ITaxAndFee;
     reference_number: string;
     company_id?: Schema.Types.ObjectId;
@@ -188,6 +195,12 @@ export const BookingSchema = new Schema<IBookings>(
             required: false,
             enum: BookingType,
             default: BookingType.H,
+        },
+        company_payment: {
+            type: String,
+            required: false,
+            enum: BookingType,
+            default: CompanyPaymentStatus.P,
         },
         status: {
             type: String,

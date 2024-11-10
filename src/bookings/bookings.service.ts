@@ -41,11 +41,10 @@ export class BookingsService {
         filter['status'] = { $ne: BookingStatus.CR }
 
         const bandCategorySection = await this.bookingModel
-            .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .find(filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
-            .populate('hotel_or_car');
 
         return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
 
@@ -69,9 +68,8 @@ export class BookingsService {
 
 
         return await this.bookingModel
-            .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .find($filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1 })
             .sort($orderBy)
-            .populate('hotel_or_car');
 
     }
 
