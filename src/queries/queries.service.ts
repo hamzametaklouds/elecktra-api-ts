@@ -76,6 +76,8 @@ export class QueriesService {
             is_mobile,
             email,
             query,
+            is_deleted,
+            is_disabled,
             status
         } = body;
 
@@ -92,6 +94,8 @@ export class QueriesService {
                 email,
                 query,
                 is_mobile,
+                is_deleted,
+                is_disabled,
                 status,
                 updated_by: user?.userId || null
             }, { new: true })
