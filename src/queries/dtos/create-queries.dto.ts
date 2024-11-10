@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class CreateQueryDto {
 
@@ -26,6 +26,15 @@ export class CreateQueryDto {
     })
     @IsString()
     email: string;
+
+    @ApiProperty({
+        description: 'is_deleted boolean e.g is_deleted=true',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_mobile?: boolean;
 
     @ApiProperty({
         description: 'query string e.g query=xyzabc',

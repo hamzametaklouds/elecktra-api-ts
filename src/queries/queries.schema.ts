@@ -17,6 +17,7 @@ export interface IQuery {
     email: string;
     query: string;
     status: string;
+    is_mobile: boolean;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -50,6 +51,11 @@ export const QuerySchema = new Schema<IQuery>(
             required: true,
             enum: QueryStatus,
             default: QueryStatus.P
+        },
+        is_mobile: {
+            type: Boolean,
+            required: false,
+            default: false,
         },
         is_disabled: {
             type: Boolean,

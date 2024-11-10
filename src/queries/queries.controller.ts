@@ -50,13 +50,10 @@ export class QueriesController {
 
 
 
-    @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN, Role.USER)
     @Post()
     @ApiBody({ type: CreateQueryDto })
     async insert(@Body() body: CreateQueryDto, @Req() req: Request) {
-        const createOption = await this.quiriesService.insertOption(body, req.user);
+        const createOption = await this.quiriesService.insertOption(body);
         return { message: RESOURCE_CREATED, data: createOption };
     }
 

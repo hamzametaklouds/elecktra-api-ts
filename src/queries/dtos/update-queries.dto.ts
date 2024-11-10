@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { QueryStatus } from '../queries.schema';
 
 export class UpdateQueryDto {
@@ -48,5 +48,32 @@ export class UpdateQueryDto {
     @IsEnum(QueryStatus)
     @IsOptional()
     status: string;
+
+    @ApiProperty({
+        description: 'is_deleted boolean e.g is_deleted=true',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_mobile?: boolean;
+
+    @ApiProperty({
+        description: 'is_deleted boolean e.g is_deleted=true',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_disabled?: boolean;
+
+    @ApiProperty({
+        description: 'is_deleted boolean e.g is_deleted=true',
+        required: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_deleted?: boolean;
 
 }

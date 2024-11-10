@@ -42,12 +42,13 @@ export class QueriesService {
 
     }
 
-    async insertOption(body: CreateQueryDto, user: { userId?: ObjectId }) {
+    async insertOption(body: CreateQueryDto) {
 
         const {
             first_name,
             last_name,
             email,
+            is_mobile,
             query,
         } = body;
 
@@ -55,9 +56,10 @@ export class QueriesService {
             {
                 first_name,
                 last_name,
+                is_mobile,
                 email,
                 query,
-                created_by: user?.userId || null
+                // created_by: user?.userId || null
             }).save();
 
 
@@ -71,6 +73,7 @@ export class QueriesService {
         const {
             first_name,
             last_name,
+            is_mobile,
             email,
             query,
             status
@@ -88,6 +91,7 @@ export class QueriesService {
                 last_name,
                 email,
                 query,
+                is_mobile,
                 status,
                 updated_by: user?.userId || null
             }, { new: true })
