@@ -27,10 +27,10 @@ export class HotelAndCarsController {
     @Roles(Role.SUPER_ADMIN, Role.COMPANY_ADMIN)
     @Get()
     @ApiQuery({ type: QueryParamsDTO })
-    async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
+    async getUserList(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
         const { $rpp, $page, $filter, $orderBy } = pagination;
         if ($rpp && $page) {
-            const result = await this.hotelAndCarsService.getPaginatedUsers($rpp, $page, $filter, $orderBy);
+            const result = await this.hotelAndCarsService.getPaginatedUsers($rpp, $page, $filter, $orderBy, req.user);
             return {
                 status: result ? true : false,
                 statusCode: result ? 200 : 400,
@@ -38,7 +38,7 @@ export class HotelAndCarsController {
                 data: result ? result : null
             }
         }
-        const result = await this.hotelAndCarsService.getFilteredUsers($filter, $orderBy);
+        const result = await this.hotelAndCarsService.getFilteredUsers($filter, $orderBy, req.user);
         return {
             status: result ? true : false,
             statusCode: result ? 200 : 400,

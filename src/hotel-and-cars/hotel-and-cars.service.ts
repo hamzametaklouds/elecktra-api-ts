@@ -174,18 +174,27 @@ export class HotelAndCarsService {
     }
 
 
-    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy) {
+    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user) {
         const skip: number = (page - 1) * rpp;
         const totalDocuments: number = await this.hotelAndCarsModel.countDocuments(filter);
         const totalPages: number = Math.ceil(totalDocuments / rpp);
         page = page > totalPages ? totalPages : page;
 
+        if (!filter['type']) {
+            throw new BadRequestException('Type must be specified')
+        }
+
+        if (user?.company_id) {
+            filter['company_id'] = user?.company_id
+        }
+
         const bandCategorySection = await this.hotelAndCarsModel
-            .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .find(filter, { _id: 1, title: 1, description: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
-            .populate('company_id');
+            .populate({ path: 'company_id', select: '_id title description icon' })
+            .populate({ path: 'created_by', select: '_id first_name last_name email' })
 
         return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
 
@@ -197,11 +206,22 @@ export class HotelAndCarsService {
      * @param $orderBy orderby as an argument
      * @returns bandCategory based on filter
      */
-    async getFilteredUsers($filter: Object, $orderBy) {
+    async getFilteredUsers($filter: Object, $orderBy, user) {
+
+        if (!$filter['type']) {
+            throw new BadRequestException('Type must be specified')
+        }
+
+        if (user?.company_id) {
+            $filter['company_id'] = user?.company_id
+        }
+
+
         return await this.hotelAndCarsModel
-            .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+            .find($filter, { _id: 1, title: 1, description: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort($orderBy)
-            .populate('company_id');
+            .populate({ path: 'company_id', select: '_id title description icon' })
+            .populate({ path: 'created_by', select: '_id first_name last_name email' })
 
     }
     async planCarTrip(body: PlanCarTripDto, user: { userId?: ObjectId }, $filter, $sortBy) {
