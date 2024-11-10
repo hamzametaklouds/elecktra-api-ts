@@ -13,7 +13,6 @@ import { Request } from 'express';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { RolesGuard } from 'src/app/guards/role-guard';
-import { ValidateInvitationDto } from './dtos/validate-invitation.dto';
 
 UseFilters(HttpExceptionFilter);
 @Controller('invitations')
@@ -33,11 +32,11 @@ export class InvitationsController {
   @Roles(Role.SUPER_ADMIN)
   @Get()
   @ApiQuery({ type: QueryParamsDTO })
-  async get(@ParamsHandler() pagination: IPaginationQuery) {
+  async get(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
 
     const { $rpp, $page, $filter, $orderBy } = pagination;
     if ($rpp && $page) {
-      const result = await this.invitationService.getPaginatedInvitations($rpp, $page, $filter, $orderBy);
+      const result = await this.invitationService.getPaginatedInvitations($rpp, $page, $filter, $orderBy, req.user);
 
       return {
         status: result ? true : false,
@@ -46,7 +45,7 @@ export class InvitationsController {
         data: result ? result : null
       }
     }
-    const result = await this.invitationService.getFilteredInvitations($filter, $orderBy)
+    const result = await this.invitationService.getFilteredInvitations($filter, $orderBy, req.user)
     return {
       status: result ? true : false,
       statusCode: result ? 200 : 400,

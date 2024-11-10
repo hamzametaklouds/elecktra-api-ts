@@ -107,13 +107,14 @@ export class InvitationsService {
    * @param orderBy receives order by as an argument
    * @returns Page out of total pages, total number of documents received and filtered paginated invitation data
    */
-  async getPaginatedInvitations(rpp: number, page: number, filter: object, orderBy): Promise<IPageinatedDataTable> {
+  async getPaginatedInvitations(rpp: number, page: number, filter: object, orderBy, user): Promise<IPageinatedDataTable> {
 
 
 
-    // if (!filter['company_id']) {
-    //   throw new BadRequestException('Company Id must be provided in the filters')
-    // }
+
+    if (user?.company_id) {
+      filter['company_id'] = user?.company_id
+    }
 
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.invitationModel.countDocuments(filter);
@@ -121,7 +122,7 @@ export class InvitationsService {
     page = page > totalPages ? totalPages : page;
 
     const invitations = await this.invitationModel
-      .find(filter)
+      .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp)
@@ -140,15 +141,15 @@ export class InvitationsService {
    * @param $orderBy orderby as an argument
    * @returns invitations based on filter
    */
-  async getFilteredInvitations($filter: Object, $orderBy) {
+  async getFilteredInvitations($filter: Object, $orderBy, user) {
 
-    // if (!$filter['company_id']) {
-    //   throw new BadRequestException('Company Id must be provided in the filters')
-    // }
 
+    if (user?.company_id) {
+      $filter['company_id'] = user?.company_id
+    }
 
     return await this.invitationModel
-      .find($filter)
+      .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy)
       .populate('company_id')
       .populate({
