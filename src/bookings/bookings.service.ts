@@ -93,6 +93,15 @@ export class BookingsService {
             { $unwind: '$hotel' },
             {
                 $lookup: {
+                    from: 'companies',
+                    localField: 'company_id',
+                    foreignField: '_id',
+                    as: 'company',
+                },
+            },
+            { $unwind: '$company' },
+            {
+                $lookup: {
                     from: 'rating_reviews',
                     localField: '_id',
                     foreignField: 'booking_id',
@@ -111,6 +120,7 @@ export class BookingsService {
                     images: '$hotel.images',
                     guests: 1,
                     start_date: 1,
+                    company: 1,
                     taxes_and_fees: 1,
                     reference_number: 1,
                     check_in_time: 1,
@@ -188,6 +198,15 @@ export class BookingsService {
             { $unwind: '$car' },
             {
                 $lookup: {
+                    from: 'companies',
+                    localField: 'company_id',
+                    foreignField: '_id',
+                    as: 'company',
+                },
+            },
+            { $unwind: '$company' },
+            {
+                $lookup: {
                     from: 'rating_reviews',
                     localField: '_id',
                     foreignField: 'booking_id',
@@ -207,6 +226,7 @@ export class BookingsService {
                     highlights: '$car.highlights',
                     guests: 1,
                     start_date: 1,
+                    company: 1,
                     review: { $ifNull: ['$review', null] },
                     rating: { $ifNull: ['$review.rating', null] },
                     taxes_and_fees: 1,
