@@ -80,7 +80,7 @@ export class BookingsService {
 
         const hotels = await this.bookingModel.aggregate([
             {
-                $match: { created_by: userExists._id, type: BookingType.H }
+                $match: { created_by: userExists._id, type: BookingType.H, status: { $ne: BookingStatus.CR } }
             },
             {
                 $lookup: {
