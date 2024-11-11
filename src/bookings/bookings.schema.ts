@@ -136,6 +136,8 @@ export interface IBookings {
     company_payment: string;
     taxes_and_fees: ITaxAndFee;
     reference_number: string;
+    check_in_time?: string;
+    check_out_time?: string;
     company_id?: Schema.Types.ObjectId;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
@@ -170,6 +172,16 @@ export const BookingSchema = new Schema<IBookings>(
             required: false,
             default: null
         },
+        check_in_time: {
+            type: String,
+            required: false,
+            default: null
+        },
+        check_out_time: {
+            type: String,
+            required: false,
+            default: null
+        },
         taxes_and_fees: {
             type: TaxAndFeeSchema,
             required: false,
@@ -180,6 +192,7 @@ export const BookingSchema = new Schema<IBookings>(
             required: true,
             default: null
         },
+
         sub_total: {
             type: Number,
             required: true,

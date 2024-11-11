@@ -8,7 +8,7 @@ import { CreateUserDto } from './dtos/create-users.dto';
 import { UpdateUserDto } from './dtos/update-users.dto';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { CreateHostUserDto } from 'src/auth/dtos/create-host-user.dto';
+import { CreateHostUserDto } from 'src/users/dtos/create-host-user.dto';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');

@@ -147,6 +147,8 @@ export interface IHotelAndCars {
     price: number;
     hotel_type?: string;
     total_rooms: number;
+    check_in_time?: string;
+    check_out_time?: string;
     rooms_reserved: number;
     availability_from: Date;
     availability_till: Date;
@@ -190,6 +192,16 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         },
         highlights: {
             type: [HighlightSchema],
+            required: false,
+            default: null
+        },
+        check_in_time: {
+            type: String,
+            required: false,
+            default: null
+        },
+        check_out_time: {
+            type: String,
             required: false,
             default: null
         },

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNumber, IsString } from 'class-validator';
+import { IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
 
 export class CreateBookingsDto {
@@ -52,6 +52,23 @@ export class CreateBookingsDto {
     @IsNumber()
     infants: number;
 
+    // @ApiProperty({
+    //     description: 'infants number e.g infants=xyzabc',
+    //     required: true,
+    //     default: 0,
+    // })
+    // @IsString()
+    // @IsOptional()
+    // check_in_time: string;
+
+    // @ApiProperty({
+    //     description: 'infants number e.g infants=xyzabc',
+    //     required: true,
+    //     default: 0,
+    // })
+    // @IsString()
+    // @IsOptional()
+    // check_out_time: string;
 
 }
 

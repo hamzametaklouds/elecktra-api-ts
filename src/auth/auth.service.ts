@@ -6,7 +6,7 @@ import { SystemUsersService } from 'src/system-users/system-users.service';
 import admin from "firebase-admin"
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import * as bcrypt from 'bcrypt'
-import { CreateHostUserDto } from './dtos/create-host-user.dto';
+import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
 
 
 

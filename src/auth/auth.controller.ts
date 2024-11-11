@@ -6,7 +6,7 @@ import { SignUpUserDto } from './dtos/sign-up.dto';
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import { LoginDto } from './dtos/log-in.dto';
 import { AdminLoginDto } from './dtos/admin-log-in.dto';
-import { CreateHostUserDto } from './dtos/create-host-user.dto';
+import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
 
 UseFilters(HttpExceptionFilter);
 @Controller('auth')

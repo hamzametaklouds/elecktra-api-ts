@@ -7,6 +7,7 @@ import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
 import { CreatePaymentDto } from './dtos/create-payment';
 import { UsersService } from 'src/users/users.service';
+import { RecordType } from 'src/hotel-and-cars/hotel-and-cars.schema';
 
 @Injectable()
 export class BookingsService {
@@ -112,6 +113,8 @@ export class BookingsService {
                     start_date: 1,
                     taxes_and_fees: 1,
                     reference_number: 1,
+                    check_in_time: 1,
+                    check_out_time: 1,
                     nights: 1,
                     type: 1,
                     sub_total: 1,
@@ -343,6 +346,7 @@ export class BookingsService {
             throw new BadRequestException('Invalid hotel Id')
         }
 
+
         const reference_number = Array.from({ length: 15 }, () => 'abcdefghijk123455678990lmnopqr0928340483stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 62)]).join('').toLowerCase();
 
 
@@ -396,6 +400,8 @@ export class BookingsService {
                     total_tax_applied: tax
                 },
                 sub_total: sub_total,
+                check_in_time: hotelExists.check_in_time,
+                check_out_time: hotelExists.check_out_time,
                 nights: diffInDays,
                 created_by: user.userId ? user.userId : null
             }).save();
