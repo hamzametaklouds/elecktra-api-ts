@@ -9,6 +9,7 @@ import { WhishlistService } from 'src/whishlist/whishlist.service';
 import { PlanCarTripDto } from './dtos/book-car.dto';
 import { RecentSearchsService } from 'src/recent-searchs/recent-searchs.service';
 import { CreateIdealCarDto } from './dtos/create-car-ideal.dto';
+import { UpdateIdealCarDto } from './dtos/update-car-ideal.dto';
 const moment = require('moment');
 
 @Injectable()
@@ -647,6 +648,53 @@ export class HotelAndCarsService {
                 is_ideal: true,
                 car_details,
                 created_by: user?.userId || null
+            }).save();
+
+
+        return screen
+
+    }
+
+    async updateIdealCar(id, body: UpdateIdealCarDto, user: { userId?: ObjectId }) {
+
+        const car = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false })
+
+
+        if (!car) {
+            throw new BadRequestException('Invalid id')
+        }
+
+        const {
+            title,
+            description,
+            images,
+            address,
+            highlights,
+            amenities,
+            car_options,
+            price,
+            car_details,
+            is_deleted,
+            is_disabled,
+
+        } = body;
+
+        const screen = await new this.hotelAndCarsModel(
+            {
+                title,
+                description,
+                images,
+                address,
+                highlights,
+                amenities,
+                car_options,
+                type: RecordType.C,
+                price,
+                is_ideal: true,
+                car_details,
+                is_deleted,
+                is_disabled,
+                updated_by: user?.userId || null
             }).save();
 
 

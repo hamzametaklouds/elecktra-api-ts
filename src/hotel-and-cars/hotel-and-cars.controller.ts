@@ -15,6 +15,7 @@ import { RolesGuard } from 'src/app/guards/role-guard';
 import { Role } from 'src/roles/roles.schema';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { CreateIdealCarDto } from './dtos/create-car-ideal.dto';
+import { UpdateIdealCarDto } from './dtos/update-car-ideal.dto';
 
 const { RESOURCE_CREATED } = getMessages('hotel-or-car(s)');
 
@@ -115,6 +116,17 @@ export class HotelAndCarsController {
     @ApiBody({ type: CreateIdealCarDto })
     async insertIdealCar(@Body() body: CreateIdealCarDto, @Req() req: Request) {
         const createOption = await this.hotelAndCarsService.insertIdealCar(body, req.user);
+        return { message: 'Ideal Car created successfully', data: createOption };
+    }
+
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @Put('ideal-car')
+    @ApiBody({ type: UpdateIdealCarDto })
+    async updateIdealCar(@Query('id') id: string, @Body() body: UpdateIdealCarDto, @Req() req: Request) {
+        const createOption = await this.hotelAndCarsService.updateIdealCar(id, body, req.user);
         return { message: 'Ideal Car created successfully', data: createOption };
     }
 
