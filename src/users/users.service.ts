@@ -8,6 +8,7 @@ import { CreateUserDto } from './dtos/create-users.dto';
 import { UpdateUserDto } from './dtos/update-users.dto';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { CreateHostUserDto } from 'src/auth/dtos/create-host-user.dto';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -162,6 +163,43 @@ export class UsersService {
       uuid,
       country_code,
       phone_no,
+    }).save();
+
+
+    return createdUser
+
+  }
+
+  async joinUser(userObject: CreateHostUserDto) {
+    const {
+      image,
+      first_name,
+      last_name,
+      email,
+      country_code,
+      phone_no,
+      address
+    } = userObject;
+
+    const ifEmailExists = await this.getUserByEmail(email);
+    if (ifEmailExists) {
+      throw new ConflictException('Email already exists')
+    }
+    const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
+    if (ifPhoneExists) {
+      throw new ConflictException('Phone number already exists')
+    }
+
+    let createdUser;
+
+    createdUser = await new this.userModel({
+      image,
+      first_name,
+      last_name,
+      email,
+      country_code,
+      phone_no,
+      address
     }).save();
 
 

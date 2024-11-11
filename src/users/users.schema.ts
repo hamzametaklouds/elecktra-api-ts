@@ -10,10 +10,12 @@ export interface IUsers {
   country_code: string;
   phone_no: string;
   gender?: string
+  address: string;
   emergency_contact?: string;
   country?: string
   street?: string
   suite?: string
+  is_host: boolean;
   city?: string
   post_code?: string
   dob: string;
@@ -100,6 +102,11 @@ export const UsersSchema = new Schema<IUsers>(
       type: String,
       required: false,
       default: ''
+    },
+    is_host: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     is_disabled: {
       type: Boolean,

@@ -6,6 +6,7 @@ import { SignUpUserDto } from './dtos/sign-up.dto';
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import { LoginDto } from './dtos/log-in.dto';
 import { AdminLoginDto } from './dtos/admin-log-in.dto';
+import { CreateHostUserDto } from './dtos/create-host-user.dto';
 
 UseFilters(HttpExceptionFilter);
 @Controller('auth')
@@ -65,6 +66,14 @@ export class AuthController {
     async signup(@Body() body: SignUpUserDto) {
         const createAuth = await this.authService.signUpUser(body);
         return { message: 'User signed up successfully', data: createAuth };
+    }
+
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    @ApiBody({ type: CreateHostUserDto })
+    @Post('join-us')
+    async joinUs(@Body() body: CreateHostUserDto) {
+        const createAuth = await this.authService.joinUser(body);
+        return { message: 'User joined successfully', data: createAuth };
     }
 
 

@@ -6,6 +6,7 @@ import { SystemUsersService } from 'src/system-users/system-users.service';
 import admin from "firebase-admin"
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import * as bcrypt from 'bcrypt'
+import { CreateHostUserDto } from './dtos/create-host-user.dto';
 
 
 
@@ -161,6 +162,14 @@ export class AuthService {
     const access_token = await this.jwtService.sign({ userName: user.first_name, sub: user._id })
 
     return { access_token: access_token, user: user }
+
+  }
+
+  async joinUser(body: CreateHostUserDto) {
+
+    const user = await this.usersService.joinUser(body)
+
+    return { user: user }
 
   }
 }
