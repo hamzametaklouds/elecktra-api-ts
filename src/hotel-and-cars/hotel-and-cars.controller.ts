@@ -14,6 +14,7 @@ import { PlanCarTripDto } from './dtos/book-car.dto';
 import { RolesGuard } from 'src/app/guards/role-guard';
 import { Role } from 'src/roles/roles.schema';
 import { Roles } from 'src/app/dtos/roles-decorator';
+import { CreateIdealCarDto } from './dtos/create-car-ideal.dto';
 
 const { RESOURCE_CREATED } = getMessages('hotel-or-car(s)');
 
@@ -45,6 +46,14 @@ export class HotelAndCarsController {
             message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
             data: result ? result : null
         }
+    }
+
+
+
+    @Get('ideal-car')
+    async idealCars() {
+        const hotels = await this.hotelAndCarsService.getIdealCars();
+        return { message: 'Ideal Cars fetched successfully', data: hotels };
     }
 
     @ApiBearerAuth(AuthorizationHeader)
@@ -97,6 +106,18 @@ export class HotelAndCarsController {
         const createOption = await this.hotelAndCarsService.insertOption(body, req.user);
         return { message: RESOURCE_CREATED, data: createOption };
     }
+
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @Post('ideal-car')
+    @ApiBody({ type: CreateIdealCarDto })
+    async insertIdealCar(@Body() body: CreateIdealCarDto, @Req() req: Request) {
+        const createOption = await this.hotelAndCarsService.insertIdealCar(body, req.user);
+        return { message: 'Ideal Car created successfully', data: createOption };
+    }
+
 
 
     @ApiBearerAuth(AuthorizationHeader)
