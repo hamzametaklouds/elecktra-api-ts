@@ -212,7 +212,7 @@ export const BookingSchema = new Schema<IBookings>(
         company_payment: {
             type: String,
             required: false,
-            enum: BookingType,
+            enum: CompanyPaymentStatus,
             default: CompanyPaymentStatus.P,
         },
         status: {
