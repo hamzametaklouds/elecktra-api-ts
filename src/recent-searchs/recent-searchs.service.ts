@@ -55,12 +55,14 @@ export class RecentSearchsService {
 
     }
 
-    async getHotelRecentSearchs() {
-        return await this.recentSearchModel.find({ type: OptionParentType.S, is_deleted: false }).sort({ created_at: -1 }).limit(6)
+    async getHotelRecentSearchs(user) {
+        console.log(user)
+        return await this.recentSearchModel.find({ created_by: user?.userId, type: OptionParentType.S, is_deleted: false }).sort({ created_at: -1 }).limit(6)
     }
 
-    async getCarRecentSearchs() {
-        return await this.recentSearchModel.find({ type: OptionParentType.C, is_deleted: false }).sort({ created_at: -1 }).limit(6)
+    async getCarRecentSearchs(user) {
+        console.log(user)
+        return await this.recentSearchModel.find({ created_by: user?.userId, type: OptionParentType.C, is_deleted: false }).sort({ created_at: -1 }).limit(6)
     }
 
 

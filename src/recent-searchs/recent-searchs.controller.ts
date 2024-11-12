@@ -19,16 +19,16 @@ export class RecentSearchsController {
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
     @Get('cars')
-    async cars() {
-        const options = await this.recentSearchsService.getCarRecentSearchs();
+    async cars(@Req() req: Request) {
+        const options = await this.recentSearchsService.getCarRecentSearchs(req.user);
         return { message: 'Recent Cars fetched successfully', data: options };
     }
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
     @Get('hotels')
-    async detail() {
-        const options = await this.recentSearchsService.getHotelRecentSearchs();
+    async detail(@Req() req: Request) {
+        const options = await this.recentSearchsService.getHotelRecentSearchs(req.user);
         return { message: 'Recent hotels fetched successfully', data: options };
     }
 
