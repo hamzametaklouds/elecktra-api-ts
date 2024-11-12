@@ -465,12 +465,13 @@ export class HotelAndCarsService {
                     address: 1,
                     highlights: 1,
                     amenities: 1,
-                    car_options: 1,
                     price: 1,
                     car_details: 1,
                     created_at: 1
                 })
             .sort({ created_at: -1 })
+            .populate({ path: 'amenities', select: '_id title description' })
+            .populate({ path: 'car_details.fuel_type car_details.transmission', select: '_id title description' })
     }
 
     async hotelCarDetail(hotel_id: string, user: { userId?: ObjectId }) {
