@@ -10,6 +10,7 @@ import { PlanCarTripDto } from './dtos/book-car.dto';
 import { RecentSearchsService } from 'src/recent-searchs/recent-searchs.service';
 import { CreateIdealCarDto } from './dtos/create-car-ideal.dto';
 import { UpdateIdealCarDto } from './dtos/update-car-ideal.dto';
+import { UpdateHotelAndCarDto } from './dtos/update-hotel-or-car.dto';
 const moment = require('moment');
 
 @Injectable()
@@ -703,7 +704,7 @@ export class HotelAndCarsService {
 
     }
 
-    async updateOption(id, body: CreateHotelAndCarDto, user: { userId?: ObjectId }) {
+    async updateOption(id, body: UpdateHotelAndCarDto, user: { userId?: ObjectId }) {
 
 
         const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false })
@@ -727,10 +728,10 @@ export class HotelAndCarsService {
             total_rooms,
             rooms_reserved,
             hotel_type,
-            company_id,
             availability_from,
             availability_till,
             host_or_owner,
+            is_available,
             car_details,
             hotel_details,
 
@@ -755,7 +756,7 @@ export class HotelAndCarsService {
                 long,
                 price,
                 total_rooms,
-                company_id,
+                is_available,
                 rooms_reserved,
                 availability_from: availability_from ? new Date(availability_from) : null,
                 availability_till: availability_till ? new Date(availability_till) : null,

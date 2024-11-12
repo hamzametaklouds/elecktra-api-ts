@@ -16,6 +16,7 @@ import { Role } from 'src/roles/roles.schema';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { CreateIdealCarDto } from './dtos/create-car-ideal.dto';
 import { UpdateIdealCarDto } from './dtos/update-car-ideal.dto';
+import { UpdateHotelAndCarDto } from './dtos/update-hotel-or-car.dto';
 
 const { RESOURCE_CREATED } = getMessages('hotel-or-car(s)');
 
@@ -136,8 +137,8 @@ export class HotelAndCarsController {
     @UseGuards(JWTAuthGuard, RolesGuard)
     @Roles(Role.SUPER_ADMIN)
     @Put()
-    @ApiBody({ type: CreateHotelAndCarDto })
-    async update(@Query('id') id: string, @Body() body: CreateHotelAndCarDto, @Req() req: Request) {
+    @ApiBody({ type: UpdateHotelAndCarDto })
+    async update(@Query('id') id: string, @Body() body: UpdateHotelAndCarDto, @Req() req: Request) {
         const createOption = await this.hotelAndCarsService.updateOption(id, body, req.user);
         return { message: 'Updated Successfully', data: createOption };
     }
