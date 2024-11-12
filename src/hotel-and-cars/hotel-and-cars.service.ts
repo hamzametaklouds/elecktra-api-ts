@@ -177,14 +177,19 @@ export class HotelAndCarsService {
     }
 
 
-    async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user) {
+    async getPaginatedUsers(rpp: number, page: number, $filter: Object, orderBy, user) {
         const skip: number = (page - 1) * rpp;
-        const totalDocuments: number = await this.hotelAndCarsModel.countDocuments(filter);
+        const totalDocuments: number = await this.hotelAndCarsModel.countDocuments($filter);
         const totalPages: number = Math.ceil(totalDocuments / rpp);
         page = page > totalPages ? totalPages : page;
 
-        if (!filter['type']) {
-            throw new BadRequestException('Type must be specified')
+
+        const filter: Record<string, any> = $filter;
+
+        console.log('filter----', $filter)
+
+        if (!user?.company_id && !('type' in filter || filter?.$and?.[0]?.type)) {
+            throw new BadRequestException('Type must be specified');
         }
 
         if (user?.company_id) {
@@ -209,10 +214,17 @@ export class HotelAndCarsService {
      * @param $orderBy orderby as an argument
      * @returns bandCategory based on filter
      */
-    async getFilteredUsers($filter: Object, $orderBy, user) {
+    async getFilteredUsers(filter: Object, $orderBy, user) {
 
-        if (!$filter['type']) {
-            throw new BadRequestException('Type must be specified')
+
+
+
+        const $filter: Record<string, any> = filter;
+
+        console.log('filter----', $filter)
+
+        if (!user?.company_id && !('type' in $filter || $filter?.$and?.[0]?.type)) {
+            throw new BadRequestException('Type must be specified');
         }
 
         if (user?.company_id) {
@@ -705,70 +717,36 @@ export class HotelAndCarsService {
     }
 
     async updateOption(id, body: UpdateHotelAndCarDto, user: { userId?: ObjectId }) {
-
-
-        const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false })
-
+        const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false });
         if (!optionExist) {
-            throw new BadRequestException('Invalid Id')
+            throw new BadRequestException('Invalid Id');
         }
 
         const {
-            title,
-            description,
-            images,
-            address,
-            highlights,
-            amenities,
-            car_options,
-            type,
-            lat,
-            long,
-            price,
-            total_rooms,
-            rooms_reserved,
-            hotel_type,
-            availability_from,
-            availability_till,
-            host_or_owner,
-            is_available,
-            car_details,
-            hotel_details,
-
+            title, description, images, address, highlights, amenities, car_options, type, lat, long,
+            price, total_rooms, rooms_reserved, hotel_type, availability_from, availability_till,
+            host_or_owner, is_available, car_details, hotel_details
         } = body;
 
-        const screen = await this.hotelAndCarsModel.findByIdAndUpdate({ _id: optionExist._id },
+        // Validate lat and long before updating
+        const coordinates = (lat != null && long != null) ? [long, lat] : optionExist.location.coordinates;
+
+        const updatedOption = await this.hotelAndCarsModel.findByIdAndUpdate(
+            { _id: optionExist._id },
             {
-                title,
-                description,
-                images,
-                address,
-                highlights,
-                amenities,
-                hotel_type,
-                car_options,
-                type,
-                location: {
-                    type: 'Point',
-                    coordinates: [long, lat]
-                },
-                lat,
-                long,
-                price,
-                total_rooms,
-                is_available,
-                rooms_reserved,
+                title, description, images, address, highlights, amenities, hotel_type, car_options, type,
+                location: { type: 'Point', coordinates },
+                lat, long, price, total_rooms, is_available, rooms_reserved,
                 availability_from: availability_from ? new Date(availability_from) : null,
                 availability_till: availability_till ? new Date(availability_till) : null,
-                host_or_owner,
-                car_details,
-                hotel_details,
+                host_or_owner, car_details, hotel_details,
                 created_by: user?.userId || null
-            }, { new: true })
+            },
+            { new: true }
+        );
 
-
-        return screen
-
+        return updatedOption;
     }
+
 }
 
