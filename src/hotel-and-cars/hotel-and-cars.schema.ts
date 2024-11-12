@@ -156,6 +156,8 @@ export interface IHotelAndCars {
     car_details: ICarDetails
     hotel_details: IHotelDetails
     is_available?: boolean;
+    rating: number;
+    review: number;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_ideal?: boolean;
@@ -167,12 +169,12 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
     {
         title: {
             type: String,
-            required: true,
+            required: false,
             default: null
         },
         description: {
             type: String,
-            required: true,
+            required: false,
             default: null
         },
         hotel_type: {
@@ -182,7 +184,7 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         },
         images: {
             type: [String],
-            required: true,
+            required: false,
             default: null
         },
         address: {
@@ -231,14 +233,28 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
                 default: 'Point'
             },
             coordinates: {
-                type: [Number],  // [longitude, latitude]
-                required: true
+                type: [Number],  // Array of numbers [longitude, latitude]
+                required: true,
+                validate: {
+                    validator: function (value: number[]) {
+                        return Array.isArray(value) && value.length === 2;
+                    },
+                    message: 'Coordinates must be an array of two numbers [longitude, latitude].'
+                }
             }
         },
         price: {
             type: Number,
             required: false,
             default: null
+        },
+        rating: {
+            type: Number,
+            required: false,
+        },
+        review: {
+            type: Number,
+            required: false,
         },
         total_rooms: {
             type: Number,

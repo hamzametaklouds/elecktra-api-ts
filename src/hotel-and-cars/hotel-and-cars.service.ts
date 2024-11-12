@@ -468,10 +468,19 @@ export class HotelAndCarsService {
 
     async getIdealCars() {
 
-        return await this.hotelAndCarsModel
-            .find(
-                { is_ideal: true, type: RecordType.C, is_deleted: false, is_disabled: false },
-                {
+        return await this.hotelAndCarsModel.aggregate([
+            // Filter documents based on the conditions
+            {
+                $match: {
+                    is_ideal: true,
+                    type: RecordType.C,
+                    is_deleted: false,
+                    is_disabled: false
+                }
+            },
+            // Project the required fields
+            {
+                $project: {
                     title: 1,
                     description: 1,
                     images: 1,
@@ -480,13 +489,53 @@ export class HotelAndCarsService {
                     amenities: 1,
                     price: 1,
                     car_details: 1,
-                    rating: 4.5,
-                    reviews: 2213,
+                    rating: { $literal: 4.5 }, // Directly add static value
+                    reviews: { $literal: 2213 }, // Directly add static value
                     created_at: 1
-                })
-            .sort({ created_at: -1 })
-            .populate({ path: 'amenities', select: '_id title description' })
-            .populate({ path: 'car_details.fuel_type car_details.transmission', select: '_id title description' })
+                }
+            },
+            // Sort by `created_at` in descending order
+            {
+                $sort: { created_at: -1 }
+            },
+            // Lookup amenities data
+            {
+                $lookup: {
+                    from: 'options', // The collection to join
+                    localField: 'amenities',
+                    foreignField: '_id',
+                    as: 'amenities',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in amenities
+                    ]
+                }
+            },
+            // Lookup car_details data for `fuel_type`
+            {
+                $lookup: {
+                    from: 'options', // Assume 'car_details' collection exists for fuel type and transmission
+                    localField: 'car_details.fuel_type',
+                    foreignField: '_id',
+                    as: 'car_details.fuel_type',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in fuel type
+                    ]
+                }
+            },
+            // Lookup car_details data for `transmission`
+            {
+                $lookup: {
+                    from: 'options',
+                    localField: 'car_details.transmission',
+                    foreignField: '_id',
+                    as: 'car_details.transmission',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in transmission
+                    ]
+                }
+            }
+        ]);
+
     }
 
     async hotelCarDetail(hotel_id: string, user: { userId?: ObjectId }) {
@@ -643,6 +692,8 @@ export class HotelAndCarsService {
             images,
             address,
             highlights,
+            rating,
+            review,
             amenities,
             car_options,
             price,
@@ -658,6 +709,8 @@ export class HotelAndCarsService {
                 address,
                 highlights,
                 amenities,
+                rating,
+                review,
                 car_options,
                 type: RecordType.C,
                 price,
@@ -727,21 +780,25 @@ export class HotelAndCarsService {
         const {
             title, description, images, address, highlights, amenities, car_options, type, lat, long,
             price, total_rooms, rooms_reserved, hotel_type, availability_from, availability_till,
-            host_or_owner, is_available, car_details, hotel_details
+            host_or_owner, is_available, car_details, hotel_details, is_deleted, is_disabled
         } = body;
 
-        // Validate lat and long before updating
-        const coordinates = (lat != null && long != null) ? [long, lat] : optionExist.location.coordinates;
+        // Check if both lat and long are provided, else set a default or throw an error
+        const location = lat && long ? { type: 'Point', coordinates: [long, lat] } : optionExist.location;
+
+        if (!location.coordinates || location.coordinates.length !== 2) {
+            throw new BadRequestException('Latitude and Longitude must be specified');
+        }
 
         const updatedOption = await this.hotelAndCarsModel.findByIdAndUpdate(
             { _id: optionExist._id },
             {
                 title, description, images, address, highlights, amenities, hotel_type, car_options, type,
-                location: { type: 'Point', coordinates },
                 lat, long, price, total_rooms, is_available, rooms_reserved,
+                location, // Pass the validated or existing location here
                 availability_from: availability_from ? new Date(availability_from) : null,
                 availability_till: availability_till ? new Date(availability_till) : null,
-                host_or_owner, car_details, hotel_details,
+                host_or_owner, car_details, hotel_details, is_deleted, is_disabled,
                 created_by: user?.userId || null
             },
             { new: true }
@@ -749,6 +806,7 @@ export class HotelAndCarsService {
 
         return updatedOption;
     }
+
 
 }
 

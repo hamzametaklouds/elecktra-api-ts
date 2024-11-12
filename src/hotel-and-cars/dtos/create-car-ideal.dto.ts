@@ -81,7 +81,24 @@ export class CreateIdealCarDto {
     @IsNumber()
     price: number;
 
+    @ApiProperty({
+        description: 'rating number e.g rating=676',
+        required: true,
+        default: 0,
+    })
+    @IsNumber()
+    @IsOptional()
+    rating: number;
 
+
+    @ApiProperty({
+        description: 'review number e.g review=676',
+        required: true,
+        default: 0,
+    })
+    @IsNumber()
+    @IsOptional()
+    review: number;
 
     @ApiProperty({
         description: 'car_details string e.g car_details=[{icon:,detail:}]',
