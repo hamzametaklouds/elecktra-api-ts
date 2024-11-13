@@ -12,6 +12,7 @@ import { IPaginationQuery } from 'src/app/interfaces';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { RolesGuard } from 'src/app/guards/role-guard';
+import { UpdateHostDto } from './dtos/update-host.dto';
 
 
 UseFilters(HttpExceptionFilter);
@@ -62,6 +63,31 @@ export class UsersController {
     }
   }
 
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Get('hosts')
+  @ApiQuery({ type: QueryParamsDTO })
+  async getHostUserList(@ParamsHandler() pagination: IPaginationQuery) {
+    const { $rpp, $page, $filter, $orderBy } = pagination;
+    if ($rpp && $page) {
+      const result = await this.userService.getPaginatedHostUsers($rpp, $page, $filter, $orderBy);
+      return {
+        status: result ? true : false,
+        statusCode: result ? 200 : 400,
+        message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+        data: result ? result : null
+      }
+    }
+    const result = await this.userService.getFilteredHostUsers($filter, $orderBy);
+    return {
+      status: result ? true : false,
+      statusCode: result ? 200 : 400,
+      message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+      data: result ? result : null
+    }
+  }
+
 
 
   //   /**
@@ -79,6 +105,17 @@ export class UsersController {
   async update(@Query('id') id: string, @Body() body: UpdateUserDto, @Req() req: Request) {
 
     const user = await this.userService.updateUser(id, body, req.user);
+    return user;
+  }
+
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Put('host')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBody({ type: UpdateHostDto })
+  async updateHost(@Query('id') id: string, @Body() body: UpdateHostDto, @Req() req: Request) {
+    const user = await this.userService.updateHostUser(id, body, req.user);
     return user;
   }
 

@@ -9,6 +9,7 @@ import { UpdateUserDto } from './dtos/update-users.dto';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { CreateHostUserDto } from 'src/users/dtos/create-host-user.dto';
+import { UpdateHostDto } from './dtos/update-host.dto';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -62,6 +63,36 @@ export class UsersService {
     return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
 
   }
+
+  async getPaginatedHostUsers(rpp: number, page: number, filter: Object, orderBy) {
+    const skip: number = (page - 1) * rpp;
+    const totalDocuments: number = await this.userModel.countDocuments(filter);
+    const totalPages: number = Math.ceil(totalDocuments / rpp);
+    page = page > totalPages ? totalPages : page;
+
+    filter['is_host'] = true
+
+    const bandCategorySection = await this.userModel
+      .find(filter, { first_name: 1, last_name: 1, email: 1, country_code: 1, phone_no: 1, address: 1, is_host: 1 })
+      .sort(orderBy)
+      .skip(skip)
+      .limit(rpp)
+
+    return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
+
+  }
+
+
+  async getFilteredHostUsers($filter: Object, $orderBy) {
+
+    $filter['is_host'] = true
+
+    return await this.userModel
+      .find($filter, { first_name: 1, last_name: 1, email: 1, country_code: 1, phone_no: 1, address: 1, is_host: 1 })
+      .sort($orderBy)
+
+  }
+
 
   /**
    *The purpose of this method is to return bandCategory based on filter
@@ -198,6 +229,7 @@ export class UsersService {
       last_name,
       email,
       country_code,
+      is_host: true,
       phone_no,
       address
     }).save();
@@ -378,5 +410,33 @@ export class UsersService {
 
     return { status: true, statusCode: 204, message: `User ${is_deleted ? 'deleted' : is_deleted ? 'deleted' : 'updated'} successfully`, data: updatedUser };
   }
+
+  async updateHostUser(id, userObject: UpdateHostDto, user: { userId?: ObjectId }) {
+
+    const userExists = await this.userModel.findOne({ _id: id })
+
+    if (!userExists) {
+      throw new BadRequestException('Invalid token')
+    }
+
+    const {
+      status
+
+    } = userObject;
+
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      { _id: userExists._id },
+      {
+        host_status: status,
+        updated_by: user.userId
+      },
+      { new: true }
+    );
+
+    return updatedUser
+  }
+
+
 
 }

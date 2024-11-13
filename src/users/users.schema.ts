@@ -1,6 +1,13 @@
 import { Schema } from 'mongoose';
 import { USERS_COLLECTION } from './users.constants';
 
+
+export enum HostStatus {
+  P = 'Pending',
+  A = 'Approved',
+  R = 'Rejected'
+}
+
 export interface IUsers {
   _id?: Schema.Types.ObjectId;
   image: string;
@@ -16,6 +23,7 @@ export interface IUsers {
   street?: string
   suite?: string
   is_host: boolean;
+  host_status: string
   city?: string
   post_code?: string
   dob: string;
@@ -42,6 +50,12 @@ export const UsersSchema = new Schema<IUsers>(
       type: String,
       required: false,
       default: ''
+    },
+    host_status: {
+      type: String,
+      required: false,
+      enum: HostStatus,
+      default: HostStatus.P
     },
     email: {
       type: String,
