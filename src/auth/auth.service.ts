@@ -23,7 +23,7 @@ export class AuthService {
     const user = await this.usersService.getUserByUUID(uuid);
 
     if (!user) {
-      throw new BadRequestException('Invalid UUID')
+      throw new NotFoundException('User not found')
     }
 
     if (user.is_disabled) {
