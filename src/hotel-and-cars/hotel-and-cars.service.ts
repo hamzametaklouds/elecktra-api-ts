@@ -635,9 +635,12 @@ export class HotelAndCarsService {
             hotel_details,
         } = body;
 
-        // Validate coordinates
-        if (lat == null || long == null) {
-            throw new BadRequestException('Latitude and Longitude must be specified and not null.');
+        // Validate latitude and longitude
+        if (lat < -90 || lat > 90) {
+            throw new BadRequestException('Latitude must be between -90 and 90');
+        }
+        if (long < -180 || long > 180) {
+            throw new BadRequestException('Longitude must be between -180 and 180');
         }
 
         const screen = await new this.hotelAndCarsModel({
@@ -653,7 +656,7 @@ export class HotelAndCarsService {
             unavailability_calendar,
             location: {
                 type: 'Point',
-                coordinates: [long, lat]  // Make sure these values are valid numbers
+                coordinates: [long, lat],
             },
             lat,
             long,
@@ -666,11 +669,12 @@ export class HotelAndCarsService {
             host_or_owner,
             car_details,
             hotel_details,
-            created_by: user?.userId || null
+            created_by: user?.userId || null,
         }).save();
 
         return screen;
     }
+
 
 
 
