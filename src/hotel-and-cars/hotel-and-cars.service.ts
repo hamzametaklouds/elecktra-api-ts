@@ -611,7 +611,6 @@ export class HotelAndCarsService {
 
 
     async insertOption(body: CreateHotelAndCarDto, user: { userId?: ObjectId }) {
-
         const {
             title,
             description,
@@ -634,43 +633,45 @@ export class HotelAndCarsService {
             host_or_owner,
             car_details,
             hotel_details,
-
         } = body;
 
-        const screen = await new this.hotelAndCarsModel(
-            {
-                title,
-                description,
-                images,
-                address,
-                highlights,
-                amenities,
-                hotel_type,
-                car_options,
-                type,
-                unavailability_calendar,
-                location: {
-                    type: 'Point',
-                    coordinates: [long, lat]
-                },
-                lat,
-                long,
-                price,
-                total_rooms,
-                company_id,
-                rooms_reserved,
-                availability_from: availability_from ? new Date(availability_from) : null,
-                availability_till: availability_till ? new Date(availability_till) : null,
-                host_or_owner,
-                car_details,
-                hotel_details,
-                created_by: user?.userId || null
-            }).save();
+        // Validate coordinates
+        if (lat == null || long == null) {
+            throw new BadRequestException('Latitude and Longitude must be specified and not null.');
+        }
 
+        const screen = await new this.hotelAndCarsModel({
+            title,
+            description,
+            images,
+            address,
+            highlights,
+            amenities,
+            hotel_type,
+            car_options,
+            type,
+            unavailability_calendar,
+            location: {
+                type: 'Point',
+                coordinates: [long, lat]  // Make sure these values are valid numbers
+            },
+            lat,
+            long,
+            price,
+            total_rooms,
+            company_id,
+            rooms_reserved,
+            availability_from: availability_from ? new Date(availability_from) : null,
+            availability_till: availability_till ? new Date(availability_till) : null,
+            host_or_owner,
+            car_details,
+            hotel_details,
+            created_by: user?.userId || null
+        }).save();
 
-        return screen
-
+        return screen;
     }
+
 
 
     async insertIdealCar(body: CreateIdealCarDto, user: { userId?: ObjectId }) {
