@@ -51,11 +51,21 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.COMPANY_ADMIN, Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
+    @Get('detail')
+    async getBookingDetail(@Query('id') id: string, @Req() req: Request) {
+        const screens = await this.bookingsService.getBookingsForUser(req.user)
+        return screens;
+    }
+
+
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
     @Roles(Role.USER)
     @Get()
     async getCar(@Req() req: Request) {
         const screens = await this.bookingsService.getBookingsForUser(req.user)
-
         return screens;
     }
 

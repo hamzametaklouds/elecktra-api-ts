@@ -290,6 +290,134 @@ export class BookingsService {
         return { hotels: hotels, cars: cars };
     }
 
+    async getBookingDetail(id, user: { userId?: ObjectId }) {
+
+        const bookingExists = await this.bookingModel.findOne({ _id: id, is_deleted: false })
+
+        if (!bookingExists) {
+            throw new BadRequestException('Invalid Booking id')
+        }
+        const currentDate = new Date();
+
+        const hotels = await this.bookingModel.aggregate([
+            {
+                $match: { _id: bookingExists._id, status: { $ne: BookingStatus.CR } }
+            },
+            {
+                $lookup: {
+                    from: 'hotel_and_cars',
+                    localField: 'hotel_or_car',
+                    foreignField: '_id',
+                    as: 'hotel',
+                },
+            },
+            { $unwind: '$hotel' },
+            {
+                $lookup: {
+                    from: 'companies',
+                    localField: 'company_id',
+                    foreignField: '_id',
+                    as: 'company',
+                },
+            },
+            { $unwind: '$company' },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'created_by',
+                    foreignField: '_id',
+                    as: 'user',
+                },
+            },
+            { $unwind: '$user' },
+            {
+                $lookup: {
+                    from: 'rating_reviews',
+                    localField: '_id',
+                    foreignField: 'booking_id',
+                    as: 'review',
+                },
+            },
+            { $unwind: { path: '$review', preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    _id: 1,
+                    hotel_or_car: 1,
+                    title: '$hotel.title',
+                    description: '$hotel.description',
+                    address: '$hotel.address',
+                    price: '$hotel.price',
+                    images: '$hotel.images',
+                    guests: 1,
+                    start_date: 1,
+                    company: 1,
+                    taxes_and_fees: 1,
+                    reference_number: 1,
+                    check_in_time: 1,
+                    check_out_time: 1,
+                    nights: 1,
+                    type: 1,
+                    user: 1,
+                    sub_total: 1,
+                    review: { $ifNull: ['$review', null] },
+                    rating: { $ifNull: ['$review.rating', null] },
+                    end_date: 1,
+                    created_at: 1,
+                    status: {
+                        $cond: {
+                            if: { $eq: ['$status', 'Cancelled'] },
+                            then: 'Cancelled',
+                            else: {
+                                $cond: {
+                                    if: { $eq: ['$status', 'Checkout'] },
+                                    then: 'Past',
+                                    else: {
+                                        $cond: [
+                                            {
+                                                $and: [
+                                                    { $lte: ['$start_date', currentDate] },
+                                                    { $gte: ['$end_date', currentDate] }
+                                                ]
+                                            },
+                                            'Live',
+                                            {
+                                                $cond: [
+                                                    { $lt: ['$end_date', currentDate] },
+                                                    'Past',
+                                                    {
+                                                        $cond: [
+                                                            {
+                                                                $lte: [
+                                                                    {
+                                                                        $dateDiff: {
+                                                                            startDate: currentDate,
+                                                                            endDate: '$start_date',
+                                                                            unit: 'day'
+                                                                        }
+                                                                    },
+                                                                    2
+                                                                ]
+                                                            },
+                                                            'Upcoming',
+                                                            'Upcoming'
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ]);
+
+
+        return hotels[0];
+    }
+
 
     async updateBooking(body: IPayment, booking_id) {
 
