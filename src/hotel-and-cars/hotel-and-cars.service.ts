@@ -482,11 +482,9 @@ export class HotelAndCarsService {
             {
                 $project: {
                     title: 1,
-                    description: 1,
                     images: 1,
                     address: 1,
                     highlights: 1,
-                    amenities: 1,
                     price: 1,
                     car_details: 1,
                     rating: 1, // Directly add static value
@@ -499,17 +497,6 @@ export class HotelAndCarsService {
                 $sort: { created_at: -1 }
             },
             // Lookup amenities data
-            {
-                $lookup: {
-                    from: 'options', // The collection to join
-                    localField: 'amenities',
-                    foreignField: '_id',
-                    as: 'amenities',
-                    pipeline: [
-                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in amenities
-                    ]
-                }
-            },
             // Lookup car_details data for `fuel_type`
             {
                 $lookup: {
