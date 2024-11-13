@@ -176,6 +176,7 @@ export class CreateHotelAndCarDto {
         default: 0,
     })
     @IsMongoId()
+    @IsOptional()
     host_or_owner: ObjectId;
 
     @ApiProperty({
