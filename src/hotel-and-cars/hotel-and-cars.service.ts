@@ -489,8 +489,8 @@ export class HotelAndCarsService {
                     amenities: 1,
                     price: 1,
                     car_details: 1,
-                    rating: { $literal: 4.5 }, // Directly add static value
-                    reviews: { $literal: 2213 }, // Directly add static value
+                    rating: 1, // Directly add static value
+                    reviews: 1, // Directly add static value
                     created_at: 1
                 }
             },
@@ -693,7 +693,7 @@ export class HotelAndCarsService {
             address,
             highlights,
             rating,
-            review,
+            reviews,
             amenities,
             car_options,
             price,
@@ -710,7 +710,7 @@ export class HotelAndCarsService {
                 highlights,
                 amenities,
                 rating,
-                review,
+                reviews,
                 car_options,
                 type: RecordType.C,
                 price,
@@ -738,6 +738,8 @@ export class HotelAndCarsService {
             description,
             images,
             address,
+            rating,
+            reviews,
             highlights,
             amenities,
             car_options,
@@ -756,6 +758,8 @@ export class HotelAndCarsService {
                 address,
                 highlights,
                 amenities,
+                rating,
+                reviews,
                 car_options,
                 type: RecordType.C,
                 price,

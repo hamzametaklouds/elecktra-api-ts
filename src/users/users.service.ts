@@ -73,7 +73,7 @@ export class UsersService {
     filter['is_host'] = true
 
     const bandCategorySection = await this.userModel
-      .find(filter, { first_name: 1, last_name: 1, email: 1, country_code: 1, phone_no: 1, address: 1, is_host: 1 })
+      .find(filter, { first_name: 1, last_name: 1, email: 1, country_code: 1, phone_no: 1, host_status: 1, address: 1, is_host: 1 })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp)
@@ -88,7 +88,7 @@ export class UsersService {
     $filter['is_host'] = true
 
     return await this.userModel
-      .find($filter, { first_name: 1, last_name: 1, email: 1, country_code: 1, phone_no: 1, address: 1, is_host: 1 })
+      .find($filter, { first_name: 1, last_name: 1, email: 1, host_status: 1, country_code: 1, phone_no: 1, address: 1, is_host: 1 })
       .sort($orderBy)
 
   }

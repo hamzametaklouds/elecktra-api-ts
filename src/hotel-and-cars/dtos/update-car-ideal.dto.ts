@@ -123,6 +123,26 @@ export class UpdateIdealCarDto {
     is_deleted: boolean;
 
 
+    @ApiProperty({
+        description: 'rating number e.g rating=676',
+        required: true,
+        default: 0,
+    })
+    @IsNumber()
+    @IsOptional()
+    rating: number;
+
+
+    @ApiProperty({
+        description: 'review number e.g review=676',
+        required: true,
+        default: 0,
+    })
+    @IsNumber()
+    @IsOptional()
+    reviews: number;
+
+
 
 
 

@@ -157,7 +157,7 @@ export interface IHotelAndCars {
     hotel_details: IHotelDetails
     is_available?: boolean;
     rating: number;
-    review: number;
+    reviews: number;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_ideal?: boolean;
@@ -252,7 +252,7 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             type: Number,
             required: false,
         },
-        review: {
+        reviews: {
             type: Number,
             required: false,
         },

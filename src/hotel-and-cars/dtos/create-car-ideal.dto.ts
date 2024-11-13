@@ -98,7 +98,7 @@ export class CreateIdealCarDto {
     })
     @IsNumber()
     @IsOptional()
-    review: number;
+    reviews: number;
 
     @ApiProperty({
         description: 'car_details string e.g car_details=[{icon:,detail:}]',
