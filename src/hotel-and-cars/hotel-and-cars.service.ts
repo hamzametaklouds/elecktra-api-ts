@@ -632,6 +632,7 @@ export class HotelAndCarsService {
             address,
             highlights,
             amenities,
+            unavailability_calendar,
             car_options,
             type,
             lat,
@@ -660,6 +661,7 @@ export class HotelAndCarsService {
                 hotel_type,
                 car_options,
                 type,
+                unavailability_calendar,
                 location: {
                     type: 'Point',
                     coordinates: [long, lat]
@@ -784,6 +786,7 @@ export class HotelAndCarsService {
         const {
             title, description, images, address, highlights, amenities, car_options, type, lat, long,
             price, total_rooms, rooms_reserved, hotel_type, availability_from, availability_till,
+            unavailability_calendar,
             host_or_owner, is_available, car_details, hotel_details, is_deleted, is_disabled
         } = body;
 
@@ -797,7 +800,7 @@ export class HotelAndCarsService {
         const updatedOption = await this.hotelAndCarsModel.findByIdAndUpdate(
             { _id: optionExist._id },
             {
-                title, description, images, address, highlights, amenities, hotel_type, car_options, type,
+                title, description, images, address, highlights, amenities, unavailability_calendar, hotel_type, car_options, type,
                 lat, long, price, total_rooms, is_available, rooms_reserved,
                 location, // Pass the validated or existing location here
                 availability_from: availability_from ? new Date(availability_from) : null,

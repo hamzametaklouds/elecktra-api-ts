@@ -205,6 +205,16 @@ export class UpdateHotelAndCarDto {
     is_available: boolean
 
     @ApiProperty({
+        description: 'unavailability_calendar number e.g unavailability_calendar=676',
+        required: true,
+        default: ['2024-10-02T10:06:18.650+00:00'],
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    unavailability_calendar: string[];
+
+    @ApiProperty({
         description: 'is_ideal number e.g is_ideal=676',
         required: false,
         default: false,

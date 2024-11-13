@@ -149,6 +149,7 @@ export interface IHotelAndCars {
     total_rooms: number;
     check_in_time?: string;
     check_out_time?: string;
+    unavailability_calendar?: Date[];
     rooms_reserved: number;
     availability_from: Date;
     availability_till: Date;
@@ -265,6 +266,11 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             type: Number,
             required: false,
             default: 0
+        },
+        unavailability_calendar: {
+            type: [Date],
+            required: false,
+            default: null
         },
         availability_from: {
             type: Date,

@@ -159,6 +159,16 @@ export class CreateHotelAndCarDto {
     @IsOptional()
     availability_till: string;
 
+    @ApiProperty({
+        description: 'unavailability_calendar number e.g unavailability_calendar=676',
+        required: true,
+        default: ['2024-10-02T10:06:18.650+00:00'],
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    unavailability_calendar: string[];
+
 
     @ApiProperty({
         description: 'host_or_owner number e.g host_or_owner=676',
