@@ -94,7 +94,7 @@ export class HotelAndCarsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.COMPANY_ADMIN)
     @Post()
     @ApiBody({ type: CreateHotelAndCarDto })
     async insert(@Body() body: CreateHotelAndCarDto, @Req() req: Request) {
@@ -137,7 +137,7 @@ export class HotelAndCarsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.COMPANY_ADMIN)
     @Put()
     @ApiBody({ type: UpdateHotelAndCarDto })
     async update(@Query('id') id: string, @Body() body: UpdateHotelAndCarDto, @Req() req: Request) {
