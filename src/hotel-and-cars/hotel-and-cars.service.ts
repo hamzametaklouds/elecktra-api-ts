@@ -774,6 +774,13 @@ export class HotelAndCarsService {
             host_or_owner, is_available, car_details, hotel_details, is_deleted, is_disabled
         } = body;
 
+        // Validate latitude and longitude
+        if (lat < -90 || lat > 90) {
+            throw new BadRequestException('Latitude must be between -90 and 90');
+        }
+        if (long < -180 || long > 180) {
+            throw new BadRequestException('Longitude must be between -180 and 180');
+        }
         // Check if both lat and long are provided, else set a default or throw an error
         const location = lat && long ? { type: 'Point', coordinates: [long, lat] } : optionExist.location;
 
