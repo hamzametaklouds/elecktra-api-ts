@@ -468,6 +468,8 @@ export class HotelAndCarsService {
 
     async getIdealCars() {
 
+
+
         return await this.hotelAndCarsModel.aggregate([
             // Filter documents based on the conditions
             {
@@ -484,7 +486,6 @@ export class HotelAndCarsService {
                     title: 1,
                     images: 1,
                     address: 1,
-                    highlights: 1,
                     price: 1,
                     car_details: 1,
                     rating: 1, // Directly add static value
@@ -677,45 +678,32 @@ export class HotelAndCarsService {
 
 
 
-
     async insertIdealCar(body: CreateIdealCarDto, user: { userId?: ObjectId }) {
-
         const {
             title,
-            description,
             images,
             address,
-            highlights,
             rating,
             reviews,
-            amenities,
-            car_options,
             price,
             car_details,
-
         } = body;
 
-        const screen = await new this.hotelAndCarsModel(
-            {
-                title,
-                description,
-                images,
-                address,
-                highlights,
-                amenities,
-                rating,
-                reviews,
-                car_options,
-                type: RecordType.C,
-                price,
-                is_ideal: true,
-                car_details,
-                created_by: user?.userId || null
-            }).save();
+        const screen = await new this.hotelAndCarsModel({
+            title,
+            images,
+            address,
+            rating,
+            reviews,
+            location: { type: 'Point', coordinates: [-90, 90] },  // Set to null explicitly
+            type: RecordType.C,
+            price,
+            is_ideal: true,
+            car_details,
+            created_by: user?.userId || null,
+        }).save();
 
-
-        return screen
-
+        return screen;
     }
 
     async updateIdealCar(id, body: UpdateIdealCarDto, user: { userId?: ObjectId }) {
@@ -729,14 +717,10 @@ export class HotelAndCarsService {
 
         const {
             title,
-            description,
             images,
             address,
             rating,
             reviews,
-            highlights,
-            amenities,
-            car_options,
             price,
             car_details,
             is_deleted,
@@ -744,17 +728,16 @@ export class HotelAndCarsService {
 
         } = body;
 
-        const screen = await new this.hotelAndCarsModel(
+        const screen = await this.hotelAndCarsModel.findByIdAndUpdate(
+            {
+                _id: car._id
+            },
             {
                 title,
-                description,
                 images,
                 address,
-                highlights,
-                amenities,
                 rating,
                 reviews,
-                car_options,
                 type: RecordType.C,
                 price,
                 is_ideal: true,
@@ -762,7 +745,11 @@ export class HotelAndCarsService {
                 is_deleted,
                 is_disabled,
                 updated_by: user?.userId || null
-            }).save();
+            },
+            {
+                new: true
+            }
+        );
 
 
         return screen

@@ -230,17 +230,19 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             type: {
                 type: String,
                 enum: ['Point'],
-                required: true,
+                required: false,
                 default: 'Point'
             },
             coordinates: {
-                type: [Number],  // Array of numbers [longitude, latitude]
-                required: true,
+                type: [Number],
+                required: false,
+                default: null,  // Allow `coordinates` to be `null`
                 validate: {
                     validator: function (value: number[]) {
-                        return Array.isArray(value) && value.length === 2;
+                        // Allow `null` or a valid array of [longitude, latitude]
+                        return value === null || (Array.isArray(value) && value.length === 2);
                     },
-                    message: 'Coordinates must be an array of two numbers [longitude, latitude].'
+                    message: 'Coordinates must be null or an array of two numbers [longitude, latitude].'
                 }
             }
         },
