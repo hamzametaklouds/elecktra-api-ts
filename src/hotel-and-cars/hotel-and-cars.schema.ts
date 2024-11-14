@@ -21,6 +21,7 @@ export enum HotelType {
     H = 'Hotel',
     F = 'Flat',
     GH = 'Guest House',
+    A = 'Apartment'
 }
 
 export interface ICarDetails {
