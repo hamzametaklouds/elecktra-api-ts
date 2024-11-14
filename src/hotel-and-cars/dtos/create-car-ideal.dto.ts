@@ -10,7 +10,6 @@ export class CreateIdealCarDto {
         default: '',
     })
     @IsString()
-    @IsNotEmpty()
     title: string;
 
     @ApiProperty({
@@ -19,7 +18,7 @@ export class CreateIdealCarDto {
         default: '',
     })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     description: string;
 
     @ApiProperty({
