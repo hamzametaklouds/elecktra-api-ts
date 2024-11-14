@@ -15,6 +15,7 @@ export enum BookingStatus {
     CN = 'Cancelled',
     CR = 'Created',
     CK = 'Checkout',
+    R = 'Refunded'
 }
 
 export enum CompanyPaymentStatus {

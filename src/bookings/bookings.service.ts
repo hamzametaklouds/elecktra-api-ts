@@ -2,12 +2,13 @@ import { Injectable, Inject, BadRequestException, forwardRef, UnauthorizedExcept
 import { Model, ObjectId } from 'mongoose';
 import { CreateBookingsDto } from './dtos/create-bookings.dto';
 import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
-import { BookingStatus, BookingType, IBookings, IPayment } from './bookings.schema';
+import { BookingStatus, BookingType, CompanyPaymentStatus, IBookings, IPayment } from './bookings.schema';
 import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
 import { CreatePaymentDto } from './dtos/create-payment';
 import { UsersService } from 'src/users/users.service';
 import { RecordType } from 'src/hotel-and-cars/hotel-and-cars.schema';
+import { UpdateCompanyPaymentDto } from './dtos/update-company-payment';
 
 @Injectable()
 export class BookingsService {
@@ -475,6 +476,34 @@ export class BookingsService {
         return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.CK }, { new: true })
 
     }
+
+    async updateBookingCompanyStatus(id, body: UpdateCompanyPaymentDto, user: { userId?: ObjectId }) {
+
+        const bookingExists = await this.bookingModel.findOne({ _id: id, is_deleted: false })
+
+
+        if (!bookingExists) {
+            throw new BadRequestException('Invalid id')
+        }
+
+        const updatedBooking = await this.bookingModel.findByIdAndUpdate(
+            { _id: bookingExists._id },
+            {
+                status: body.company_status === CompanyPaymentStatus.CN ? BookingStatus.R : bookingExists.status,
+                company_payment: body.company_status,
+                updated_by: user.userId
+            },
+            { new: true })
+
+
+        return updatedBooking;
+
+
+    }
+
+
+
+
 
 
     async insertBooking(body: CreateBookingsDto, user: { userId?: ObjectId }) {

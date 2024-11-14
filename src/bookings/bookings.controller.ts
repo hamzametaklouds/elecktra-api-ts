@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Get, Query, Put } from '@nestjs/common';
 import getMessages from 'src/app/api-messages';
 import { ApiBearerAuth, ApiTags, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -13,6 +13,7 @@ import { Role } from 'src/roles/roles.schema';
 import { IPaginationQuery } from 'src/app/interfaces';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
 import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
+import { UpdateCompanyPaymentDto } from './dtos/update-company-payment';
 
 const { RESOURCE_CREATED } = getMessages('boking(s)');
 
@@ -90,6 +91,16 @@ export class BookingsController {
     async insert(@Body() body: CreateBookingsDto, @Req() req: Request) {
         const createBooking = await this.bookingsService.insertBooking(body, req.user);
         return { message: RESOURCE_CREATED, data: createBooking };
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @Put()
+    @ApiBody({ type: UpdateCompanyPaymentDto })
+    async updateCompany(@Query('id') id: string, @Body() body: UpdateCompanyPaymentDto, @Req() req: Request) {
+        const updateBooking = await this.bookingsService.updateBookingCompanyStatus(id, body, req.user);
+        return { message: 'Company Status updated successfully', data: updateBooking };
     }
 
     @ApiBearerAuth(AuthorizationHeader)
