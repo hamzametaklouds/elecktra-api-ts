@@ -54,7 +54,7 @@ export class BookingsController {
     @Roles(Role.COMPANY_ADMIN, Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
     @Get('detail')
     async getBookingDetail(@Query('id') id: string, @Req() req: Request) {
-        const screens = await this.bookingsService.getBookingsForUser(req.user)
+        const screens = await this.bookingsService.getBookingDetail(id, req.user)
         return screens;
     }
 
