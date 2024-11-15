@@ -539,6 +539,8 @@ export class HotelAndCarsService {
             throw new BadRequestException('Invalid Id')
         }
 
+        console.log('hotelExists----', hotelExists)
+
 
         const hotel = await this.hotelAndCarsModel.aggregate([
             {
@@ -567,7 +569,7 @@ export class HotelAndCarsService {
                     description: 1,
                     address: 1,
                     images: 1,
-                    highlights: 1,
+                    //highlights: 1,
                     price: 1,
                     car_details: 1,
                     ratings: 3.2,
@@ -599,8 +601,8 @@ export class HotelAndCarsService {
 
         const userWishList = await this.wishListService.getWishlistById(user.userId)
 
-        if (user?.userId?.toString() !== '67272691b1673e7c1353639a') {
-            hotel[0].is_in_wishlist = userWishList.cars.includes(hotel[0]._id);
+        if (user?.userId?.toString() !== '67272691b1673e7c1353639a' && userWishList?.cars) {
+            hotel[0].is_in_wishlist = userWishList?.cars?.includes(hotel[0]?._id);
         }
 
 
