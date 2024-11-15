@@ -81,6 +81,7 @@ export class AuthService {
         { title: 'Landing Page Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
         { title: 'Queries', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
         { title: 'Host Requests', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+        { title: 'Invitations', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
       );
     } else if (user.roles.includes('internal_admin')) {
       modules.push(
@@ -94,6 +95,7 @@ export class AuthService {
         { title: 'Payment Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
         { title: 'Queries', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
         { title: 'Host Requests', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+        { title: 'Invitations', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
       );
     } else if (user.roles.includes('company_admin')) {
       modules.push(
