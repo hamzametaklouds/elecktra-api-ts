@@ -552,6 +552,9 @@ export class HotelAndCarsService {
                     localField: 'car_options',
                     foreignField: '_id',
                     as: 'car_options',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1, icon: 1, parent_type: 1, sub_type: 1 } } // Select specific fields in fuel type
+                    ]
                 },
             },
             {
@@ -560,7 +563,44 @@ export class HotelAndCarsService {
                     localField: 'amenities',
                     foreignField: '_id',
                     as: 'amenities',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1, icon: 1, parent_type: 1, sub_type: 1 } } // Select specific fields in fuel type
+                    ]
                 },
+            },
+            {
+                $lookup: {
+                    from: 'options', // Assume 'car_details' collection exists for fuel type and transmission
+                    localField: 'car_details.fuel_type',
+                    foreignField: '_id',
+                    as: 'car_details.fuel_type',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in fuel type
+                    ]
+                }
+            },
+            // Lookup car_details data for `transmission`
+            {
+                $lookup: {
+                    from: 'options',
+                    localField: 'car_details.transmission',
+                    foreignField: '_id',
+                    as: 'car_details.transmission',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in transmission
+                    ]
+                }
+            },
+            {
+                $lookup: {
+                    from: 'options',
+                    localField: 'car_details.make',
+                    foreignField: '_id',
+                    as: 'car_details.make',
+                    pipeline: [
+                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in transmission
+                    ]
+                }
             },
             {
                 $project: {
@@ -569,7 +609,7 @@ export class HotelAndCarsService {
                     description: 1,
                     address: 1,
                     images: 1,
-                    //highlights: 1,
+                    highlights: 1,
                     price: 1,
                     car_details: 1,
                     ratings: 3.2,
