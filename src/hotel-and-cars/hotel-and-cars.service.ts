@@ -75,6 +75,21 @@ export class HotelAndCarsService {
                         },
                         { $sort: { "dist.calculated": 1 } },
                         {
+                            $match: {
+                                $or: [
+                                    { unavailability_calendar: { $exists: false } },
+                                    { unavailability_calendar: { $eq: null } },
+                                    {
+                                        $expr: {
+                                            $not: {
+                                                $in: [new Date(), "$unavailability_calendar"],
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                        {
                             $project: {
                                 _id: 1,
                                 title: 1,
@@ -115,6 +130,21 @@ export class HotelAndCarsService {
                             },
                         },
                         { $sort: { "dist.calculated": 1 } },
+                        {
+                            $match: {
+                                $or: [
+                                    { unavailability_calendar: { $exists: false } },
+                                    { unavailability_calendar: { $eq: null } },
+                                    {
+                                        $expr: {
+                                            $not: {
+                                                $in: [new Date(), "$unavailability_calendar"],
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
                         {
                             $project: {
                                 _id: 1,
