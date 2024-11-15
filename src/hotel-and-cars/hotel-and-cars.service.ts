@@ -459,7 +459,7 @@ export class HotelAndCarsService {
 
         const userWishList = await this.wishListService.getWishlistById(user.userId)
 
-        if (user?.userId?.toString() !== '67272691b1673e7c1353639a') {
+        if (user?.userId?.toString() !== '67272691b1673e7c1353639a' && userWishList?.hotels) {
             hotel[0].is_in_wishlist = userWishList?.hotels?.includes(hotel[0]._id);
         }
 
