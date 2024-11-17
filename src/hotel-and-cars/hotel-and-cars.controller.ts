@@ -102,15 +102,11 @@ export class HotelAndCarsController {
         return { message: RESOURCE_CREATED, data: createOption };
     }
 
-
-
     @Get('ideal-car')
     async idealCars() {
         const hotels = await this.hotelAndCarsService.getIdealCars();
         return { message: 'Ideal Cars fetched successfully', data: hotels };
     }
-
-
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
@@ -144,7 +140,5 @@ export class HotelAndCarsController {
         const createOption = await this.hotelAndCarsService.updateOption(id, body, req.user);
         return { message: 'Updated Successfully', data: createOption };
     }
-
-
 
 }

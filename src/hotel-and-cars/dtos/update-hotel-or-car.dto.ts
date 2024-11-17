@@ -191,9 +191,8 @@ export class UpdateHotelAndCarDto {
             ground_rules: '',
         },
     })
-    @IsArray()
     @IsOptional()
-    hotel_details: object[];
+    hotel_details: object;
 
     @ApiProperty({
         description: 'is_available number e.g is_available=676',

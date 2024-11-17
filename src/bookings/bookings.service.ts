@@ -43,7 +43,7 @@ export class BookingsService {
         filter['status'] = { $ne: BookingStatus.CR }
 
         const bandCategorySection = await this.bookingModel
-            .find(filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
+            .find(filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
@@ -70,7 +70,7 @@ export class BookingsService {
 
 
         return await this.bookingModel
-            .find($filter, { _id: 1, status: 1, check_in_time: 1, check_out_time: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
+            .find($filter, { _id: 1, status: 1, check_in_time: 1, check_out_time: 1, company_payment: 1, nights: 1, sub_total: 1, hotel_details: 1, car_details: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
             .sort($orderBy)
 
     }
@@ -357,6 +357,8 @@ export class BookingsService {
                     check_in_time: 1,
                     check_out_time: 1,
                     nights: 1,
+                    hotel_details: 1,
+                    car_details: 1,
                     type: 1,
                     user: 1,
                     sub_total: 1,
@@ -481,7 +483,6 @@ export class BookingsService {
 
         const bookingExists = await this.bookingModel.findOne({ _id: id, is_deleted: false })
 
-
         if (!bookingExists) {
             throw new BadRequestException('Invalid id')
         }
@@ -522,6 +523,11 @@ export class BookingsService {
         if (!hotelExists) {
             throw new BadRequestException('Invalid hotel Id')
         }
+
+        if (adults && adults === 0) {
+            throw new BadRequestException('There should atleast be 1 adult')
+        }
+
 
 
         const reference_number = Array.from({ length: 15 }, () => 'abcdefghijk123455678990lmnopqr0928340483stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 62)]).join('').toLowerCase();

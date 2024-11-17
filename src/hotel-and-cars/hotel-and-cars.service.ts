@@ -834,7 +834,10 @@ export class HotelAndCarsService {
     }
 
     async updateOption(id, body: UpdateHotelAndCarDto, user: { userId?: ObjectId }) {
+
+
         const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false });
+
         if (!optionExist) {
             throw new BadRequestException('Invalid Id');
         }
@@ -859,6 +862,8 @@ export class HotelAndCarsService {
         if (!location.coordinates || location.coordinates.length !== 2) {
             throw new BadRequestException('Latitude and Longitude must be specified');
         }
+
+        console.log('hotel_details----', hotel_details)
 
         const updatedOption = await this.hotelAndCarsModel.findByIdAndUpdate(
             { _id: optionExist._id },
