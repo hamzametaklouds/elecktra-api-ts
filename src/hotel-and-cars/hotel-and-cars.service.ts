@@ -227,7 +227,7 @@ export class HotelAndCarsService {
         }
 
         const bandCategorySection = await this.hotelAndCarsModel
-            .find(filter, { _id: 1, title: 1, description: 1, type: 1, price: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, check_out_time: 1, company_id: 1, created_at: 1, created_by: 1, is_disabled: 1 })
+            .find(filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, type: 1, price: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, check_out_time: 1, company_id: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
@@ -263,7 +263,7 @@ export class HotelAndCarsService {
 
 
         return await this.hotelAndCarsModel
-            .find($filter, { _id: 1, title: 1, description: 1, company_id: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1 })
+            .find($filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, company_id: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort($orderBy)
             .populate({ path: 'company_id', select: '_id title description icon' })
             .populate({ path: 'created_by', select: '_id first_name last_name email' })
@@ -456,6 +456,7 @@ export class HotelAndCarsService {
                     check_out_time: 1,
                     availability_from: 1,
                     availability_till: 1,
+                    unavailability_calendar: 1,
                     hotel_details: 1,
                     total_reviews: 321,
                     location: 1,
