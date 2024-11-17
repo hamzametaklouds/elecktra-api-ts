@@ -36,8 +36,6 @@ export class AuthController {
         return createAuth;
     }
 
-
-
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: AdminLoginDto })
     @Post('admin/log-in')
@@ -45,7 +43,6 @@ export class AuthController {
         const createAuth = await this.authService.validateSystemUser(body.email, body.password);
         return createAuth;
     }
-
 
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: GoogleLoginDto })
