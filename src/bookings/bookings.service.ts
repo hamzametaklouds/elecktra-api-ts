@@ -47,6 +47,7 @@ export class BookingsService {
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
+            .populate({ path: 'company_id', select: '_id title description icon' })
 
         return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
 
@@ -72,6 +73,7 @@ export class BookingsService {
         return await this.bookingModel
             .find($filter, { _id: 1, status: 1, check_in_time: 1, check_out_time: 1, company_payment: 1, nights: 1, sub_total: 1, hotel_details: 1, car_details: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
             .sort($orderBy)
+            .populate({ path: 'company_id', select: '_id title description icon' })
 
     }
 
@@ -490,7 +492,7 @@ export class BookingsService {
         const updatedBooking = await this.bookingModel.findByIdAndUpdate(
             { _id: bookingExists._id },
             {
-                status: body.company_status === CompanyPaymentStatus.CN ? BookingStatus.R : bookingExists.status,
+                status: body.booking_status,
                 company_payment: body.company_status,
                 updated_by: user.userId
             },

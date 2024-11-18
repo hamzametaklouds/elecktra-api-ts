@@ -24,6 +24,10 @@ export enum CompanyPaymentStatus {
     CN = 'Cancelled',
 }
 
+export enum ModifyClientBookingStatus {
+    R = 'Refunded',
+}
+
 
 export interface IGuests {
     _id?: Schema.Types.ObjectId;
