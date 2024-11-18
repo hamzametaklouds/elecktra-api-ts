@@ -208,6 +208,7 @@ export class UsersService {
       last_name,
       email,
       country_code,
+      host_type,
       phone_no,
       address
     } = userObject;
@@ -228,6 +229,7 @@ export class UsersService {
       first_name,
       last_name,
       email,
+      host_type,
       country_code,
       is_host: true,
       phone_no,

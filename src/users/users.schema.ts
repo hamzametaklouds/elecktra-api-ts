@@ -8,6 +8,11 @@ export enum HostStatus {
   R = 'Rejected'
 }
 
+export enum HostType {
+  S = 'Stay',
+  C = 'Car'
+}
+
 export interface IUsers {
   _id?: Schema.Types.ObjectId;
   image: string;
@@ -23,6 +28,7 @@ export interface IUsers {
   street?: string
   suite?: string
   is_host: boolean;
+  host_type?: string;
   host_status: string
   city?: string
   post_code?: string
@@ -46,16 +52,18 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       default: ''
     },
-    last_name: {
-      type: String,
-      required: false,
-      default: ''
-    },
+
     host_status: {
       type: String,
       required: false,
       enum: HostStatus,
       default: HostStatus.P
+    },
+    host_type: {
+      type: String,
+      required: false,
+      enum: HostType,
+      default: HostType.S
     },
     email: {
       type: String,
