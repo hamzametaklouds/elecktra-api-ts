@@ -109,9 +109,6 @@ export class InvitationsService {
    */
   async getPaginatedInvitations(rpp: number, page: number, filter: object, orderBy, user): Promise<IPageinatedDataTable> {
 
-
-
-
     if (user?.company_id) {
       filter['company_id'] = user?.company_id
     }
@@ -128,7 +125,7 @@ export class InvitationsService {
       .limit(rpp)
       .populate('company_id')
       .populate({
-        path: 'created_by ',
+        path: 'created_by',
         select: '_id first_name last_name email phone_no',
         match: { is_deleted: false },
       });
