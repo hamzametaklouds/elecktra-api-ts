@@ -439,7 +439,109 @@ export class HotelAndCarsService {
                     localField: 'amenities',
                     foreignField: '_id',
                     as: 'amenities',
+                    pipeline: [
+                        {
+                            $project: {
+                                _id: 1,
+                                title: 1,
+                                icon: 1
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $lookup: {
+                    from: 'rating_reviews',
+                    localField: '_id',
+                    foreignField: 'hotel_or_car',
+                    as: 'reviews'
                 },
+            },
+            {
+                $unwind: {
+                    path: "$reviews",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'reviews.created_by',
+                    foreignField: '_id',
+                    as: 'user_details'
+                },
+            },
+            {
+                $unwind: {
+                    path: "$user_details",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'companies',
+                    localField: 'company_id',
+                    foreignField: '_id',
+                    as: 'company_details'
+                },
+            },
+            {
+                $unwind: {
+                    path: "$company_details",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $addFields: {
+                    "reviews.name": "$user_details.name"
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    title: { $first: "$title" },
+                    description: { $first: "$description" },
+                    address: { $first: "$address" },
+                    bedrooms_available: { $first: "$total_rooms" },
+                    images: { $first: "$images" },
+                    highlights: { $first: "$highlights" },
+                    price: { $first: "$price" },
+                    ratings: { $avg: "$reviews.rating" },
+                    total_reviews: { $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] } },
+                    check_in_time: { $first: "$check_in_time" },
+                    check_out_time: { $first: "$check_out_time" },
+                    availability_from: { $first: "$availability_from" },
+                    availability_till: { $first: "$availability_till" },
+                    unavailability_calendar: { $first: "$unavailability_calendar" },
+                    hotel_details: { $first: "$hotel_details" },
+                    location: { $first: "$location" },
+                    hotel_type: { $first: "$hotel_type" },
+                    is_in_wishlist: { $first: { $literal: false } },
+                    amenities: { $first: "$amenities" },
+                    reviews: {
+                        $push: {
+                            $cond: [
+                                { $ifNull: ["$reviews", false] },
+                                {
+                                    _id: "$reviews._id",
+                                    rating: "$reviews.rating",
+                                    review: "$reviews.review",
+                                    name: "$reviews.name"
+                                },
+                                null
+                            ]
+                        }
+                    },
+                    cancellation_policy: { $first: "$hotel_details.cancellation_policy" },
+                    host_details: {
+                        $first: {
+                            _id: "$company_details._id",
+                            name: "$company_details.title",
+                            years_of_experience: 7
+                        }
+                    }
+                }
             },
             {
                 $project: {
@@ -447,46 +549,30 @@ export class HotelAndCarsService {
                     title: 1,
                     description: 1,
                     address: 1,
-                    bedrooms_available: '$total_rooms',
+                    bedrooms_available: 1,
                     images: 1,
                     highlights: 1,
                     price: 1,
-                    ratings: 3.2,
+                    ratings: { $round: [{ $ifNull: ["$ratings", 0] }, 2] }, // Default rating to 0
+                    total_reviews: 1,
                     check_in_time: 1,
                     check_out_time: 1,
                     availability_from: 1,
                     availability_till: 1,
                     unavailability_calendar: 1,
                     hotel_details: 1,
-                    total_reviews: 321,
                     location: 1,
                     hotel_type: 1,
-                    is_in_wishlist: { $literal: false },
+                    is_in_wishlist: 1,
                     amenities: 1,
-                    reviews: [
-                        {
-                            name: 'John doe',
-                            rating: 3.4,
-                            review: 'Exellent place'
-                        },
-                        {
-                            name: 'Muhammad Junaid',
-                            rating: 4,
-                            review: 'There is still room for improvement'
-                        }
-                    ],
-                    availablity_from: 1,
-                    availablity_till: 1,
-                    cancellation_policy: '$hotel_details.cancellation_policy',
-                    host_details: {
-                        name: 'Hamza Sohail',
-                        years_of_experience: 7,
-
-                    }
-
+                    reviews: { $ifNull: ["$reviews", []] }, // Default reviews to empty array
+                    cancellation_policy: 1,
+                    host_details: 1
                 }
             }
-        ])
+        ]);
+
+
 
         const userWishList = await this.wishListService.getWishlistById(user.userId)
 
@@ -563,15 +649,11 @@ export class HotelAndCarsService {
     }
 
     async hotelCarDetail(hotel_id: string, user: { userId?: ObjectId }) {
-
-        const hotelExists = await this.hotelAndCarsModel.findOne({ _id: hotel_id, is_deleted: false })
+        const hotelExists = await this.hotelAndCarsModel.findOne({ _id: hotel_id, is_deleted: false });
 
         if (!hotelExists) {
-            throw new BadRequestException('Invalid Id')
+            throw new BadRequestException('Invalid Id');
         }
-
-        console.log('hotelExists----', hotelExists)
-
 
         const hotel = await this.hotelAndCarsModel.aggregate([
             {
@@ -584,9 +666,9 @@ export class HotelAndCarsService {
                     foreignField: '_id',
                     as: 'car_options',
                     pipeline: [
-                        { $project: { _id: 1, title: 1, description: 1, icon: 1, parent_type: 1, sub_type: 1 } } // Select specific fields in fuel type
+                        { $project: { _id: 1, title: 1, description: 1, icon: 1, parent_type: 1, sub_type: 1 } }
                     ]
-                },
+                }
             },
             {
                 $lookup: {
@@ -595,22 +677,21 @@ export class HotelAndCarsService {
                     foreignField: '_id',
                     as: 'amenities',
                     pipeline: [
-                        { $project: { _id: 1, title: 1, description: 1, icon: 1, parent_type: 1, sub_type: 1 } } // Select specific fields in fuel type
+                        { $project: { _id: 1, title: 1, description: 1, icon: 1, parent_type: 1, sub_type: 1 } }
                     ]
-                },
+                }
             },
             {
                 $lookup: {
-                    from: 'options', // Assume 'car_details' collection exists for fuel type and transmission
+                    from: 'options',
                     localField: 'car_details.fuel_type',
                     foreignField: '_id',
                     as: 'car_details.fuel_type',
                     pipeline: [
-                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in fuel type
+                        { $project: { _id: 1, title: 1, description: 1 } }
                     ]
                 }
             },
-            // Lookup car_details data for `transmission`
             {
                 $lookup: {
                     from: 'options',
@@ -618,7 +699,7 @@ export class HotelAndCarsService {
                     foreignField: '_id',
                     as: 'car_details.transmission',
                     pipeline: [
-                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in transmission
+                        { $project: { _id: 1, title: 1, description: 1 } }
                     ]
                 }
             },
@@ -629,8 +710,61 @@ export class HotelAndCarsService {
                     foreignField: '_id',
                     as: 'car_details.make',
                     pipeline: [
-                        { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in transmission
+                        { $project: { _id: 1, title: 1, description: 1 } }
                     ]
+                }
+            },
+            {
+                $lookup: {
+                    from: 'companies',
+                    localField: 'company_id',
+                    foreignField: '_id',
+                    as: 'company_details'
+                },
+            },
+            {
+                $unwind: {
+                    path: "$company_details",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    title: { $first: "$title" },
+                    description: { $first: "$description" },
+                    address: { $first: "$address" },
+                    images: { $first: "$images" },
+                    highlights: { $first: "$highlights" },
+                    price: { $first: "$price" },
+                    car_details: { $first: "$car_details" },
+                    ratings: { $avg: "$reviews.rating" },
+                    total_reviews: { $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] } },
+                    location: { $first: "$location" },
+                    is_in_wishlist: { $first: { $literal: false } },
+                    car_options: { $first: "$car_options" },
+                    amenities: { $first: "$amenities" },
+                    reviews: {
+                        $push: {
+                            $cond: [
+                                { $ifNull: ["$reviews", false] },
+                                {
+                                    _id: "$reviews._id",
+                                    rating: "$reviews.rating",
+                                    review: "$reviews.review",
+                                    name: "$reviews.name"
+                                },
+                                null
+                            ]
+                        }
+                    },
+                    owner_details: {
+                        $first: {
+                            _id: "$company_details._id",
+                            name: "$company_details.title",
+                            years_of_experience: 7
+                        }
+                    }
                 }
             },
             {
@@ -643,49 +777,27 @@ export class HotelAndCarsService {
                     highlights: 1,
                     price: 1,
                     car_details: 1,
-                    ratings: 3.2,
-                    total_reviews: 321,
+                    ratings: { $round: [{ $ifNull: ["$ratings", 0] }, 2] },
+                    total_reviews: 1,
                     location: 1,
-                    is_in_wishlist: { $literal: false },
+                    is_in_wishlist: 1,
                     car_options: 1,
-                    reviews: [
-                        {
-                            name: 'John doe',
-                            rating: 3.4,
-                            review: 'Exellent place'
-                        },
-                        {
-                            name: 'Muhammad Junaid',
-                            rating: 4,
-                            review: 'There is still room for improvement'
-                        }
-                    ],
-                    owner_details: {
-                        name: 'Hamza Sohail',
-                        image: 'https://thumbnail.staging.carnivalist.com/fit-in/1000x1000/ac04720e-c222-4ece-b0f2-6102dbb15d00.jpg'
-                    },
-                    amenities: 1
-
+                    reviews: { $ifNull: ["$reviews", []] },
+                    amenities: 1,
+                    owner_details: 1
                 }
             }
-        ])
+        ]);
 
-        const userWishList = await this.wishListService.getWishlistById(user.userId)
+        const userWishList = await this.wishListService.getWishlistById(user.userId);
 
         if (user?.userId?.toString() !== '67272691b1673e7c1353639a' && userWishList?.cars) {
             hotel[0].is_in_wishlist = userWishList?.cars?.includes(hotel[0]?._id);
         }
 
-
-
-
-
-
-
-
-        return hotel
-
+        return hotel;
     }
+
 
 
 
