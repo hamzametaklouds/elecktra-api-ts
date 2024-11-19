@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsEmail, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsEmail, IsEnum, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { HostType } from '../users.schema';
 
@@ -39,13 +39,22 @@ export class CreateHostUserDto {
 
 
   @ApiProperty({
-    description: 'host_type string e.g host_type= jonathan.charles@gmail.com',
-    required: true,
-    default: HostType.S,
+    description: 'for_stay boolean e.g for_stay=true',
+    required: false,
+    default: false,
   })
-  @IsEnum(HostType)
+  @IsBoolean()
   @IsOptional()
-  host_type: string;
+  for_stay?: boolean;
+
+  @ApiProperty({
+    description: 'for_car boolean e.g for_car=true',
+    required: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  for_car?: boolean;
 
   @ApiProperty({
     description: 'country_code string e.g country_code= +2',
@@ -70,7 +79,6 @@ export class CreateHostUserDto {
   })
   @IsString()
   address: string;
-
 
 
 }

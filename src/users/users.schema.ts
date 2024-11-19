@@ -28,7 +28,8 @@ export interface IUsers {
   street?: string
   suite?: string
   is_host: boolean;
-  host_type?: string;
+  for_stay?: boolean;
+  for_car?: boolean;
   host_status: string
   city?: string
   post_code?: string
@@ -58,12 +59,6 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       enum: HostStatus,
       default: HostStatus.P
-    },
-    host_type: {
-      type: String,
-      required: false,
-      enum: HostType,
-      default: HostType.S
     },
     email: {
       type: String,
@@ -126,6 +121,16 @@ export const UsersSchema = new Schema<IUsers>(
       default: ''
     },
     is_host: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    for_stay: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    for_car: {
       type: Boolean,
       required: false,
       default: false,
