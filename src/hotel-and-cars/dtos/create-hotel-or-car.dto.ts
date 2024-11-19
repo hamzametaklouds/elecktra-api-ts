@@ -42,6 +42,25 @@ export class CreateHotelAndCarDto {
     @IsOptional()
     address: string;
 
+
+    @ApiProperty({
+        description: 'check_in_time string e.g check_in_time=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    @IsOptional()
+    check_in_time: string;
+
+    @ApiProperty({
+        description: 'check_in_time string e.g check_in_time=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    @IsOptional()
+    check_out_time: string;
+
     @ApiProperty({
         description: 'hotel_type string e.g hotel_type=xyzabc',
         required: true,

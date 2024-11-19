@@ -43,29 +43,52 @@ const sortArrayToObject = ($orderBy: string): Object => {
   return result;
 };
 const queryArrayToObjects = ($filter: string): Object => {
-  // identifying operator: and/or & separating filters into [filters:string] or [filter:string]
+  // Identifying operator: and/or & separating filters into [filters:string] or [filter:string]
   const opr = $filter.includes(' or ') ? ' or ' : $filter.includes(' and ') ? ' and ' : undefined;
   const filters: string[] = opr ? $filter.split(opr) : [$filter];
-  // creating [filters:Object] or [filter:Object]
+
+  // Creating [filters:Object] or [filter:Object]
   const filterObjects: Object[] = filters.map(filter => {
     const [field, operator, ...valueArray] = filter.split(' ');
-    const value = valueArray.join(' ');
+    let value = valueArray.join(' ');
+
+    // Check if the value is a date string (e.g., '2024-11-11')
+    let parsedValue: string | Date = value;
+    if (Date.parse(value)) {
+      parsedValue = new Date(value);  // Parse to Date object
+    }
+
+    // Narrow the type to Date explicitly for valid date strings
+    if (parsedValue instanceof Date && !isNaN(parsedValue.getTime())) {
+      parsedValue = parsedValue.toISOString(); // Convert Date to ISO string
+    }
+
     const obj = {};
-    if (operator.trim() === 'like') {
+
+    // Ensure `trim()` is called only on a string
+    if (typeof parsedValue === 'string' && operator.trim() === 'like') {
       obj[field] = {
-        $regex: '.*' + value.trim() + '.*',
+        $regex: '.*' + parsedValue.trim() + '.*',
         $options: 'i',
       };
     } else if (operator.trim() === 'in') {
       obj[field] = { [`$${operator}`]: value.split(',') };
     } else {
-      obj[field] = { [`$${operator}`]: value };
+      obj[field] = { [`$${operator}`]: parsedValue };
     }
     return obj;
   });
+
   const result = opr ? { [`$${opr.trim()}`]: filterObjects } : filterObjects[0];
+
+  // Default filter for 'is_deleted' if not already present
   if (!$filter.includes('is_deleted')) {
     result['is_deleted'] = false;
   }
+
   return result;
 };
+
+
+
+

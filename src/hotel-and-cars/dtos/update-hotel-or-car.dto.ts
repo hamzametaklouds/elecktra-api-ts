@@ -153,6 +153,24 @@ export class UpdateHotelAndCarDto {
     @IsOptional()
     hotel_type: string;
 
+    @ApiProperty({
+        description: 'check_in_time string e.g check_in_time=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    @IsOptional()
+    check_in_time: string;
+
+    @ApiProperty({
+        description: 'check_in_time string e.g check_in_time=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    @IsOptional()
+    check_out_time: string;
+
 
     @ApiProperty({
         description: 'host_or_owner number e.g host_or_owner=676',

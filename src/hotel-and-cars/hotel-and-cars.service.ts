@@ -903,6 +903,8 @@ export class HotelAndCarsService {
             type,
             lat,
             long,
+            check_in_time,
+            check_out_time,
             price,
             total_rooms,
             rooms_reserved,
@@ -932,6 +934,8 @@ export class HotelAndCarsService {
             amenities,
             hotel_type,
             car_options,
+            check_in_time,
+            check_out_time,
             type,
             unavailability_calendar,
             location: {
@@ -1047,7 +1051,8 @@ export class HotelAndCarsService {
         const {
             title, description, images, address, highlights, amenities, car_options, type, lat, long,
             price, total_rooms, rooms_reserved, hotel_type, availability_from, availability_till,
-            unavailability_calendar,
+            unavailability_calendar, check_in_time,
+            check_out_time,
             host_or_owner, is_available, car_details, hotel_details, is_deleted, is_disabled
         } = body;
 
@@ -1071,7 +1076,8 @@ export class HotelAndCarsService {
             { _id: optionExist._id },
             {
                 title, description, images, address, highlights, amenities, unavailability_calendar, hotel_type, car_options, type,
-                lat, long, price, total_rooms, is_available, rooms_reserved,
+                lat, long, price, total_rooms, is_available, rooms_reserved, check_in_time,
+                check_out_time,
                 location, // Pass the validated or existing location here
                 availability_from: availability_from ? new Date(availability_from) : null,
                 availability_till: availability_till ? new Date(availability_till) : null,

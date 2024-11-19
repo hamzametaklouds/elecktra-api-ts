@@ -35,6 +35,8 @@ export class BookingsService {
         const totalPages: number = Math.ceil(totalDocuments / rpp);
         page = page > totalPages ? totalPages : page;
 
+        console.log('filter-------', filter['$and'])
+
 
         if (user?.company_id) {
             filter['company_id'] = user?.company_id
