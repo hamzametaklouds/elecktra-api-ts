@@ -63,6 +63,7 @@ export class HotelAndCarsService {
                 newFilter = { is_deleted: { $eq: false } };
             }
 
+            console.log('$filter-------', $filter);
             console.log('$newFilter-------', newFilter);
 
             const userWishList = await this.wishListService.getWishlistById(user.userId);
@@ -156,6 +157,9 @@ export class HotelAndCarsService {
                                 distance: 1,
                                 created_by: 1
                             }
+                        },
+                        {
+                            $match: { ratings: { $lte: newFilter['rating']['$lt'] ? newFilter['rating']['$lt'] : 5 } }
                         }
                     ]);
                 } catch (error) {
@@ -226,9 +230,7 @@ export class HotelAndCarsService {
                                 rating: { $avg: "$reviews.rating" } // Calculate the average rating
                             }
                         },
-                        {
-                            $match: newFilter
-                        },
+
                         {
                             $project: {
                                 _id: 1,
@@ -246,8 +248,12 @@ export class HotelAndCarsService {
                                 distance: 1,
                                 created_by: 1
                             }
+                        },
+                        {
+                            $match: { ratings: { $lte: newFilter['rating']['$lt'] ? newFilter['rating']['$lt'] : 5 } }
                         }
                     ]);
+                    console.log('newFilter[rating]-------', newFilter['rating'])
                 } catch (error) {
                     console.error("Error during aggregation without date filters:", error);
                     throw new Error("Could not fetch hotels");
@@ -279,7 +285,7 @@ export class HotelAndCarsService {
                 user
             );
 
-            console.log("Hotels found:", hotel);
+
             return hotel;
 
         } catch (err) {

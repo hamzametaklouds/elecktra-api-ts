@@ -42,6 +42,7 @@ const sortArrayToObject = ($orderBy: string): Object => {
   });
   return result;
 };
+
 const queryArrayToObjects = ($filter: string): Object => {
   // Identifying operator: and/or & separating filters into [filters:string] or [filter:string]
   const opr = $filter.includes(' or ') ? ' or ' : $filter.includes(' and ') ? ' and ' : undefined;
@@ -50,25 +51,28 @@ const queryArrayToObjects = ($filter: string): Object => {
   // Creating [filters:Object] or [filter:Object]
   const filterObjects: Object[] = filters.map(filter => {
     const [field, operator, ...valueArray] = filter.split(' ');
-    let value = valueArray.join(' ');
+    let value = valueArray.join(' ').trim();
 
-    // Check if the value is a date string (e.g., '2024-11-11')
-    let parsedValue: string | Date = value;
-    if (Date.parse(value)) {
-      parsedValue = new Date(value);  // Parse to Date object
+    // Check if the value is a valid ISO 8601 date (strict check)
+    let parsedValue: string | number | Date = value;
+    if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}.\d{3}Z)?$/.test(value)) {
+      parsedValue = new Date(value); // Parse to Date object
     }
 
-    // Narrow the type to Date explicitly for valid date strings
+    // Validate the parsed date and retain ISO string only for valid dates
     if (parsedValue instanceof Date && !isNaN(parsedValue.getTime())) {
-      parsedValue = parsedValue.toISOString(); // Convert Date to ISO string
+      parsedValue = parsedValue.toISOString();
+    } else if (!isNaN(Number(value))) {
+      // If it's not a date, treat as a number (e.g., `rating lt 3`)
+      parsedValue = Number(value);
     }
 
     const obj = {};
 
-    // Ensure `trim()` is called only on a string
-    if (typeof parsedValue === 'string' && operator.trim() === 'like') {
+    // Add support for operators like `lt`, `gt`, `like`, `in`, etc.
+    if (operator.trim() === 'like') {
       obj[field] = {
-        $regex: '.*' + parsedValue.trim() + '.*',
+        $regex: '.*' + parsedValue + '.*',
         $options: 'i',
       };
     } else if (operator.trim() === 'in') {
@@ -88,6 +92,7 @@ const queryArrayToObjects = ($filter: string): Object => {
 
   return result;
 };
+
 
 
 
