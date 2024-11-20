@@ -48,6 +48,11 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       default: ''
     },
+    last_name: {
+      type: String,
+      required: false,
+      default: null
+    },
     first_name: {
       type: String,
       required: false,

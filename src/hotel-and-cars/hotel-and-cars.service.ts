@@ -52,25 +52,25 @@ export class HotelAndCarsService {
 
             console.log('$filter-------', $filter);
 
-            let newFilter // Default filter
+            let rating = 5// Default filter
             if ($filter['rating']) {
-                newFilter = {     // Retain other default filters
-                    rating: $filter['rating'], // Add rating filter
-                };
+
+                rating = $filter['rating']['$lt']
                 delete $filter.rating; // Remove rating from the original filter
             }
-            else {
-                newFilter = { is_deleted: { $eq: false } };
-            }
 
-            console.log('$filter-------', $filter);
-            console.log('$newFilter-------', newFilter);
 
             const userWishList = await this.wishListService.getWishlistById(user.userId);
 
             if (start_date && end_date) {
-                const startDate = moment(start_date).utc().startOf('day').toDate();
-                const endDate = moment(end_date).utc().endOf('day').toDate();
+                // Validate and parse start_date and end_date
+                if (!moment(start_date, moment.ISO_8601, true).isValid() ||
+                    !moment(end_date, moment.ISO_8601, true).isValid()) {
+                    throw new BadRequestException("Invalid date format. Please use ISO 8601 format (e.g., 2024-12-04T00:00:00.000Z).");
+                }
+
+                const startDate = moment.utc(start_date).startOf('day').toDate();
+                const endDate = moment.utc(end_date).endOf('day').toDate();
 
                 try {
                     hotel = await this.hotelAndCarsModel.aggregate([
@@ -137,9 +137,7 @@ export class HotelAndCarsService {
                                 rating: { $avg: "$reviews.rating" } // Calculate the average rating
                             }
                         },
-                        {
-                            $match: newFilter
-                        },
+
                         {
                             $project: {
                                 _id: 1,
@@ -159,14 +157,16 @@ export class HotelAndCarsService {
                             }
                         },
                         {
-                            $match: { ratings: { $lte: newFilter['rating']['$lt'] ? newFilter['rating']['$lt'] : 5 } }
+                            $match: { ratings: { $lte: 5 } }
                         }
                     ]);
                 } catch (error) {
                     console.error("Error during aggregation:", error);
                     throw new Error("Could not fetch hotels");
                 }
-            } else {
+            }
+
+            else {
                 try {
                     hotel = await this.hotelAndCarsModel.aggregate([
                         {
@@ -250,10 +250,10 @@ export class HotelAndCarsService {
                             }
                         },
                         {
-                            $match: { ratings: { $lte: newFilter['rating']['$lt'] ? newFilter['rating']['$lt'] : 5 } }
+                            $match: { ratings: { $lte: 5 } }
                         }
                     ]);
-                    console.log('newFilter[rating]-------', newFilter['rating'])
+
                 } catch (error) {
                     console.error("Error during aggregation without date filters:", error);
                     throw new Error("Could not fetch hotels");
