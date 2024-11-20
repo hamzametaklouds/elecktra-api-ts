@@ -186,6 +186,7 @@ export class InvitationsService {
     const invitation = await new this.invitationModel({
       email,
       company_id: company_id ? company_id : null,
+      company_name: company_id ? companyExists?.title : null,
       link_id: generatedLinkId,
       role,
       invitation_status: InvitationStatus.P,

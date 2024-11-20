@@ -144,6 +144,7 @@ export interface IBookings {
     check_in_time?: string;
     check_out_time?: string;
     company_id?: Schema.Types.ObjectId;
+    company_name: string;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -183,6 +184,11 @@ export const BookingSchema = new Schema<IBookings>(
             default: null
         },
         check_out_time: {
+            type: String,
+            required: false,
+            default: null
+        },
+        company_name: {
             type: String,
             required: false,
             default: null

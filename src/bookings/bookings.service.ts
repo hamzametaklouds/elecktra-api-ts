@@ -9,6 +9,8 @@ import { CreatePaymentDto } from './dtos/create-payment';
 import { UsersService } from 'src/users/users.service';
 import { RecordType } from 'src/hotel-and-cars/hotel-and-cars.schema';
 import { UpdateCompanyPaymentDto } from './dtos/update-company-payment';
+import { matchFilters } from 'src/app/mongo.utils';
+import { CompaniesService } from 'src/companies/companies.service';
 
 @Injectable()
 export class BookingsService {
@@ -19,7 +21,8 @@ export class BookingsService {
         @Inject(forwardRef(() => StripeService))
         private stripeService: StripeService,
         private hotelAndCarService: HotelAndCarsService,
-        private userService: UsersService
+        private userService: UsersService,
+        private companiesService: CompaniesService
     ) { }
 
 
@@ -30,12 +33,8 @@ export class BookingsService {
     }
 
     async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user) {
-        const skip: number = (page - 1) * rpp;
-        const totalDocuments: number = await this.bookingModel.countDocuments(filter);
-        const totalPages: number = Math.ceil(totalDocuments / rpp);
-        page = page > totalPages ? totalPages : page;
 
-        console.log('filter-------', filter['$and'])
+        filter = matchFilters(filter);
 
 
         if (user?.company_id) {
@@ -44,14 +43,74 @@ export class BookingsService {
 
         filter['status'] = { $ne: BookingStatus.CR }
 
-        const bandCategorySection = await this.bookingModel
+        const skip: number = (page - 1) * rpp;
+        const totalDocuments: number = await this.bookingModel.countDocuments(filter);
+        const totalPages: number = Math.ceil(totalDocuments / rpp);
+        page = page > totalPages ? totalPages : page;
+
+        console.log('filter-------', filter['$and'])
+        console.log('filter-------', filter)
+
+        const bookings = await this.bookingModel
             .find(filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
             .populate({ path: 'company_id', select: '_id title description icon' })
 
-        return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
+
+
+        // const bookings = await this.bookingModel.aggregate([
+        //     {
+        //         $match: { ...filter }
+        //     },
+        //     // {
+        //     //     $skip: skip
+        //     // },
+        //     // {
+        //     //     $limit: rpp
+        //     // },
+        //     // {
+        //     //     $lookup: {
+        //     //         from: 'companies',
+        //     //         localField: 'company_id',
+        //     //         foreignField: '_id',
+        //     //         as: 'company',
+        //     //         pipeline: [
+        //     //             { $project: { _id: 1, title: 1, description: 1 } } // Select specific fields in fuel type
+        //     //         ]
+        //     //     },
+        //     // },
+        //     // { $unwind: '$company' },
+        //     // {
+        //     //     $project: {
+        //     //         _id: 1,
+        //     //         status: 1,
+        //     //         company_payment: 1,
+        //     //         nights: 1,
+        //     //         sub_total: 1,
+        //     //         reference_number: 1,
+        //     //         check_in_time: 1,
+        //     //         check_out_time: 1,
+        //     //         start_date: 1,
+        //     //         hotel_details: 1,
+        //     //         car_details: 1,
+        //     //         end_date: 1,
+        //     //         type: 1,
+        //     //         created_at: 1,
+        //     //         company_id: '$company',
+        //     //         company_name: 1
+
+
+        //     //     }
+        //     // }
+        // ]);
+
+        console.log('bookings find-------', (await this.bookingModel.find(filter)).length)
+        console.log('bookings length-------', bookings.length)
+
+
+        return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bookings };
 
     }
 
@@ -569,6 +628,8 @@ export class BookingsService {
         sub_total = sub_total + tax
 
 
+        const company = await this.companiesService.getCompanyById(hotelExists.company_id)
+
         let booking = await new this.bookingModel(
             {
                 hotel_or_car,
@@ -576,6 +637,7 @@ export class BookingsService {
                 end_date,
                 type: hotelExists?.type,
                 company_id: hotelExists.company_id,
+                company_name: company?.title,
                 reference_number: reference_number,
                 guests: {
                     adults: adults,

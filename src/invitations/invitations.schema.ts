@@ -17,6 +17,7 @@ export interface IInvitations {
   link_id: string;
   created_by?: Schema.Types.ObjectId;
   company_id?: Schema.Types.ObjectId;
+  company_name?: string;
   invitation_status: string;
   is_used?: boolean;
   is_disabled?: boolean;
@@ -68,6 +69,10 @@ export const InvitationsSchema = new Schema<IInvitations>(
       type: Schema.Types.ObjectId,
       required: false,
       ref: COMPANIES_COLLECTION,
+    },
+    company_name: {
+      type: String,
+      required: false,
     },
     created_by: {
       type: Schema.Types.ObjectId,
