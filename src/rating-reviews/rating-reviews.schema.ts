@@ -56,23 +56,23 @@ export const ReviewAndRatingSchema = new Schema<IReviewAndRatings>(
         },
         name: {
             type: String,
-            required: true,
+            required: false,
             default: null
         },
         image: {
             type: String,
-            required: true,
+            required: false,
             default: null
         },
         user_type: {
             type: String,
-            required: true,
+            required: false,
             enum: UserType,
             default: UserType.U
         },
         designation: {
             type: String,
-            required: true,
+            required: false,
             default: null
         },
         is_disabled: {

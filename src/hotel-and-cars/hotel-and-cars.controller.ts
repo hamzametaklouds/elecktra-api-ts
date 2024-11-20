@@ -89,7 +89,7 @@ export class HotelAndCarsController {
     @Get('car/detail')
     async detailCar(@Query('car_id') hotel_id: string, @Req() req: Request) {
         const hotels = await this.hotelAndCarsService.hotelCarDetail(hotel_id, req.user);
-        return { message: 'Hotels Data fetched successfully', data: hotels };
+        return { message: 'Cars Data fetched successfully', data: hotels };
     }
 
     @ApiBearerAuth(AuthorizationHeader)
