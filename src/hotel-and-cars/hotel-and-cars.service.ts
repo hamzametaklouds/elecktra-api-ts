@@ -60,7 +60,7 @@ export class HotelAndCarsService {
                 delete $filter.rating; // Remove rating from the original filter
             }
             else {
-                newFilter = { is_deleted: false };
+                newFilter = { is_deleted: { $eq: false } };
             }
 
             console.log('$newFilter-------', newFilter);
@@ -77,7 +77,7 @@ export class HotelAndCarsService {
                             $geoNear: {
                                 near: { type: "Point", coordinates: [long, lat] },
                                 distanceField: "dist.calculated",
-                                maxDistance: 50000,
+                                maxDistance: 500000,
                                 spherical: true,
                                 query: {
                                     is_deleted: false,
@@ -129,6 +129,7 @@ export class HotelAndCarsService {
                                 price: { $first: "$price" },
                                 location: { $first: "$location" },
                                 hotel_type: { $first: "$hotel_type" },
+                                is_deleted: { $first: "$is_deleted" },
                                 distance: { $first: "$dist.calculated" },
                                 created_by: { $first: "$created_by" },
                                 total_reviews: { $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] } },
@@ -218,6 +219,7 @@ export class HotelAndCarsService {
                                 price: { $first: "$price" },
                                 location: { $first: "$location" },
                                 hotel_type: { $first: "$hotel_type" },
+                                is_deleted: { $first: "$is_deleted" },
                                 distance: { $first: "$dist.calculated" },
                                 created_by: { $first: "$created_by" },
                                 total_reviews: { $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] } },
