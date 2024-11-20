@@ -54,7 +54,7 @@ export class QueriesController {
     @ApiBody({ type: CreateQueryDto })
     async insert(@Body() body: CreateQueryDto, @Req() req: Request) {
         const createOption = await this.quiriesService.insertOption(body);
-        return { message: RESOURCE_CREATED, data: createOption };
+        return { message: 'Your message have been sent successfully', data: createOption };
     }
 
     @ApiBearerAuth(AuthorizationHeader)
