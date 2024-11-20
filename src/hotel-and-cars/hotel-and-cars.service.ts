@@ -83,8 +83,8 @@ export class HotelAndCarsService {
                                 query: {
                                     is_deleted: false,
                                     ...$filter,
-                                    availability_from: { $lte: endDate },
-                                    availability_till: { $gte: startDate },
+                                    // availability_from: { $lte: endDate },
+                                    // availability_till: { $gte: startDate },
                                     type: RecordType.H
                                 },
                             },
