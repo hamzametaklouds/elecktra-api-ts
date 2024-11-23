@@ -26,7 +26,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN, Role.COMPANY_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN)
     @Get('list')
     @ApiQuery({ type: QueryParamsDTO })
     async getUserList(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
