@@ -195,7 +195,6 @@ export class UpdateHotelAndCarDto {
                 owner_rules: ''
             }],
     })
-    @IsArray()
     @IsOptional()
     car_details: object[];
 
