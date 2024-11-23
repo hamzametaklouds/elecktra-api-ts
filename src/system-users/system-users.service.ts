@@ -29,24 +29,51 @@ export class SystemUsersService {
   }
 
   async getUserData(user: { userId?: ObjectId }) {
-    const userExist = await this.userModel
-      .findOne({ _id: user.userId, is_deleted: false })
+    // Find the user with the provided userId and check if they are not deleted
+    const userExist = await this.userModel.findOne({
+      _id: user.userId,
+      is_deleted: false,
+    });
 
+    if (!userExist) {
+      throw new Error('User does not exist');
+    }
 
-    return await this.userModel
-      .find({ created_by: userExist._id, roles: ['internal_admin'] }, { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 })
+    // Fetch all users created by the `userExist`, excluding specific fields
+    const users = await this.userModel.find(
+      { created_by: userExist._id, roles: ['internal_admin'] },
+      { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 }
+    );
 
+    // Remove the user matching `user.userId` from the result
+    const filteredUsers = users.filter((u) => u._id.toString() !== user.userId?.toString());
+
+    return filteredUsers;
   }
 
   async getUserDataSuper(user: { userId?: ObjectId }) {
-    const userExist = await this.userModel
-      .findOne({ _id: user.userId, is_deleted: false })
+    // Find the user with the provided userId and check if they are not deleted
+    const userExist = await this.userModel.findOne({
+      _id: user.userId,
+      is_deleted: false,
+    });
 
+    if (!userExist) {
+      throw new Error('User does not exist');
+    }
 
-    return await this.userModel
-      .find({ created_by: userExist._id, roles: ['super_admin'] }, { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 })
+    // Fetch all users created by the `userExist`, excluding specific fields
+    const users = await this.userModel.find(
+      { created_by: userExist._id, roles: ['super_admin'] },
+      { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 }
+    );
 
+    // Remove the user matching `user.userId` from the result
+    const filteredUsers = users.filter((u) => u._id.toString() !== user.userId?.toString());
+
+    return filteredUsers;
   }
+
 
   async getUserByPhoneNumber(phone_no: string): Promise<ISystemUsers> {
     return await this.userModel
@@ -176,6 +203,7 @@ export class SystemUsersService {
       is_disabled: false,
       companies: invitation?.company_id ? [invitation?.company_id] : null,
       roles: [invitation?.role],
+      created_by: invitation ? invitation?.created_by : null
 
     }).save();
 
