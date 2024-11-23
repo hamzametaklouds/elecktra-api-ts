@@ -40,7 +40,7 @@ export class UsersController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN)
   @Get('list')
   @ApiQuery({ type: QueryParamsDTO })
   async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
@@ -65,7 +65,7 @@ export class UsersController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN)
   @Get('hosts')
   @ApiQuery({ type: QueryParamsDTO })
   async getHostUserList(@ParamsHandler() pagination: IPaginationQuery) {

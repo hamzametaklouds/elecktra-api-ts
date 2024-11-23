@@ -25,7 +25,7 @@ export class QueriesController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN)
     @Get()
     @ApiQuery({ type: QueryParamsDTO })
     async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
