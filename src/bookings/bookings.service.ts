@@ -41,7 +41,10 @@ export class BookingsService {
             filter['company_id'] = user?.company_id
         }
 
-        filter['status'] = { $ne: BookingStatus.CR }
+        if (!filter['status']) {
+            filter['status'] = { $ne: BookingStatus.CR }
+        }
+
 
         const skip: number = (page - 1) * rpp;
         const totalDocuments: number = await this.bookingModel.countDocuments(filter);
@@ -123,7 +126,10 @@ export class BookingsService {
     async getFilteredUsers($filter: Object, $orderBy, user) {
 
 
-        $filter['status'] = { $ne: BookingStatus.CR }
+
+        if (!$filter['status']) {
+            $filter['status'] = { $ne: BookingStatus.CR }
+        }
 
 
         if (user?.company_id) {
