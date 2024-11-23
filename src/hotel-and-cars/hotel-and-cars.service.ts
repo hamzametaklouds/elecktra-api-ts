@@ -533,7 +533,9 @@ export class HotelAndCarsService {
                             $project: {
                                 _id: 1,
                                 title: 1,
-                                icon: 1
+                                icon: 1,
+                                parent_type: 1,
+                                sub_type: 1
                             }
                         }
                     ]
