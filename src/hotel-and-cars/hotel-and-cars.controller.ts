@@ -27,7 +27,7 @@ export class HotelAndCarsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN, Role.COMPANY_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN)
     @Get()
     @ApiQuery({ type: QueryParamsDTO })
     async getUserList(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
