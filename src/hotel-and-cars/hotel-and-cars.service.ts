@@ -297,11 +297,6 @@ export class HotelAndCarsService {
 
 
     async getPaginatedUsers(rpp: number, page: number, $filter: Object, orderBy, user) {
-        const skip: number = (page - 1) * rpp;
-        const totalDocuments: number = await this.hotelAndCarsModel.countDocuments($filter);
-        const totalPages: number = Math.ceil(totalDocuments / rpp);
-        page = page > totalPages ? totalPages : page;
-
 
         const filter: Record<string, any> = $filter;
 
@@ -314,6 +309,13 @@ export class HotelAndCarsService {
         if (user?.company_id) {
             filter['company_id'] = user?.company_id
         }
+
+        const skip: number = (page - 1) * rpp;
+        const totalDocuments: number = await this.hotelAndCarsModel.countDocuments($filter);
+        const totalPages: number = Math.ceil(totalDocuments / rpp);
+        page = page > totalPages ? totalPages : page;
+
+
 
         const bandCategorySection = await this.hotelAndCarsModel
             .find(filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, type: 1, price: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, check_out_time: 1, company_id: 1, created_at: 1, created_by: 1, is_disabled: 1 })
