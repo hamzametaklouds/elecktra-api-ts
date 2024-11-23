@@ -19,7 +19,7 @@ export class RatingReviewsService {
 
     async getCustomeReviews() {
         return await this.ratingAndReviewsModel
-            .find({ custom_review: true, is_deleted: false }, { custom_review: 0, __v: 0, updatedAt: 0, booking_id: 0, hotel_or_car: 0, created_by: 0, updated_at: 0, updated_by: 0 })
+            .find({ custom_review: true, is_disabled: false, is_deleted: false }, { custom_review: 0, __v: 0, updatedAt: 0, booking_id: 0, hotel_or_car: 0, created_by: 0, updated_at: 0, updated_by: 0 })
     }
 
 
