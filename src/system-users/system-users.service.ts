@@ -41,7 +41,7 @@ export class SystemUsersService {
 
     // Fetch all users created by the `userExist`, excluding specific fields
     const users = await this.userModel.find(
-      { created_by: userExist._id, roles: ['internal_admin'] },
+      { roles: ['internal_admin'] },
       { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 }
     );
 
@@ -64,7 +64,7 @@ export class SystemUsersService {
 
     // Fetch all users created by the `userExist`, excluding specific fields
     const users = await this.userModel.find(
-      { created_by: userExist._id, roles: ['super_admin'] },
+      { roles: ['super_admin'] },
       { created_at: 0, updated_at: 0, password: 0, __v: 0, created_by: 0, updated_by: 0 }
     );
 
