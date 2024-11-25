@@ -396,8 +396,6 @@ export class HotelAndCarsService {
                             spherical: true,
                             query: {
                                 is_deleted: false,
-                                // availability_from: { $lte: endDate },
-                                // availability_till: { $gte: startDate },
                                 type: RecordType.C
                             },
                         },
@@ -422,7 +420,7 @@ export class HotelAndCarsService {
                             as: 'fuel_type',
                         },
                     },
-                    { $unwind: '$fuel_type' },
+                    { $unwind: { path: '$fuel_type', preserveNullAndEmptyArrays: true } }, // Preserve nulls
                     {
                         $lookup: {
                             from: 'options',
@@ -431,7 +429,7 @@ export class HotelAndCarsService {
                             as: 'make',
                         },
                     },
-                    { $unwind: '$make' },
+                    { $unwind: { path: '$make', preserveNullAndEmptyArrays: true } }, // Preserve nulls
                     {
                         $lookup: {
                             from: 'options',
@@ -440,7 +438,7 @@ export class HotelAndCarsService {
                             as: 'transmission',
                         },
                     },
-                    { $unwind: '$transmission' },
+                    { $unwind: { path: '$transmission', preserveNullAndEmptyArrays: true } }, // Preserve nulls
                     {
                         $project: {
                             _id: 1,
@@ -468,6 +466,7 @@ export class HotelAndCarsService {
                         }
                     }
                 ]);
+
             } catch (error) {
                 console.error("Error during aggregation without date filters:", error);
                 throw new Error("Could not fetch cars");
