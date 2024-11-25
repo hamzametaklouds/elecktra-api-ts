@@ -303,7 +303,7 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         is_available: {
             type: Boolean,
             required: false,
-            default: false,
+            default: true,
         },
         is_disabled: {
             type: Boolean,
