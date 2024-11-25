@@ -78,14 +78,12 @@ export class HotelAndCarsService {
                             $geoNear: {
                                 near: { type: "Point", coordinates: [long, lat] },
                                 distanceField: "dist.calculated",
-                                maxDistance: 500000,
+                                maxDistance: 50000, // Correct placement of maxDistance
                                 spherical: true,
                                 query: {
                                     is_deleted: false,
                                     ...$filter,
-                                    // availability_from: { $lte: endDate },
-                                    // availability_till: { $gte: startDate },
-                                    type: RecordType.H
+                                    type: RecordType.H,
                                 },
                             },
                         },
@@ -107,17 +105,17 @@ export class HotelAndCarsService {
                         },
                         {
                             $lookup: {
-                                from: 'rating_reviews',
-                                localField: '_id',
-                                foreignField: 'hotel_or_car',
-                                as: 'reviews'
+                                from: "rating_reviews",
+                                localField: "_id",
+                                foreignField: "hotel_or_car",
+                                as: "reviews",
                             },
                         },
                         {
                             $unwind: {
                                 path: "$reviews",
-                                preserveNullAndEmptyArrays: true
-                            }
+                                preserveNullAndEmptyArrays: true,
+                            },
                         },
                         {
                             $group: {
@@ -133,11 +131,12 @@ export class HotelAndCarsService {
                                 is_deleted: { $first: "$is_deleted" },
                                 distance: { $first: "$dist.calculated" },
                                 created_by: { $first: "$created_by" },
-                                total_reviews: { $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] } },
-                                rating: { $avg: "$reviews.rating" } // Calculate the average rating
-                            }
+                                total_reviews: {
+                                    $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] },
+                                },
+                                rating: { $avg: "$reviews.rating" }, // Calculate the average rating
+                            },
                         },
-
                         {
                             $project: {
                                 _id: 1,
@@ -153,16 +152,17 @@ export class HotelAndCarsService {
                                 hotel_type: 1,
                                 is_in_wishlist: { $literal: false },
                                 distance: 1,
-                                created_by: 1
-                            }
+                                created_by: 1,
+                            },
                         },
                         {
-                            $match: { ratings: { $lte: 5 } }
-                        }
+                            $match: { ratings: { $lte: 5 } },
+                        },
                     ]);
+
                 } catch (error) {
                     console.error("Error during aggregation:", error);
-                    throw new Error("Could not fetch hotels");
+                    throw new BadRequestException("Could not fetch hotels");
                 }
             }
 
@@ -173,12 +173,12 @@ export class HotelAndCarsService {
                             $geoNear: {
                                 near: { type: "Point", coordinates: [long, lat] },
                                 distanceField: "dist.calculated",
-                                maxDistance: 50000,
+                                maxDistance: 50000, // Correct placement of maxDistance
                                 spherical: true,
                                 query: {
                                     is_deleted: false,
                                     ...$filter,
-                                    type: RecordType.H
+                                    type: RecordType.H,
                                 },
                             },
                         },
@@ -200,17 +200,17 @@ export class HotelAndCarsService {
                         },
                         {
                             $lookup: {
-                                from: 'rating_reviews',
-                                localField: '_id',
-                                foreignField: 'hotel_or_car',
-                                as: 'reviews'
+                                from: "rating_reviews",
+                                localField: "_id",
+                                foreignField: "hotel_or_car",
+                                as: "reviews",
                             },
                         },
                         {
                             $unwind: {
                                 path: "$reviews",
-                                preserveNullAndEmptyArrays: true
-                            }
+                                preserveNullAndEmptyArrays: true,
+                            },
                         },
                         {
                             $group: {
@@ -226,11 +226,12 @@ export class HotelAndCarsService {
                                 is_deleted: { $first: "$is_deleted" },
                                 distance: { $first: "$dist.calculated" },
                                 created_by: { $first: "$created_by" },
-                                total_reviews: { $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] } },
-                                rating: { $avg: "$reviews.rating" } // Calculate the average rating
-                            }
+                                total_reviews: {
+                                    $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] },
+                                },
+                                rating: { $avg: "$reviews.rating" }, // Calculate the average rating
+                            },
                         },
-
                         {
                             $project: {
                                 _id: 1,
@@ -246,13 +247,14 @@ export class HotelAndCarsService {
                                 hotel_type: 1,
                                 is_in_wishlist: { $literal: false },
                                 distance: 1,
-                                created_by: 1
-                            }
+                                created_by: 1,
+                            },
                         },
                         {
-                            $match: { ratings: { $lte: 5 } }
-                        }
+                            $match: { ratings: { $lte: 5 } },
+                        },
                     ]);
+
 
                 } catch (error) {
                     console.error("Error during aggregation without date filters:", error);
@@ -290,7 +292,7 @@ export class HotelAndCarsService {
 
         } catch (err) {
             console.error("Error during the plan trip process:", err);
-            throw new BadRequestException(err);
+            throw new BadRequestException(err.message);
         }
     }
 
