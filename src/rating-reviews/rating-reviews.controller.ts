@@ -28,6 +28,13 @@ export class RatingReviewsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard)
+    @Get('admin/custom')
+    async getAdmin() {
+        return await this.ratingReviewsService.getAdminCustomeReviews()
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard)
     @Post()
     @ApiBody({ type: CreateRatingReviewDto })
     async insert(@Body() body: CreateRatingReviewDto, @Req() req: Request) {

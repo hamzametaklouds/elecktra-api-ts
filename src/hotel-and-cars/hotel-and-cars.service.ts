@@ -108,6 +108,7 @@ export class HotelAndCarsService {
                                 from: "rating_reviews",
                                 localField: "_id",
                                 foreignField: "hotel_or_car",
+                                pipeline: [{ $sort: { created_at: -1 } }],
                                 as: "reviews",
                             },
                         },
@@ -203,6 +204,7 @@ export class HotelAndCarsService {
                                 from: "rating_reviews",
                                 localField: "_id",
                                 foreignField: "hotel_or_car",
+                                pipeline: [{ $sort: { created_at: -1 } }],
                                 as: "reviews",
                             },
                         },
@@ -394,8 +396,8 @@ export class HotelAndCarsService {
                             spherical: true,
                             query: {
                                 is_deleted: false,
-                                availability_from: { $lte: endDate },
-                                availability_till: { $gte: startDate },
+                                // availability_from: { $lte: endDate },
+                                // availability_till: { $gte: startDate },
                                 type: RecordType.C
                             },
                         },
@@ -550,6 +552,7 @@ export class HotelAndCarsService {
                     from: 'rating_reviews',
                     localField: '_id',
                     foreignField: 'hotel_or_car',
+                    pipeline: [{ $sort: { created_at: -1 } }],
                     as: 'reviews'
                 },
             },
