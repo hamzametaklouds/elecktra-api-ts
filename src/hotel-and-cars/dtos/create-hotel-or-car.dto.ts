@@ -30,7 +30,6 @@ export class CreateHotelAndCarDto {
     })
     @IsArray()
     @IsString({ each: true })
-    @IsOptional()
     images: string[];
 
     @ApiProperty({
