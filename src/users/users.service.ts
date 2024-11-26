@@ -65,12 +65,14 @@ export class UsersService {
   }
 
   async getPaginatedHostUsers(rpp: number, page: number, filter: Object, orderBy) {
+
+    filter['is_host'] = true
+
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.userModel.countDocuments(filter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
     page = page > totalPages ? totalPages : page;
 
-    filter['is_host'] = true
 
     const bandCategorySection = await this.userModel
       .find(filter, { first_name: 1, last_name: 1, email: 1, country_code: 1, phone_no: 1, host_status: 1, address: 1, is_host: 1, for_car: 1, for_stay: 1 })
