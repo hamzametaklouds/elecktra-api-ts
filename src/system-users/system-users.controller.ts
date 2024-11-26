@@ -53,6 +53,7 @@ export class SystemUsersController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard)
+
   @Get('internal-admins')
   async get(@Req() req: Request) {
     return await this.systemUserService.getUserData(req.user)
