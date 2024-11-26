@@ -71,18 +71,6 @@ export class BookingsController {
     }
 
 
-
-    @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.USER)
-    @Get()
-    async getBookings(@Req() req: Request) {
-        const screens = await this.bookingsService.getBookingsForUser(req.user)
-
-        return screens;
-    }
-
-
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
     @Roles(Role.USER)
@@ -95,7 +83,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN)
+    @Roles(Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
     @Put()
     @ApiBody({ type: UpdateCompanyPaymentDto })
     async updateCompany(@Query('id') id: string, @Body() body: UpdateCompanyPaymentDto, @Req() req: Request) {
