@@ -63,7 +63,7 @@ export class InvitationsController {
    */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN)
   @Post('sent-invitation')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: CreateInvitationDto })
