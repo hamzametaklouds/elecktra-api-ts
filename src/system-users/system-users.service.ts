@@ -160,10 +160,10 @@ export class SystemUsersService {
       throw new ConflictException('Email already exists')
 
     }
-    const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
-    if (ifPhoneExists) {
-      throw new ConflictException('Phone number already exists')
-    }
+    // const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
+    // if (ifPhoneExists) {
+    //   throw new ConflictException('Phone number already exists')
+    // }
 
     let invitation;
 
