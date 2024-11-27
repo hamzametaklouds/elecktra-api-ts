@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { PlanTripDto } from './dtos/book-trip.dto';
 import { Model, ObjectId } from 'mongoose';
 import { HOTEL_AND_CARS_PROVIDER_TOKEN } from './hotel-and-cars.constants';
@@ -11,6 +11,7 @@ import { RecentSearchsService } from 'src/recent-searchs/recent-searchs.service'
 import { CreateIdealCarDto } from './dtos/create-car-ideal.dto';
 import { UpdateIdealCarDto } from './dtos/update-car-ideal.dto';
 import { UpdateHotelAndCarDto } from './dtos/update-hotel-or-car.dto';
+import { PlatformAccessStatus } from 'src/app/global-enums';
 const moment = require('moment');
 
 @Injectable()
@@ -81,6 +82,7 @@ export class HotelAndCarsService {
                                 spherical: true,
                                 query: {
                                     is_deleted: false,
+                                    platform_access_status: PlatformAccessStatus.A,
                                     ...$filter,
                                     type: RecordType.H,
                                 },
@@ -321,7 +323,7 @@ export class HotelAndCarsService {
 
 
         const bandCategorySection = await this.hotelAndCarsModel
-            .find(filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, type: 1, price: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, check_out_time: 1, company_id: 1, created_at: 1, created_by: 1, is_disabled: 1 })
+            .find(filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, type: 1, price: 1, availability_from: 1, platform_access_status: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, check_out_time: 1, company_id: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
@@ -357,7 +359,7 @@ export class HotelAndCarsService {
 
 
         return await this.hotelAndCarsModel
-            .find($filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, company_id: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1 })
+            .find($filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, company_id: 1, platform_access_status: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort($orderBy)
             .populate({ path: 'company_id', select: '_id title description icon' })
             .populate({ path: 'created_by', select: '_id first_name last_name email' })
@@ -395,7 +397,9 @@ export class HotelAndCarsService {
                             spherical: true,
                             query: {
                                 is_deleted: false,
-                                type: RecordType.C
+                                type: RecordType.C,
+                                ...$filter,
+                                platform_access_status: PlatformAccessStatus.A,
                             },
                         },
                     },
@@ -612,7 +616,7 @@ export class HotelAndCarsService {
                     unavailability_calendar: { $first: "$unavailability_calendar" },
                     hotel_details: { $first: "$hotel_details" },
                     location: { $first: "$location" },
-                    hotel_type: { $first: "$hotel_type" },
+                    hotel_type: { $first: "$hotel_type" }, platform_access_status: { $first: "$platform_access_status" },
                     is_in_wishlist: { $first: { $literal: false } },
                     amenities: { $first: "$amenities" },
                     reviews: {
@@ -653,6 +657,7 @@ export class HotelAndCarsService {
                     total_reviews: 1,
                     check_in_time: 1,
                     check_out_time: 1,
+                    platform_access_status: 1,
                     availability_from: 1,
                     availability_till: 1,
                     unavailability_calendar: 1,
@@ -842,6 +847,7 @@ export class HotelAndCarsService {
                     check_in_time: { $first: { $ifNull: ["$check_in_time", null] } },
                     check_out_time: { $first: { $ifNull: ["$check_out_time", null] } },
                     availability_from: { $first: { $ifNull: ["$availability_from", null] } },
+                    platform_access_status: { $first: "$platform_access_status" },
                     availability_till: { $first: { $ifNull: ["$availability_till", null] } },
                     amenities: { $first: "$amenities" },
                     reviews: {
@@ -878,6 +884,7 @@ export class HotelAndCarsService {
                     check_in_time: 1,
                     check_out_time: 1,
                     availability_from: 1,
+                    platform_access_status: 1,
                     availability_till: 1,
                     price: 1,
                     car_details: 1,
@@ -1021,6 +1028,7 @@ export class HotelAndCarsService {
             reviews,
             price,
             car_details,
+            platform_access_status,
             is_deleted,
             is_disabled,
 
@@ -1041,6 +1049,7 @@ export class HotelAndCarsService {
                 is_ideal: true,
                 car_details,
                 is_deleted,
+                platform_access_status,
                 is_disabled,
                 updated_by: user?.userId || null
             },
@@ -1054,7 +1063,7 @@ export class HotelAndCarsService {
 
     }
 
-    async updateOption(id, body: UpdateHotelAndCarDto, user: { userId?: ObjectId }) {
+    async updateOption(id, body: UpdateHotelAndCarDto, user) {
 
 
         const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false });
@@ -1068,8 +1077,13 @@ export class HotelAndCarsService {
             price, total_rooms, rooms_reserved, hotel_type, availability_from, availability_till,
             unavailability_calendar, check_in_time,
             check_out_time,
-            host_or_owner, car_details, hotel_details, is_deleted, is_disabled
+            host_or_owner, car_details, hotel_details, is_deleted, is_disabled, platform_access_status
         } = body;
+
+
+        if (platform_access_status && user?.company_id) {
+            throw new ForbiddenException('Company admin is not allowed to modify the platform access');
+        }
 
         // Validate latitude and longitude
         if (lat < -90 || lat > 90) {
@@ -1091,7 +1105,7 @@ export class HotelAndCarsService {
             { _id: optionExist._id },
             {
                 title, description, images, address, highlights, amenities, unavailability_calendar, hotel_type, car_options, type,
-                lat, long, price, total_rooms, rooms_reserved, check_in_time,
+                lat, long, price, total_rooms, rooms_reserved, check_in_time, platform_access_status,
                 check_out_time,
                 location, // Pass the validated or existing location here
                 availability_from: availability_from ? new Date(availability_from) : null,

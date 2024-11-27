@@ -1,4 +1,4 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { CreateQueryDto } from './dtos/create-queries.dto';
 import { QUERY_PROVIDER_TOKEN } from './queries.constants';
@@ -68,7 +68,7 @@ export class QueriesService {
     }
 
 
-    async updateOption(id, body: UpdateQueryDto, user: { userId?: ObjectId }) {
+    async updateOption(id, body: UpdateQueryDto, user) {
 
         const {
             first_name,
@@ -77,6 +77,7 @@ export class QueriesService {
             email,
             query,
             is_deleted,
+            platform_access_status,
             is_disabled,
             status
         } = body;
@@ -87,6 +88,11 @@ export class QueriesService {
             throw new BadRequestException('Invalid screen id')
         }
 
+
+        if (platform_access_status && user?.company_id) {
+            throw new ForbiddenException('Company admin is not allowed to modify the platform access');
+        }
+
         const screen = await this.queryModel.findByIdAndUpdate({ _id: screenExits._id },
             {
                 first_name,
@@ -94,6 +100,7 @@ export class QueriesService {
                 email,
                 query,
                 is_mobile,
+                platform_access_status,
                 is_deleted,
                 is_disabled,
                 status,

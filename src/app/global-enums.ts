@@ -10,3 +10,11 @@ export enum UserRoles {
   CO = 'Car Owner',
 }
 
+export enum PlatformAccessStatus {
+  P = 'Pending',
+  A = 'Approved',
+  R = 'Rejected',
+  B = 'Blocked',
+}
+
+

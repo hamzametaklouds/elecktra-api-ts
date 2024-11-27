@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { QueryStatus } from '../queries.schema';
+import { PlatformAccessStatus } from 'src/app/global-enums';
 
 export class UpdateQueryDto {
 
@@ -21,6 +22,15 @@ export class UpdateQueryDto {
     @IsString()
     @IsOptional()
     last_name: string;
+
+    @ApiProperty({
+        description: 'platform_access_status string e.g platform_access_status=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsEnum(PlatformAccessStatus)
+    @IsOptional()
+    platform_access_status: string;
 
     @ApiProperty({
         description: 'email string e.g email=xyzabc',

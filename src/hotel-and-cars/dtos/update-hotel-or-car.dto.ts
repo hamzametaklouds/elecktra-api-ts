@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
 import { HotelType, RecordType } from '../hotel-and-cars.schema';
+import { PlatformAccessStatus } from 'src/app/global-enums';
 
 export class UpdateHotelAndCarDto {
 
@@ -152,6 +153,15 @@ export class UpdateHotelAndCarDto {
     @IsEnum(HotelType)
     @IsOptional()
     hotel_type: string;
+
+    @ApiProperty({
+        description: 'platform_access_status string e.g platform_access_status=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsEnum(PlatformAccessStatus)
+    @IsOptional()
+    platform_access_status: string;
 
     @ApiProperty({
         description: 'check_in_time string e.g check_in_time=xyzabc',

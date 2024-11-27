@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { QUERY_COLLECTION } from './queries.constants';
+import { PlatformAccessStatus } from 'src/app/global-enums';
 
 
 export enum QueryStatus {
@@ -17,6 +18,7 @@ export interface IQuery {
     email: string;
     query: string;
     status: string;
+    platform_access_status: string
     is_mobile: boolean;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
@@ -45,6 +47,12 @@ export const QuerySchema = new Schema<IQuery>(
             type: String,
             required: true,
             default: null
+        },
+        platform_access_status: {
+            type: String,
+            required: false,
+            enum: PlatformAccessStatus,
+            default: PlatformAccessStatus.P
         },
         status: {
             type: String,

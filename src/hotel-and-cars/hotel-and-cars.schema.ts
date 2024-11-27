@@ -4,6 +4,7 @@ import { HOTEL_AND_CARS_COLLECTION } from './hotel-and-cars.constants';
 import { OPTIONS_COLLECTION } from 'src/options/options.constants';
 import { ILocation } from 'src/app/interfaces';
 import { COMPANIES_COLLECTION } from 'src/companies/companies.constant';
+import { PlatformAccessStatus } from 'src/app/global-enums';
 
 
 export enum RecordType {
@@ -154,6 +155,7 @@ export interface IHotelAndCars {
     rooms_reserved: number;
     availability_from: Date;
     availability_till: Date;
+    platform_access_status: string
     host_or_owner: Schema.Types.ObjectId
     car_details: ICarDetails
     hotel_details: IHotelDetails
@@ -172,6 +174,12 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             type: String,
             required: false,
             default: null
+        },
+        platform_access_status: {
+            type: String,
+            required: false,
+            enum: PlatformAccessStatus,
+            default: PlatformAccessStatus.P
         },
         description: {
             type: String,

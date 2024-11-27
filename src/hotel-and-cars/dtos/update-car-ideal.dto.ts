@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ObjectId } from 'mongoose';
+import { PlatformAccessStatus } from 'src/app/global-enums';
 
 export class UpdateIdealCarDto {
 
@@ -78,6 +79,15 @@ export class UpdateIdealCarDto {
     })
     @IsOptional()
     car_details: object;
+
+    @ApiProperty({
+        description: 'platform_access_status string e.g platform_access_status=xyzabc',
+        required: true,
+        default: '',
+    })
+    @IsEnum(PlatformAccessStatus)
+    @IsOptional()
+    platform_access_status: string;
 
 
 
