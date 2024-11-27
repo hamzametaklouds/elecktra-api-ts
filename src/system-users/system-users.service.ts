@@ -109,7 +109,8 @@ export class SystemUsersService {
       .sort($orderBy)
       .skip(skip)
       .limit($rpp)
-
+      .populate({ path: 'companies', select: '_id title description icon' })
+      .populate({ path: 'created_by', select: '_id first_name last_name' })
     return { pages: `Page ${$page} of ${totalPages}`, current_page: $page, total_pages: totalPages, total_records: totalDocuments, data: users };
 
   }
@@ -136,6 +137,9 @@ export class SystemUsersService {
         companies: 1, is_disabled: 1, is_deleted: 1
       })
       .sort($orderBy)
+      .populate({ path: 'companies', select: '_id title description icon' })
+      .populate({ path: 'created_by', select: '_id first_name last_name' })
+
 
     return { data: users };
 
