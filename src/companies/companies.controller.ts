@@ -52,10 +52,27 @@ export class CompaniesController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN, Role.SUPER_ADMIN, Role.INTERNAL_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN)
+    @ApiQuery({ type: QueryParamsDTO })
     @Get('admins')
-    async getCompanyAdmins(@Query('company_id') company_id: string) {
-        return await this.companiesService.getCompanyAdminsForCompanyById(company_id)
+    async getCompanyAdmins(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
+        const { $rpp, $page, $filter, $orderBy } = pagination;
+        if ($rpp && $page) {
+            const result = await this.companiesService.getCompanyAdminsForCompanyByIdPaginated($rpp, $page, $filter, $orderBy, req.user);
+            return {
+                status: result ? true : false,
+                statusCode: result ? 200 : 400,
+                message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+                data: result ? result : null
+            }
+        }
+        const result = await this.companiesService.getCompanyAdminsForCompanyById($filter, $orderBy, req.user);
+        return {
+            status: result ? true : false,
+            statusCode: result ? 200 : 400,
+            message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+            data: result ? result : null
+        }
 
     }
 

@@ -80,25 +80,65 @@ export class SystemUsersService {
       .findOne({ phone_no: phone_no, is_deleted: false })
   }
 
-  async getCompanyAdmins(id) {
-    return await this.userModel.aggregate([
-      {
-        $match: { companies: id }
-      },
-      {
-        $project: {
-          _id: 1,
-          first_name: 1,
-          last_name: 1,
-          email: 1,
-          country_code: 1,
-          phone_no: 1,
-          companies: 1, is_disabled: 1, is_deleted: 1
+  async getCompanyAdminsPaginated($rpp, $page, $filter, $orderBy, user) {
 
-        }
-      }
 
-    ])
+    if ($filter['company_id']) {
+      $filter = { companies: $filter['company_id'] }
+    }
+    else {
+      $filter = { is_deleted: false }
+
+    }
+
+    const skip: number = ($page - 1) * $rpp;
+    const totalDocuments: number = await this.userModel.countDocuments($filter);
+    const totalPages: number = Math.ceil(totalDocuments / $rpp);
+    $page = $page > totalPages ? totalPages : $page;
+
+    const users = await this.userModel
+      .find($filter, {
+        _id: 1,
+        first_name: 1,
+        last_name: 1,
+        email: 1,
+        country_code: 1,
+        phone_no: 1,
+        companies: 1, is_disabled: 1, is_deleted: 1
+      })
+      .sort($orderBy)
+      .skip(skip)
+      .limit($rpp)
+
+    return { pages: `Page ${$page} of ${totalPages}`, current_page: $page, total_pages: totalPages, total_records: totalDocuments, data: users };
+
+  }
+
+  async getCompanyAdminsFiltered($filter, $orderBy, user) {
+
+
+    if ($filter['company_id']) {
+      $filter = { companies: $filter['company_id'] }
+    }
+    else {
+      $filter = { is_deleted: false }
+
+    }
+
+    const users = await this.userModel
+      .find($filter, {
+        _id: 1,
+        first_name: 1,
+        last_name: 1,
+        email: 1,
+        country_code: 1,
+        phone_no: 1,
+        companies: 1, is_disabled: 1, is_deleted: 1
+      })
+      .sort($orderBy)
+
+    return { data: users };
+
   }
 
   async getUserById(id: ObjectId): Promise<ISystemUsers> {

@@ -52,19 +52,24 @@ export class CompaniesService {
 
     }
 
-    async getCompanyAdminsForCompanyById(id) {
-
-        const company = await this.companyModel.findOne({ _id: id, is_deleted: false, is_disabled: false })
-
-        if (!company) {
-            throw new BadRequestException('Invalid Id')
-        }
+    async getCompanyAdminsForCompanyByIdPaginated($rpp, $page, $filter, $orderBy, user) {
 
 
-        return await this.systemUserService.getCompanyAdmins(company._id)
+
+        return await this.systemUserService.getCompanyAdminsPaginated($rpp, $page, $filter, $orderBy, user)
 
 
     }
+
+    async getCompanyAdminsForCompanyById($filter, $orderBy, user) {
+
+
+
+        return await this.systemUserService.getCompanyAdminsFiltered($filter, $orderBy, user)
+
+
+    }
+
 
 
     async insertCompany(body: CreateCompanyDto, user: { userId?: ObjectId }) {
