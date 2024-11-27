@@ -18,6 +18,13 @@ export enum BookingStatus {
     R = 'Refunded'
 }
 
+export enum ActualBookingStatus {
+    P = 'Pending',
+    C = 'Completed',
+    IP = 'In Progress',
+    CN = 'Cancelled'
+}
+
 export enum CompanyPaymentStatus {
     P = 'Pending',
     C = 'Completed',
@@ -145,6 +152,10 @@ export interface IBookings {
     check_out_time?: string;
     company_id?: Schema.Types.ObjectId;
     company_name: string;
+    company_payment_paid_on: Date;
+    company_payment_amount: number;
+    company_payment_comment: string;
+    booking_status: string;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -202,6 +213,27 @@ export const BookingSchema = new Schema<IBookings>(
             type: String,
             required: true,
             default: null
+        },
+        company_payment_paid_on: {
+            type: Date,
+            required: false,
+            default: null
+        },
+        company_payment_amount: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        company_payment_comment: {
+            type: String,
+            required: false,
+            default: null
+        },
+        booking_status: {
+            type: String,
+            enum: ActualBookingStatus,
+            required: false,
+            default: ActualBookingStatus.P
         },
 
         sub_total: {

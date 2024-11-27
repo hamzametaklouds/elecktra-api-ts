@@ -11,6 +11,7 @@ import { RecordType } from 'src/hotel-and-cars/hotel-and-cars.schema';
 import { UpdateCompanyPaymentDto } from './dtos/update-company-payment';
 import { matchFilters } from 'src/app/mongo.utils';
 import { CompaniesService } from 'src/companies/companies.service';
+import { CreateCompanyPaymentDto } from './dtos/company-payment.dto';
 
 @Injectable()
 export class BookingsService {
@@ -55,7 +56,7 @@ export class BookingsService {
         console.log('filter-------', filter)
 
         const bookings = await this.bookingModel
-            .find(filter, { _id: 1, status: 1, company_payment: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1 })
+            .find(filter, { _id: 1, status: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
@@ -138,7 +139,7 @@ export class BookingsService {
 
 
         return await this.bookingModel
-            .find($filter, { _id: 1, status: 1, check_in_time: 1, check_out_time: 1, company_payment: 1, nights: 1, sub_total: 1, hotel_details: 1, car_details: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
+            .find($filter, { _id: 1, status: 1, check_in_time: 1, check_out_time: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, hotel_details: 1, car_details: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
             .sort($orderBy)
             .populate({ path: 'company_id', select: '_id title description icon' })
 
@@ -665,6 +666,37 @@ export class BookingsService {
         booking['rating'] = 4.3
 
         return booking
+
+    }
+
+    async insertBookingPayment(booking_id, body: CreateCompanyPaymentDto, user: { userId?: ObjectId }) {
+
+        const bookingExists = await this.bookingModel.findOne({ _id: booking_id })
+
+        if (!bookingExists) {
+            throw new BadRequestException('Invalid booking id')
+        }
+
+        const {
+            company_payment,
+            company_payment_amount,
+            company_payment_comment,
+            booking_status
+        } = body;
+
+        if (company_payment_amount > bookingExists.sub_total) {
+            throw new BadRequestException('Value cannot be greater than the Booking subtotal')
+        }
+
+        const bookingUpdated = await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, {
+            company_payment_paid_on: new Date(),
+            company_payment_amount,
+            company_payment_comment,
+            booking_status,
+            company_payment,
+            updated_by: user.userId
+        })
+        return bookingUpdated
 
     }
 

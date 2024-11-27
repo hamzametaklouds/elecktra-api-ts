@@ -14,6 +14,7 @@ import { IPaginationQuery } from 'src/app/interfaces';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
 import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
 import { UpdateCompanyPaymentDto } from './dtos/update-company-payment';
+import { CreateCompanyPaymentDto } from './dtos/company-payment.dto';
 
 const { RESOURCE_CREATED } = getMessages('boking(s)');
 
@@ -140,6 +141,16 @@ export class BookingsController {
     @ApiBody({ type: CreatePaymentDto })
     async intent(@Body() body: CreatePaymentDto, @Req() req: Request) {
         const createBooking = await this.bookingsService.verifyPayment(body, req.user);
+        return { message: 'Payment Successful', data: createBooking };
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
+    @Post('company-payment')
+    @ApiBody({ type: CreateCompanyPaymentDto })
+    async companyPayment(@Query('booking_id') booking_id: string, @Body() body: CreateCompanyPaymentDto, @Req() req: Request) {
+        const createBooking = await this.bookingsService.insertBookingPayment(booking_id, body, req.user);
         return { message: 'Payment Successful', data: createBooking };
     }
 
