@@ -23,6 +23,30 @@ export class BookingsController {
 
     constructor(private bookingsService: BookingsService) { }
 
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN)
+    @Get('dashboard')
+    getDashboardData() {
+        const data = {
+            common_cards: {
+                total_completed_bookings: 100,
+                total_sales: 100,
+                pending_payment: 100,
+                total_stays_listing: 100,
+                total_cars_listing: 100,
+                in_progress_bookings: 100,
+            },
+            admin_cards: {
+                pending_queries: 100,
+                pending_host_requests: 100,
+                pending_approvals: 100,
+            },
+        };
+
+        return data;
+    }
+
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
