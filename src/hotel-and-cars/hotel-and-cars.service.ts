@@ -47,7 +47,6 @@ export class HotelAndCarsService {
 
             let hotel = [];
 
-            $filter['is_available'] = true;
             $filter = matchFilters($filter);
 
             console.log('$filter-------', $filter);
@@ -322,7 +321,7 @@ export class HotelAndCarsService {
 
 
         const bandCategorySection = await this.hotelAndCarsModel
-            .find(filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, type: 1, price: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, check_out_time: 1, company_id: 1, created_at: 1, created_by: 1, is_disabled: 1, is_available: 1 })
+            .find(filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, type: 1, price: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, check_out_time: 1, company_id: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
@@ -358,7 +357,7 @@ export class HotelAndCarsService {
 
 
         return await this.hotelAndCarsModel
-            .find($filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, company_id: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1, is_available: 1 })
+            .find($filter, { _id: 1, title: 1, description: 1, unavailability_calendar: 1, company_id: 1, availability_from: 1, availability_till: 1, check_in_time: 1, hotel_details: 1, type: 1, price: 1, created_at: 1, created_by: 1, is_disabled: 1 })
             .sort($orderBy)
             .populate({ path: 'company_id', select: '_id title description icon' })
             .populate({ path: 'created_by', select: '_id first_name last_name email' })
@@ -1069,7 +1068,7 @@ export class HotelAndCarsService {
             price, total_rooms, rooms_reserved, hotel_type, availability_from, availability_till,
             unavailability_calendar, check_in_time,
             check_out_time,
-            host_or_owner, is_available, car_details, hotel_details, is_deleted, is_disabled
+            host_or_owner, car_details, hotel_details, is_deleted, is_disabled
         } = body;
 
         // Validate latitude and longitude
@@ -1092,7 +1091,7 @@ export class HotelAndCarsService {
             { _id: optionExist._id },
             {
                 title, description, images, address, highlights, amenities, unavailability_calendar, hotel_type, car_options, type,
-                lat, long, price, total_rooms, is_available, rooms_reserved, check_in_time,
+                lat, long, price, total_rooms, rooms_reserved, check_in_time,
                 check_out_time,
                 location, // Pass the validated or existing location here
                 availability_from: availability_from ? new Date(availability_from) : null,

@@ -157,7 +157,6 @@ export interface IHotelAndCars {
     host_or_owner: Schema.Types.ObjectId
     car_details: ICarDetails
     hotel_details: IHotelDetails
-    is_available?: boolean;
     rating: number;
     reviews: number;
     created_by?: Schema.Types.ObjectId;
@@ -299,11 +298,6 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
             type: HotelDetailsSchema,
             required: false,
             default: null
-        },
-        is_available: {
-            type: Boolean,
-            required: false,
-            default: true,
         },
         is_disabled: {
             type: Boolean,
