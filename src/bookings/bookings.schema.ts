@@ -33,6 +33,8 @@ export enum CompanyPaymentStatus {
 
 export enum ModifyClientBookingStatus {
     R = 'Refunded',
+    C = 'Completed',
+    CN = 'Cancelled',
 }
 
 
