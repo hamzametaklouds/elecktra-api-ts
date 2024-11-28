@@ -2,7 +2,7 @@ import { Injectable, Inject, BadRequestException, forwardRef, UnauthorizedExcept
 import { Model, ObjectId } from 'mongoose';
 import { CreateBookingsDto } from './dtos/create-bookings.dto';
 import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
-import { BookingStatus, BookingType, CompanyPaymentStatus, IBookings, IPayment } from './bookings.schema';
+import { ActualBookingStatus, BookingStatus, BookingType, CompanyPaymentStatus, IBookings, IPayment } from './bookings.schema';
 import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
 import { CreatePaymentDto } from './dtos/create-payment';
@@ -33,31 +33,206 @@ export class BookingsService {
 
     }
 
+    // async getDashBoardDetails(user) {
+
+    //     const data = {
+    //         common_cards: {
+    //             total_completed_bookings: 100,
+    //             total_sales: 100,
+    //             pending_payment: 100,
+    //             total_stays_listing: 100,
+    //             total_earnings: [
+    //                 { month: 'January', value: 450 },
+    //                 { month: 'February', value: 530 },
+    //                 { month: 'March', value: 620 },
+    //                 { month: 'April', value: 480 },
+    //                 { month: 'May', value: 550 },
+    //                 { month: 'June', value: 600 },
+    //                 { month: 'July', value: 650 },
+    //                 { month: 'August', value: 700 },
+    //                 { month: 'September', value: 560 },
+    //                 { month: 'October', value: 600 },
+    //                 { month: 'November', value: 650 },
+    //                 { month: 'December', value: 700 }
+    //             ]
+    //             ,
+    //             total_cars_listing: 100,
+    //             in_progress_bookings: 100,
+    //         },
+    //         admin_cards: {
+    //             pending_queries: 100,
+    //             pending_host_requests: 100,
+    //             pending_approvals: 100,
+    //         },
+    //     };
+
+    //     return data;
+
+    // }
     async getDashBoardDetails(user) {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+
+        const last12Months = Array.from({ length: 12 }, (_, index) => {
+            const month = (currentMonth - index - 1 + 12) % 12;
+            const year = month >= currentMonth ? currentYear - 1 : currentYear;
+            return { month, year };
+        });
+
+        const result = await this.bookingModel.aggregate([
+            {
+                $match: {
+                    //start_date: { $gte: new Date(`${currentYear}-01-01`) },
+                    status: BookingStatus.C,
+                    is_deleted: false
+                }
+            },
+            {
+                $project: {
+                    month: { $month: '$start_date' },
+                    year: { $year: '$start_date' },
+                    sub_total: 1,
+                    earnings: { $toDouble: '$earnings' },  // Convert earnings to a number
+                    type: 1,
+                    booking_status: 1,
+                }
+            },
+            {
+                $group: {
+                    _id: { month: '$month', year: '$year' },
+                    total_sales: { $sum: '$sub_total' },
+                    total_earnings: { $sum: '$earnings' },  // Correctly sum earnings for each month
+                    pending_payments: {
+                        $sum: {
+                            $cond: [{ $eq: ['$booking_status', ActualBookingStatus.P] }, '$sub_total', 0]
+                        }
+                    },
+                    pending_payments_count: {
+                        $sum: {
+                            $cond: [{ $eq: ['$booking_status', ActualBookingStatus.P] }, 1, 0]
+                        }
+                    },
+                    total_stays_listing: {
+                        $sum: {
+                            $cond: [{ $eq: ['$type', BookingType.H] }, 1, 0]
+                        }
+                    },
+                    total_cars_listing: {
+                        $sum: {
+                            $cond: [{ $eq: ['$type', BookingType.C] }, 1, 0]
+                        }
+                    },
+                    in_progress_bookings: {
+                        $sum: {
+                            $cond: [{ $eq: ['$booking_status', ActualBookingStatus.IP] }, 1, 0]
+                        }
+                    },
+                    total_completed_bookings: {
+                        $sum: {
+                            $cond: [{ $eq: ['$booking_status', 'Completed'] }, 1, 0]
+                        }
+                    }
+                }
+            },
+            {
+                $sort: { '_id.year': -1, '_id.month': -1 }
+            },
+            {
+                $project: {
+                    year: '$_id.year',
+                    month: '$_id.month',
+                    total_sales: 1,
+                    total_earnings: 1,
+                    pending_payments: 1,
+                    total_stays_listing: 1,
+                    total_cars_listing: 1,
+                    in_progress_bookings: 1,
+                    total_completed_bookings: 1,
+                    pending_payments_count: 1,
+                    _id: 0
+                }
+            },
+            {
+                $addFields: {
+                    monthName: {
+                        $switch: {
+                            branches: [
+                                { case: { $eq: ['$month', 1] }, then: 'January' },
+                                { case: { $eq: ['$month', 2] }, then: 'February' },
+                                { case: { $eq: ['$month', 3] }, then: 'March' },
+                                { case: { $eq: ['$month', 4] }, then: 'April' },
+                                { case: { $eq: ['$month', 5] }, then: 'May' },
+                                { case: { $eq: ['$month', 6] }, then: 'June' },
+                                { case: { $eq: ['$month', 7] }, then: 'July' },
+                                { case: { $eq: ['$month', 8] }, then: 'August' },
+                                { case: { $eq: ['$month', 9] }, then: 'September' },
+                                { case: { $eq: ['$month', 10] }, then: 'October' },
+                                { case: { $eq: ['$month', 11] }, then: 'November' },
+                                { case: { $eq: ['$month', 12] }, then: 'December' }
+                            ],
+                            default: 'Unknown'
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    monthName: 1,
+                    total_sales: 1,
+                    total_earnings: 1,
+                    pending_payments: 1,
+                    pending_payments_count: 1,
+                    total_sales_no_tax: { $multiply: ['$total_sales', 0.83] },  // Sales without 17% tax
+                    total_earnings_after_tax: { $multiply: [{ $multiply: ['$total_sales', 0.83] }, 0.8] },  // Earnings after 17% and 20% tax
+                    total_stays_listing: 1,
+                    total_cars_listing: 1,
+                    in_progress_bookings: 1,
+                    total_completed_bookings: 1
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    stats: { $push: { month: '$monthName', total_sales: '$total_sales', total_earnings: '$total_earnings', pending_payments: '$pending_payments', pending_payments_count: '$pending_payments_count', total_stays_listing: '$total_stays_listing', total_cars_listing: '$total_cars_listing', in_progress_bookings: '$in_progress_bookings', total_completed_bookings: '$total_completed_bookings' } }
+                }
+            },
+            {
+                $project: {
+                    stats: 1,
+                    _id: 0
+                }
+            }
+        ]);
+
+        const dashboardData = result[0]?.stats || [];
+
+        const totalData = last12Months.map(({ month, year }) => {
+            const monthName = [
+                'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+            ][month - 1];
+            const stats = dashboardData.find((item) => item.month === monthName);
+            return {
+                month: monthName,
+                total_sales: stats ? stats.total_sales : 0.00,
+                total_earnings: stats ? stats.total_earnings : 0.00,
+                pending_payments: stats ? stats.pending_payments : 0.00,
+                total_stays_listing: stats ? stats.total_stays_listing : 0.00,
+                total_cars_listing: stats ? stats.total_cars_listing : 0.00,
+                in_progress_bookings: stats ? stats.in_progress_bookings : 0.00,
+                total_completed_bookings: stats ? stats.total_completed_bookings : 0.00
+            };
+        });
 
         const data = {
             common_cards: {
-                total_completed_bookings: 100,
-                total_sales: 100,
-                pending_payment: 100,
-                total_stays_listing: 100,
-                total_earnings: [
-                    { month: 'January', value: 450 },
-                    { month: 'February', value: 530 },
-                    { month: 'March', value: 620 },
-                    { month: 'April', value: 480 },
-                    { month: 'May', value: 550 },
-                    { month: 'June', value: 600 },
-                    { month: 'July', value: 650 },
-                    { month: 'August', value: 700 },
-                    { month: 'September', value: 560 },
-                    { month: 'October', value: 600 },
-                    { month: 'November', value: 650 },
-                    { month: 'December', value: 700 }
-                ]
-                ,
-                total_cars_listing: 100,
-                in_progress_bookings: 100,
+                total_completed_bookings: totalData.reduce((acc, item) => acc + item.total_completed_bookings, 0), // Dynamically calculate completed bookings
+                total_sales: totalData.reduce((acc, item) => acc + item.total_sales, 0),
+                pending_payment: totalData.reduce((acc, item) => acc + item.pending_payments, 0),
+                total_stays_listing: totalData.reduce((acc, item) => acc + item.total_stays_listing, 0),
+                total_cars_listing: totalData.reduce((acc, item) => acc + item.total_cars_listing, 0),
+                in_progress_bookings: totalData.reduce((acc, item) => acc + item.in_progress_bookings, 0),
+                total_earnings: totalData.reduce((acc, item) => acc + item.total_earnings, 0), // Calculate total earnings
             },
             admin_cards: {
                 pending_queries: 100,
@@ -66,9 +241,18 @@ export class BookingsService {
             },
         };
 
-        return data;
+        // Mapping for the total earnings per month
+        const total_earnings = totalData.map(item => ({
+            month: item.month,
+            value: item.total_earnings
+        }));
 
+        data.common_cards.total_earnings = total_earnings;
+
+        return data;
     }
+
+
 
     async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user) {
 
