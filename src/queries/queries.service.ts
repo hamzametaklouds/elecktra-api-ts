@@ -2,7 +2,7 @@ import { Injectable, Inject, BadRequestException, ForbiddenException } from '@ne
 import { Model, ObjectId } from 'mongoose';
 import { CreateQueryDto } from './dtos/create-queries.dto';
 import { QUERY_PROVIDER_TOKEN } from './queries.constants';
-import { IQuery } from './queries.schema';
+import { IQuery, QueryStatus } from './queries.schema';
 import { UpdateQueryDto } from './dtos/update-queries.dto';
 
 @Injectable()
@@ -39,6 +39,17 @@ export class QueriesService {
         return await this.queryModel
             .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
             .sort($orderBy)
+
+    }
+
+    async getQueryReqs() {
+        const pending_queries = await this.queryModel
+            .countDocuments(
+                {
+                    status: QueryStatus.P
+                }
+            )
+        return pending_queries
 
     }
 

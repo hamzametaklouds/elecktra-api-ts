@@ -7,6 +7,7 @@ import { QueryModel } from './queries.model';
 @Module({
   imports: [DatabaseModule],
   controllers: [QueriesController],
-  providers: [QueriesService, ...QueryModel]
+  providers: [QueriesService, ...QueryModel],
+  exports: [QueriesService]
 })
 export class QueriesModule { }

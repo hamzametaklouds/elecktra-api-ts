@@ -70,86 +70,163 @@ export class BookingsService {
 
     // }
     async getDashBoardDetails(user) {
+        const result = await this.bookingModel.aggregate([
+            // Match completed bookings with specific status
+            {
+                $match: {
+                    is_deleted: false // Ensure we exclude deleted bookings
+                }
+            },
+            {
+                $project: {
+                    sub_total: 1, // Include sub_total in the result
+                    type: 1, // Booking type (Car or Hotel)
+                    status: 1, // Booking status (Pending, Completed, etc.)
+                    booking_status: 1, // Actual booking status (In Progress, Completed, etc.)
+                }
+            },
+            {
+                $group: {
+                    _id: null, // No grouping, just aggregate totals
+                    total_sales: { $sum: '$sub_total' }, // Sum of all sub_totals
+                    pending_payments: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$booking_status', 'Pending'] }, // Check status as 'Pending'
+                                '$sub_total', 0 // If status is 'Pending', add sub_total, else 0
+                            ]
+                        }
+                    },
+                    pending_payments_count: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$booking_status', 'Pending'] }, // Check booking status as 'Pending'
+                                1, 0 // Count if 'Pending', else 0
+                            ]
+                        }
+                    },
+                    total_stays_listing: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$type', 'Hotel'] }, // Check if the type is 'Hotel'
+                                1, 0
+                            ]
+                        }
+                    },
+                    total_cars_listing: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$type', 'Car'] }, // Check if the type is 'Car'
+                                1, 0
+                            ]
+                        }
+                    },
+                    in_progress_bookings: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$booking_status', 'In Progress'] }, // Check if status is 'In Progress'
+                                1, 0
+                            ]
+                        }
+                    },
+                    total_completed_bookings: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$booking_status', 'Completed'] }, // Check if booking status is 'Completed'
+                                1, 0 // Count if 'Completed', else 0
+                            ]
+                        }
+                    },
+                }
+            },
+            {
+                $project: {
+                    total_sales: 1,
+                    pending_payments: 1,
+                    pending_payments_count: 1,
+                    total_stays_listing: 1,
+                    total_cars_listing: 1,
+                    in_progress_bookings: 1,
+                    total_completed_bookings: 1, // Include completed bookings count
+                    _id: 0
+                }
+            }
+        ]);
+
+        const totalData = result[0] || {}; // If no data, default to empty object
+
+        const adCards = await this.userService.getHostAndPendingApprovals()
+
+        const total_earnings = await this.getTotalEarnings(user)
+
+        const data = {
+            common_cards: {
+                total_completed_bookings: totalData.total_completed_bookings || 0,
+                total_sales: totalData.total_sales || 0,
+                pending_payment: totalData.pending_payments || 0,
+                total_stays_listing: totalData.total_stays_listing || 0,
+                total_cars_listing: totalData.total_cars_listing || 0,
+                in_progress_bookings: totalData.in_progress_bookings || 0,
+                pending_payments_count: totalData.pending_payments_count || 0,
+                total_earnings: total_earnings?.common_cards?.total_earnings || 0,
+            },
+            admin_cards: {
+                pending_queries: adCards.pending_queries, // Placeholder for pending queries
+                pending_host_requests: adCards.pending_hosts, // Placeholder for pending host requests
+                pending_approvals: adCards.pending_queries, // Placeholder for pending approvals
+            },
+
+        };
+
+        return data;
+    }
+
+
+
+    async getTotalEarnings(user) {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth() + 1;
+        const currentMonth = currentDate.getMonth() + 1; // Month is 0-indexed in JavaScript Date
 
+        // Generate an array of the last 12 months in reverse order (from last month to current month)
         const last12Months = Array.from({ length: 12 }, (_, index) => {
-            const month = (currentMonth - index - 1 + 12) % 12;
-            const year = month >= currentMonth ? currentYear - 1 : currentYear;
+            const month = (currentMonth - index - 1 + 12) % 12; // Ensure month wraps around correctly
+            const year = month >= currentMonth ? currentYear - 1 : currentYear; // Handle year change
+
             return { month, year };
         });
 
+
+
         const result = await this.bookingModel.aggregate([
+            // Match completed bookings from the last 12 months
             {
                 $match: {
-                    //start_date: { $gte: new Date(`${currentYear}-01-01`) },
                     status: BookingStatus.C,
-                    is_deleted: false
+                    start_date: { $gte: new Date(`${currentYear}-01-01`) }
                 }
             },
             {
                 $project: {
                     month: { $month: '$start_date' },
                     year: { $year: '$start_date' },
-                    sub_total: 1,
-                    earnings: { $toDouble: '$earnings' },  // Convert earnings to a number
-                    type: 1,
-                    booking_status: 1,
+                    sub_total: 1
                 }
             },
             {
                 $group: {
                     _id: { month: '$month', year: '$year' },
-                    total_sales: { $sum: '$sub_total' },
-                    total_earnings: { $sum: '$earnings' },  // Correctly sum earnings for each month
-                    pending_payments: {
-                        $sum: {
-                            $cond: [{ $eq: ['$booking_status', ActualBookingStatus.P] }, '$sub_total', 0]
-                        }
-                    },
-                    pending_payments_count: {
-                        $sum: {
-                            $cond: [{ $eq: ['$booking_status', ActualBookingStatus.P] }, 1, 0]
-                        }
-                    },
-                    total_stays_listing: {
-                        $sum: {
-                            $cond: [{ $eq: ['$type', BookingType.H] }, 1, 0]
-                        }
-                    },
-                    total_cars_listing: {
-                        $sum: {
-                            $cond: [{ $eq: ['$type', BookingType.C] }, 1, 0]
-                        }
-                    },
-                    in_progress_bookings: {
-                        $sum: {
-                            $cond: [{ $eq: ['$booking_status', ActualBookingStatus.IP] }, 1, 0]
-                        }
-                    },
-                    total_completed_bookings: {
-                        $sum: {
-                            $cond: [{ $eq: ['$booking_status', 'Completed'] }, 1, 0]
-                        }
-                    }
+                    total_earnings: { $sum: '$sub_total' }
                 }
             },
             {
-                $sort: { '_id.year': -1, '_id.month': -1 }
+                $sort: { '_id.year': -1, '_id.month': -1 } // Sort by year and month in descending order
             },
             {
                 $project: {
                     year: '$_id.year',
                     month: '$_id.month',
-                    total_sales: 1,
-                    total_earnings: 1,
-                    pending_payments: 1,
-                    total_stays_listing: 1,
-                    total_cars_listing: 1,
-                    in_progress_bookings: 1,
-                    total_completed_bookings: 1,
-                    pending_payments_count: 1,
+                    total_earnings: { $round: ['$total_earnings', 2] }, // Round to two decimal places
                     _id: 0
                 }
             },
@@ -179,75 +256,51 @@ export class BookingsService {
             {
                 $project: {
                     monthName: 1,
-                    total_sales: 1,
-                    total_earnings: 1,
-                    pending_payments: 1,
-                    pending_payments_count: 1,
-                    total_sales_no_tax: { $multiply: ['$total_sales', 0.83] },  // Sales without 17% tax
-                    total_earnings_after_tax: { $multiply: [{ $multiply: ['$total_sales', 0.83] }, 0.8] },  // Earnings after 17% and 20% tax
-                    total_stays_listing: 1,
-                    total_cars_listing: 1,
-                    in_progress_bookings: 1,
-                    total_completed_bookings: 1
+                    total_earnings: 1
                 }
             },
             {
                 $group: {
                     _id: null,
-                    stats: { $push: { month: '$monthName', total_sales: '$total_sales', total_earnings: '$total_earnings', pending_payments: '$pending_payments', pending_payments_count: '$pending_payments_count', total_stays_listing: '$total_stays_listing', total_cars_listing: '$total_cars_listing', in_progress_bookings: '$in_progress_bookings', total_completed_bookings: '$total_completed_bookings' } }
+                    total_earnings: { $push: { month: '$monthName', value: '$total_earnings' } }
                 }
             },
             {
                 $project: {
-                    stats: 1,
+                    total_earnings: 1,
                     _id: 0
                 }
             }
         ]);
 
-        const dashboardData = result[0]?.stats || [];
-
-        const totalData = last12Months.map(({ month, year }) => {
+        // Ensure we have 12 months of data, even if some months have no bookings
+        const totalEarnings = last12Months.map(({ month, year }) => {
             const monthName = [
                 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
             ][month - 1];
-            const stats = dashboardData.find((item) => item.month === monthName);
+            const earnings = result[0]?.total_earnings.find((item) => item.month === monthName);
             return {
                 month: monthName,
-                total_sales: stats ? stats.total_sales : 0.00,
-                total_earnings: stats ? stats.total_earnings : 0.00,
-                pending_payments: stats ? stats.pending_payments : 0.00,
-                total_stays_listing: stats ? stats.total_stays_listing : 0.00,
-                total_cars_listing: stats ? stats.total_cars_listing : 0.00,
-                in_progress_bookings: stats ? stats.in_progress_bookings : 0.00,
-                total_completed_bookings: stats ? stats.total_completed_bookings : 0.00
+                value: earnings ? earnings.value : 0.00 // Ensure zero earnings are shown as 0.00
             };
         });
 
         const data = {
             common_cards: {
-                total_completed_bookings: totalData.reduce((acc, item) => acc + item.total_completed_bookings, 0), // Dynamically calculate completed bookings
-                total_sales: totalData.reduce((acc, item) => acc + item.total_sales, 0),
-                pending_payment: totalData.reduce((acc, item) => acc + item.pending_payments, 0),
-                total_stays_listing: totalData.reduce((acc, item) => acc + item.total_stays_listing, 0),
-                total_cars_listing: totalData.reduce((acc, item) => acc + item.total_cars_listing, 0),
-                in_progress_bookings: totalData.reduce((acc, item) => acc + item.in_progress_bookings, 0),
-                total_earnings: totalData.reduce((acc, item) => acc + item.total_earnings, 0), // Calculate total earnings
+                total_completed_bookings: 100, // Replace with your logic
+                total_sales: 100, // Replace with your logic
+                pending_payment: 100, // Replace with your logic
+                total_stays_listing: 100, // Replace with your logic
+                total_earnings: totalEarnings,
+                total_cars_listing: 100, // Replace with your logic
+                in_progress_bookings: 100, // Replace with your logic
             },
             admin_cards: {
-                pending_queries: 100,
-                pending_host_requests: 100,
-                pending_approvals: 100,
+                pending_queries: 100, // Replace with actual logic
+                pending_host_requests: 100, // Replace with actual logic
+                pending_approvals: 100, // Replace with actual logic
             },
         };
-
-        // Mapping for the total earnings per month
-        const total_earnings = totalData.map(item => ({
-            month: item.month,
-            value: item.total_earnings
-        }));
-
-        data.common_cards.total_earnings = total_earnings;
 
         return data;
     }

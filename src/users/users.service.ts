@@ -2,7 +2,7 @@ import { Injectable, ConflictException, Inject, NotFoundException, BadRequestExc
 import { Model, ObjectId, Types } from 'mongoose';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import getMessages from 'src/app/api-messages';
-import { IUsers } from './users.schema';
+import { HostStatus, IUsers } from './users.schema';
 import { USERS_PROVIDER_TOKEN } from './users.constants';
 import { CreateUserDto } from './dtos/create-users.dto';
 import { UpdateUserDto } from './dtos/update-users.dto';
@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { CreateHostUserDto } from 'src/users/dtos/create-host-user.dto';
 import { UpdateHostDto } from './dtos/update-host.dto';
+import { QueriesService } from 'src/queries/queries.service';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -19,6 +20,7 @@ export class UsersService {
   constructor(
     @Inject(USERS_PROVIDER_TOKEN)
     private userModel: Model<IUsers>,
+    private queriesService: QueriesService,
     private configService: ConfigService,
   ) { }
 
@@ -26,6 +28,17 @@ export class UsersService {
     return await this.userModel
       .findOne({ email: email, is_deleted: false });
   }
+
+  async getHostAndPendingApprovals() {
+    const pending_hosts = await this.userModel
+      .countDocuments({ is_host: true, host_status: HostStatus.P });
+
+    const query = await this.queriesService.getQueryReqs()
+
+    return { pending_hosts: pending_hosts, pending_queries: query }
+
+  }
+
 
   async getUserByUUID(uuid: string): Promise<IUsers> {
     return await this.userModel
