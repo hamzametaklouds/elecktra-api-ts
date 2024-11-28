@@ -33,6 +33,43 @@ export class BookingsService {
 
     }
 
+    async getDashBoardDetails(user) {
+
+        const data = {
+            common_cards: {
+                total_completed_bookings: 100,
+                total_sales: 100,
+                pending_payment: 100,
+                total_stays_listing: 100,
+                total_earnings: [
+                    { month: 'January', value: 450 },
+                    { month: 'February', value: 530 },
+                    { month: 'March', value: 620 },
+                    { month: 'April', value: 480 },
+                    { month: 'May', value: 550 },
+                    { month: 'June', value: 600 },
+                    { month: 'July', value: 650 },
+                    { month: 'August', value: 700 },
+                    { month: 'September', value: 560 },
+                    { month: 'October', value: 600 },
+                    { month: 'November', value: 650 },
+                    { month: 'December', value: 700 }
+                ]
+                ,
+                total_cars_listing: 100,
+                in_progress_bookings: 100,
+            },
+            admin_cards: {
+                pending_queries: 100,
+                pending_host_requests: 100,
+                pending_approvals: 100,
+            },
+        };
+
+        return data;
+
+    }
+
     async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user) {
 
         filter = matchFilters(filter);
@@ -554,7 +591,7 @@ export class BookingsService {
         //     throw new BadRequestException('Booking cannot be checked out as it has already ended');
         // }
 
-        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.CK }, { new: true })
+        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.C, checked_out: true }, { new: true })
 
     }
 

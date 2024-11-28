@@ -156,6 +156,7 @@ export interface IBookings {
     company_payment_amount: number;
     company_payment_comment: string;
     booking_status: string;
+    checked_out?: boolean;
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -263,6 +264,11 @@ export const BookingSchema = new Schema<IBookings>(
             required: false,
             enum: BookingStatus,
             default: BookingStatus.CR,
+        },
+        checked_out: {
+            type: Boolean,
+            required: false,
+            default: false,
         },
         is_disabled: {
             type: Boolean,
