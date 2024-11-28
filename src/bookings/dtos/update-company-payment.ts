@@ -11,7 +11,7 @@ export class UpdateCompanyPaymentDto {
     })
     @IsEnum(CompanyPaymentStatus)
     @IsOptional()
-    company_status: string;
+    company_payment: string;
 
     @ApiProperty({
         description: 'name string e.g name=xyzabc',

@@ -570,7 +570,7 @@ export class BookingsService {
             { _id: bookingExists._id },
             {
                 status: body.client_payment_status,
-                company_payment: body.company_status,
+                company_payment: body.company_payment,
                 updated_by: user.userId,
                 booking_status: body.booking_status,
                 company_payment_amount: body.company_payment_amount,
