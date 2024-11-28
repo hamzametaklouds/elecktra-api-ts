@@ -35,6 +35,21 @@ export class BookingsController {
                 total_sales: 100,
                 pending_payment: 100,
                 total_stays_listing: 100,
+                total_earnings: [
+                    { month: 'January', value: 450 },
+                    { month: 'February', value: 530 },
+                    { month: 'March', value: 620 },
+                    { month: 'April', value: 480 },
+                    { month: 'May', value: 550 },
+                    { month: 'June', value: 600 },
+                    { month: 'July', value: 650 },
+                    { month: 'August', value: 700 },
+                    { month: 'September', value: 560 },
+                    { month: 'October', value: 600 },
+                    { month: 'November', value: 650 },
+                    { month: 'December', value: 700 }
+                ]
+                ,
                 total_cars_listing: 100,
                 in_progress_bookings: 100,
             },
@@ -144,14 +159,14 @@ export class BookingsController {
         return { message: 'Payment Successful', data: createBooking };
     }
 
-    @ApiBearerAuth(AuthorizationHeader)
-    @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
-    @Post('company-payment')
-    @ApiBody({ type: CreateCompanyPaymentDto })
-    async companyPayment(@Query('booking_id') booking_id: string, @Body() body: CreateCompanyPaymentDto, @Req() req: Request) {
-        const createBooking = await this.bookingsService.insertBookingPayment(booking_id, body, req.user);
-        return { message: 'Payment Successful', data: createBooking };
-    }
+    // @ApiBearerAuth(AuthorizationHeader)
+    // @UseGuards(JWTAuthGuard, RolesGuard)
+    // @Roles(Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
+    // @Post('company-payment')
+    // @ApiBody({ type: CreateCompanyPaymentDto })
+    // async companyPayment(@Query('booking_id') booking_id: string, @Body() body: CreateCompanyPaymentDto, @Req() req: Request) {
+    //     const createBooking = await this.bookingsService.insertBookingPayment(booking_id, body, req.user);
+    //     return { message: 'Payment Successful', data: createBooking };
+    // }
 
 }

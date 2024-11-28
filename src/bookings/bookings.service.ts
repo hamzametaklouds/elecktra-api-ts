@@ -56,7 +56,12 @@ export class BookingsService {
         console.log('filter-------', filter)
 
         const bookings = await this.bookingModel
-            .find(filter, { _id: 1, status: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1 })
+            .find(filter, {
+                _id: 1, status: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1, company_payment_paid_on: 1,
+                company_payment_amount: 1,
+                company_payment_comment: 1,
+
+            })
             .sort(orderBy)
             .skip(skip)
             .limit(rpp)
@@ -139,7 +144,11 @@ export class BookingsService {
 
 
         return await this.bookingModel
-            .find($filter, { _id: 1, status: 1, check_in_time: 1, check_out_time: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, hotel_details: 1, car_details: 1, reference_number: 1, start_date: 1, end_date: 1, type: 1, created_at: 1 })
+            .find($filter, {
+                _id: 1, status: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1, company_payment_paid_on: 1,
+                company_payment_amount: 1,
+                company_payment_comment: 1,
+            })
             .sort($orderBy)
             .populate({ path: 'company_id', select: '_id title description icon' })
 
@@ -494,7 +503,7 @@ export class BookingsService {
 
     async updateBooking(body: IPayment, booking_id) {
 
-        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, status: BookingStatus.C })
+        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, company_payment_amount: body?.amount, status: BookingStatus.C })
 
     }
 
@@ -560,9 +569,13 @@ export class BookingsService {
         const updatedBooking = await this.bookingModel.findByIdAndUpdate(
             { _id: bookingExists._id },
             {
-                status: body.booking_status,
+                status: body.client_payment_status,
                 company_payment: body.company_status,
-                updated_by: user.userId
+                updated_by: user.userId,
+                booking_status: body.booking_status,
+                company_payment_amount: body.company_payment_amount,
+                company_payment_comment: body.company_payment_comment,
+                company_payment_paid_on: body.company_payment_paid_on,
             },
             { new: true })
 
