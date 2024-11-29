@@ -1,5 +1,5 @@
 import { Injectable, Inject, BadRequestException, forwardRef, UnauthorizedException } from '@nestjs/common';
-import { Model, ObjectId } from 'mongoose';
+import mongoose, { Model, ObjectId } from 'mongoose';
 import { CreateBookingsDto } from './dtos/create-bookings.dto';
 import { BOOKINGS_PROVIDER_TOKEN } from './bookings.constants';
 import { ActualBookingStatus, BookingStatus, BookingType, CompanyPaymentStatus, IBookings, IPayment } from './bookings.schema';
@@ -70,11 +70,25 @@ export class BookingsService {
 
     // }
     async getDashBoardDetails(user) {
+
+        let companyFilter;
+        if (user?.company_id) {
+            if (mongoose.Types.ObjectId.isValid(user.company_id)) {
+                companyFilter = { company_id: new mongoose.Types.ObjectId(user.company_id) }; // Convert to ObjectId
+            } else {
+                console.error('Invalid company_id format');
+                throw new Error('Invalid company ID provided.');
+            }
+        }
+        else {
+            companyFilter = { is_disabled: false }
+        }
+
         const result = await this.bookingModel.aggregate([
             // Match completed bookings with specific status
             {
                 $match: {
-                    is_deleted: false // Ensure we exclude deleted bookings
+                    is_deleted: false, ...companyFilter // Ensure we exclude deleted bookings
                 }
             },
             {
@@ -157,7 +171,7 @@ export class BookingsService {
 
         const adCards = await this.userService.getHostAndPendingApprovals()
 
-        const total_earnings = await this.getTotalEarnings(user)
+        const total_earnings = await this.getTotalEarnings(user, companyFilter)
 
         const data = {
             common_cards: {
@@ -183,7 +197,7 @@ export class BookingsService {
 
 
 
-    async getTotalEarnings(user) {
+    async getTotalEarnings(user, companyFilter) {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         const currentMonth = currentDate.getMonth() + 1; // Month is 0-indexed in JavaScript Date
@@ -203,6 +217,7 @@ export class BookingsService {
             {
                 $match: {
                     status: BookingStatus.C,
+                    ...companyFilter,
                     start_date: { $gte: new Date(`${currentYear}-01-01`) }
                 }
             },
