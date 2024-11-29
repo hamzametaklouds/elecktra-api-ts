@@ -26,7 +26,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Get('dashboard')
     async getDashboardData(@Req() req: Request) {
         return await this.bookingsService.getDashBoardDetails(req.user)
@@ -35,7 +35,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Get('list')
     @ApiQuery({ type: QueryParamsDTO })
     async getUserList(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
@@ -61,7 +61,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.COMPANY_ADMIN, Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Get('detail')
     async getBookingDetail(@Query('id') id: string, @Req() req: Request) {
         const screens = await this.bookingsService.getBookingDetail(id, req.user)
@@ -92,7 +92,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.INTERNAL_ADMIN, Role.SUPER_ADMIN)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Put()
     @ApiBody({ type: UpdateCompanyPaymentDto })
     async updateCompany(@Query('id') id: string, @Body() body: UpdateCompanyPaymentDto, @Req() req: Request) {
@@ -102,7 +102,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.USER)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Post('cancellation')
     async bookingCancel(@Query('booking_id') booking_id: string, @Req() req: Request) {
         const cancelBooking = await this.bookingsService.cancelBooking(booking_id, req.user);
@@ -111,7 +111,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.USER)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Post('checkout')
     async checkoutBooking(@Query('booking_id') booking_id: string, @Req() req: Request) {
         const cancelBooking = await this.bookingsService.checkoutBooking(booking_id, req.user);
@@ -120,7 +120,7 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.USER)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Post('payment')
     @ApiBody({ type: CreatePaymentDto })
     async intent(@Body() body: CreatePaymentDto, @Req() req: Request) {
