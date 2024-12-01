@@ -14,7 +14,6 @@ import { IPaginationQuery } from 'src/app/interfaces';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
 import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
 import { UpdateCompanyPaymentDto } from './dtos/update-company-payment';
-import { CreateCompanyPaymentDto } from './dtos/company-payment.dto';
 
 const { RESOURCE_CREATED } = getMessages('boking(s)');
 
