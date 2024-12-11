@@ -25,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     console.log(payload)
 
     if (payload.sub === '67272691b1673e7c1353639a') {
-      return { userId: '67272691b1673e7c1353639a', username: 'Guest' };
+      return { userId: '67272691b1673e7c1353639a', username: 'Guest', roles: [Role.USER] };
     }
     const userExists = await this.userService.getUserById(payload.sub);
 

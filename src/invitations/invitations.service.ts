@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CompaniesService } from 'src/companies/companies.service';
 const postmark = require("postmark");
 import * as jwt from 'jsonwebtoken';
+import { SystemUsersService } from 'src/system-users/system-users.service';
 
 
 @Injectable()
@@ -19,7 +20,9 @@ export class InvitationsService {
     @Inject(INVITATIONS_PROVIDER_TOKEN)
     private invitationModel: Model<IInvitations>,
     private configService: ConfigService,
-    private companiesService: CompaniesService
+    private companiesService: CompaniesService,
+    @Inject(forwardRef(() => SystemUsersService))
+    private systemUserService: SystemUsersService
   ) {
     SendGrid.setApiKey(this.configService.get('sendGridEmail.sendGridApiKey'));
   }
@@ -166,6 +169,12 @@ export class InvitationsService {
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
     const { email, company_id, role } = invitationObject;
 
+    const userWithEmail = await this.systemUserService.getUserByEmail(email)
+
+    if (userWithEmail) {
+      throw new BadRequestException('User with this email already exists')
+    }
+
     let companyExists;
     if (company_id) {
       companyExists = await this.companiesService.getCompanyById(company_id);
@@ -211,6 +220,7 @@ export class InvitationsService {
 
     return invitation;
   }
+
   async updateInvitationUser(invitationId) {
     return await this.invitationModel.findByIdAndUpdate({ _id: invitationId }, { invitation_status: InvitationStatus.A, is_used: true })
   }
