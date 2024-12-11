@@ -122,7 +122,7 @@ export class UsersController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.USER, Role.COMPANY_ADMIN)
   @Put('mobile')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: UpdateUserDto })
