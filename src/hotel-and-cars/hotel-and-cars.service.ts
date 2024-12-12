@@ -82,7 +82,7 @@ export class HotelAndCarsService {
                                 spherical: true,
                                 query: {
                                     is_deleted: false,
-                                    is_disable: false,
+                                    is_disabled: false,
                                     platform_access_status: PlatformAccessStatus.A,
                                     ...$filter,
                                     type: RecordType.H,
@@ -398,7 +398,7 @@ export class HotelAndCarsService {
                             spherical: true,
                             query: {
                                 is_deleted: false,
-                                is_disable: false,
+                                is_disabled: false,
                                 type: RecordType.C,
                                 ...$filter,
                                 platform_access_status: PlatformAccessStatus.A,
