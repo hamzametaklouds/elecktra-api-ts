@@ -5,13 +5,6 @@ import { ObjectId } from 'mongoose';
 
 export class CreatePaymentDto {
 
-    @ApiProperty({
-        description: 'payment_method_id string e.g payment_method_id=jknkjn54545jkj',
-        required: true,
-        default: '',
-    })
-    @IsString()
-    payment_method_id: string;
 
     @ApiProperty({
         description: 'start_date string e.g start_date=xyzabc',
@@ -44,14 +37,6 @@ export class CreatePaymentDto {
     })
     @IsString()
     name: string;
-
-    @ApiProperty({
-        description: 'save_payment boolean e.g save_payment=false',
-        required: true,
-        default: false,
-    })
-    @IsBoolean()
-    save_payment: boolean;
 
     @ApiProperty({
         description: 'booking_id string e.g booking_id=jknkjn54545jkj',
