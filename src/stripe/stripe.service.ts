@@ -126,7 +126,7 @@ export class StripeService {
         // }
 
         const updatedBooking = await this.bookingService.updateBooking({
-            customer_id: customer.id,
+            customer_id: 'dummy',
             payment_method_id: 'dummy',
             payment_id: 'dummy',
             amount: bookingExists.sub_total,
