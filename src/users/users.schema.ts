@@ -27,6 +27,7 @@ export interface IUsers {
   country?: string
   street?: string
   suite?: string
+  apple_id: string;
   is_host: boolean;
   for_stay?: boolean;
   for_car?: boolean;
@@ -44,6 +45,11 @@ export interface IUsers {
 export const UsersSchema = new Schema<IUsers>(
   {
     image: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    apple_id: {
       type: String,
       required: false,
       default: ''

@@ -124,13 +124,21 @@ export class UsersService {
 
 
 
-  async createGoogleUser(userObject) {
+  async createGoogleUser(userObject: {
+    first_name?: string,
+    last_name?: string,
+    email?: string,
+    uuid?: string,
+    apple_id?: string,
+    country_code?: string,
+    phone_no?: string,
+  }) {
     const {
-
       first_name,
       last_name,
       email,
       uuid,
+      apple_id,
       country_code,
       phone_no,
     } = userObject;
@@ -156,6 +164,7 @@ export class UsersService {
       last_name,
       email,
       uuid,
+      apple_id,
       country_code,
       phone_no,
     }).save();
@@ -293,6 +302,10 @@ export class UsersService {
 
     return createdUser
 
+  }
+
+  async updateUserAppleId(userId, appleId) {
+    return await this.userModel.findByIdAndUpdate({ _id: userId }, { apple_id: appleId })
   }
 
 

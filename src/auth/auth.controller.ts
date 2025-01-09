@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import { AuthService } from './auth.service';
@@ -7,6 +7,8 @@ import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import { LoginDto } from './dtos/log-in.dto';
 import { AdminLoginDto } from './dtos/admin-log-in.dto';
 import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
+import { AppleLoginDto } from './dtos/apple-log-in';
+
 
 UseFilters(HttpExceptionFilter);
 @Controller('auth')
@@ -27,6 +29,16 @@ export class AuthController {
     async login(@Body() body: LoginDto) {
         const createAuth = await this.authService.validateUser(body.uuid);
         return createAuth;
+    }
+
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    @ApiBody({ type: AppleLoginDto })
+    @Post('apple-login')
+    async loginWithApple(@Body() body: AppleLoginDto) {
+
+
+        const customToken = await this.authService.verifyAndAuthenticate(body.id_token);
+        return customToken
     }
 
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))

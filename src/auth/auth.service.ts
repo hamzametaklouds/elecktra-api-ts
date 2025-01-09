@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpUserDto } from './dtos/sign-up.dto';
@@ -7,7 +7,8 @@ import admin from "firebase-admin"
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import * as bcrypt from 'bcrypt'
 import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
-
+import { verifyIdToken } from 'apple-signin-auth';
+import * as appleSigninAuth from 'apple-signin-auth';
 
 
 
@@ -17,7 +18,8 @@ export class AuthService {
     private usersService: UsersService,
     private systemUsersService: SystemUsersService,
     private jwtService: JwtService,
-  ) { }
+  ) {   // Initialize Firebase Admin SDK
+  }
 
   async validateUser(uuid: string): Promise<any> {
     const user = await this.usersService.getUserByUUID(uuid);
@@ -36,6 +38,80 @@ export class AuthService {
     };
 
   }
+
+  async verifyAndAuthenticate(idToken: string) {
+    try {
+      // Step 1: Verify the Apple ID token
+      const applePayload = await appleSigninAuth.verifyIdToken(idToken, {
+        audience: 'com.apps.voyageviteapp', // Replace with your Apple app's bundle ID
+      });
+
+      const { sub: appleUserId, email } = applePayload;
+
+      if (!appleUserId) {
+        throw new UnauthorizedException('Invalid Apple ID token');
+      }
+
+      // Step 2: Check if user exists in Firebase
+      let firebaseUser;
+      try {
+
+        const userExists = await this.usersService.getUserByEmail(email)
+
+        if (userExists) {
+          const user = await this.usersService.updateUserAppleId(userExists._id, appleUserId)
+
+          return {
+            access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successful', user: userExists
+          };
+
+        }
+        firebaseUser = await admin.auth().getUserByEmail(email);
+
+
+        const fullName = firebaseUser?.displayName.split(" ")
+        const firstName = fullName[0] || '-'
+        const lastName = fullName[1] || '-'
+        const em = firebaseUser?.email || '-'
+        const uid = firebaseUser?.uuid || '-'
+
+
+        const createdUser = await this.usersService.createGoogleUser({
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          uuid: uid,
+          apple_id: appleUserId,
+          country_code: '-',
+          phone_no: '-'
+        })
+
+        return {
+          access_token: this.jwtService.sign({ userName: createdUser.first_name, sub: createdUser._id }), message: 'Login Successful', user: userExists
+        };
+      } catch (error) {
+        if (error.code === 'auth/user-not-found') {
+          // Create a new Firebase user if not found
+          firebaseUser = await admin.auth().createUser({
+            uid: appleUserId,
+            email,
+            emailVerified: true,
+          });
+        } else {
+          throw error;
+        }
+      }
+
+      // Step 3: Generate a Firebase custom token for the user
+      const customToken = await admin.auth().createCustomToken(firebaseUser.uid);
+
+      return customToken;
+    } catch (error) {
+      console.error('Error in Apple login:', error);
+      throw new UnauthorizedException('Authentication failed');
+    }
+  }
+
 
   async validateGuestUser() {
 
