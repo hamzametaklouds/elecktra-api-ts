@@ -46,6 +46,8 @@ export class AuthService {
         audience: 'com.apps.voyageviteapp', // Replace with your Apple app's bundle ID
       });
 
+      console.log(applePayload)
+
       const { sub: appleUserId, email } = applePayload;
 
       if (!appleUserId) {
@@ -66,6 +68,7 @@ export class AuthService {
           };
 
         }
+
         firebaseUser = await admin.auth().getUserByEmail(email);
 
 
@@ -207,21 +210,23 @@ export class AuthService {
       throw new BadRequestException('Invalid token')
     }
 
-    let userExists = await this.usersService.getUserByEmail(userRecordFirebase.email)
+    let userExists = await this.usersService.getUserByEmail(userRecordFirebase?.email)
 
     if (!userExists) {
 
-      const fullName = userRecordFirebase.displayName.split(" ")
-      const firstName = fullName[0]
-      const lastName = fullName[1]
+      console.log('userRecordFirebase----', userRecordFirebase)
+
+      const fullName = userRecordFirebase?.displayName?.split(" ") || null
+      const firstName = fullName[0] || null
+      const lastName = fullName[1] || null
 
       userExists = await this.usersService.createGoogleUser({
         first_name: firstName,
         last_name: lastName,
-        email: userRecordFirebase.email,
-        uuid: userRecordFirebase.uid,
+        email: userRecordFirebase?.email || null,
+        uuid: userRecordFirebase?.uid || null,
         country_code: null,
-        phone_no: userRecordFirebase.phoneNumber ? userRecordFirebase.phoneNumber : null
+        phone_no: userRecordFirebase?.phoneNumber ? userRecordFirebase?.phoneNumber : null
       })
 
     }
