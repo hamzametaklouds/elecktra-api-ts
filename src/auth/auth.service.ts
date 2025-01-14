@@ -202,42 +202,51 @@ export class AuthService {
 
   async googleLoginUser(body: GoogleLoginDto): Promise<any> {
 
-    const decodedToken = await admin.auth().verifyIdToken(body.access_token)
+    try {
 
-    const userRecordFirebase = await admin.auth().getUser(decodedToken.uid)
+      const decodedToken = await admin.auth().verifyIdToken(body.access_token)
 
-    if (!userRecordFirebase) {
-      throw new BadRequestException('Invalid token')
+      const userRecordFirebase = await admin.auth().getUser(decodedToken.uid)
+
+      if (!userRecordFirebase) {
+        throw new BadRequestException('Invalid token')
+      }
+
+      let userExists = await this.usersService.getUserByEmail(userRecordFirebase?.email)
+
+      if (!userExists) {
+
+        console.log('userRecordFirebase----', userRecordFirebase)
+
+        const fullName = userRecordFirebase?.displayName?.split(" ") || null
+        const firstName = fullName[0] || null
+        const lastName = fullName[1] || null
+
+        userExists = await this.usersService.createGoogleUser({
+          first_name: firstName || ' ',
+          last_name: lastName || ' ',
+          email: userRecordFirebase?.email || ' ',
+          uuid: userRecordFirebase?.uid || ' ',
+          country_code: null,
+          phone_no: userRecordFirebase?.phoneNumber ? userRecordFirebase?.phoneNumber : null
+        })
+
+      }
+
+      if (userExists.is_disabled) {
+        throw new ForbiddenException('We are sorry, but your account has been temporarily blocked. Please contact our customer support team for further assistance')
+      }
+
+      return {
+        access_token: this.jwtService.sign({ userName: userExists.first_name, sub: userExists._id }), message: 'Login Successful', user: userExists
+      };
+
     }
+    catch (err) {
+      console.error(err)
 
-    let userExists = await this.usersService.getUserByEmail(userRecordFirebase?.email)
-
-    if (!userExists) {
-
-      console.log('userRecordFirebase----', userRecordFirebase)
-
-      const fullName = userRecordFirebase?.displayName?.split(" ") || null
-      const firstName = fullName[0] || null
-      const lastName = fullName[1] || null
-
-      userExists = await this.usersService.createGoogleUser({
-        first_name: firstName,
-        last_name: lastName,
-        email: userRecordFirebase?.email || null,
-        uuid: userRecordFirebase?.uid || null,
-        country_code: null,
-        phone_no: userRecordFirebase?.phoneNumber ? userRecordFirebase?.phoneNumber : null
-      })
-
+      throw new BadRequestException('Something went wrong with sign in ')
     }
-
-    if (userExists.is_disabled) {
-      throw new ForbiddenException('We are sorry, but your account has been temporarily blocked. Please contact our customer support team for further assistance')
-    }
-
-    return {
-      access_token: this.jwtService.sign({ userName: userExists.first_name, sub: userExists._id }), message: 'Login Successful', user: userExists
-    };
 
   }
 
