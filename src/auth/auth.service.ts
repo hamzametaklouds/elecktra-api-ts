@@ -218,9 +218,9 @@ export class AuthService {
 
         console.log('userRecordFirebase----', userRecordFirebase)
 
-        const fullName = userRecordFirebase?.displayName?.split(" ") || null
-        const firstName = fullName[0] || null
-        const lastName = fullName[1] || null
+        const fullName = userRecordFirebase?.displayName ? userRecordFirebase?.displayName : null
+        const firstName = userRecordFirebase?.displayName
+        const lastName = userRecordFirebase?.displayName
 
         userExists = await this.usersService.createGoogleUser({
           first_name: firstName || ' ',
