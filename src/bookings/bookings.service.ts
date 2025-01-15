@@ -903,20 +903,20 @@ export class BookingsService {
             throw new BadRequestException('There should be at least 1 adult');
         }
 
-        // Check if availability_from has been reached
-        const today = new Date();
-        if (hotelExists.availability_from && new Date(hotelExists.availability_from) > today) {
-            throw new BadRequestException(
-                `Booking is not allowed before ${hotelExists.availability_from}`
-            );
-        }
+        // // Check if availability_from has been reached
+        // const today = new Date();
+        // if (hotelExists.availability_from && new Date(hotelExists.availability_from) > today) {
+        //     throw new BadRequestException(
+        //         `Booking is not allowed before ${hotelExists.availability_from}`
+        //     );
+        // }
 
-        // Check if availability_till has passed
-        if (hotelExists.availability_till && new Date(hotelExists.availability_till) < today) {
-            throw new BadRequestException(
-                `Booking is not allowed after ${hotelExists.availability_till}`
-            );
-        }
+        // // Check if availability_till has passed
+        // if (hotelExists.availability_till && new Date(hotelExists.availability_till) < today) {
+        //     throw new BadRequestException(
+        //         `Booking is not allowed after ${hotelExists.availability_till}`
+        //     );
+        // }
 
         const reference_number = Array.from(
             { length: 15 },
