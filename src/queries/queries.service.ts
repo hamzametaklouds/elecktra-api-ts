@@ -46,9 +46,11 @@ export class QueriesService {
         const pending_queries = await this.queryModel
             .countDocuments(
                 {
-                    status: QueryStatus.P
+                    status: QueryStatus.P,
+                    is_deleted: false
                 }
             )
+        console.log(pending_queries)
         return pending_queries
 
     }

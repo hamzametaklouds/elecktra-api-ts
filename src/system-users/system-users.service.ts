@@ -91,6 +91,8 @@ export class SystemUsersService {
 
     }
 
+    $filter['roles'] = ['company_admin']
+
     const skip: number = ($page - 1) * $rpp;
     const totalDocuments: number = await this.userModel.countDocuments($filter);
     const totalPages: number = Math.ceil(totalDocuments / $rpp);
@@ -123,8 +125,9 @@ export class SystemUsersService {
     }
     else {
       $filter = { is_deleted: false }
-
     }
+
+    $filter['roles'] = ['company_admin']
 
     const users = await this.userModel
       .find($filter, {

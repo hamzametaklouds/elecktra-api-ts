@@ -316,6 +316,8 @@ export class HotelAndCarsService {
             filter['company_id'] = user?.company_id
         }
 
+        filter['is_ideal'] = false
+
         const skip: number = (page - 1) * rpp;
         const totalDocuments: number = await this.hotelAndCarsModel.countDocuments($filter);
         const totalPages: number = Math.ceil(totalDocuments / rpp);
@@ -357,6 +359,8 @@ export class HotelAndCarsService {
         if (user?.company_id) {
             $filter['company_id'] = user?.company_id
         }
+
+        filter['is_ideal'] = false
 
 
         return await this.hotelAndCarsModel
