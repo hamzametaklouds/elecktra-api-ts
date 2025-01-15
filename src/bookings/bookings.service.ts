@@ -119,22 +119,22 @@ export class BookingsService {
                             ]
                         }
                     },
-                    total_stays_listing: {
-                        $sum: {
-                            $cond: [
-                                { $eq: ['$type', 'Hotel'] }, // Check if the type is 'Hotel'
-                                1, 0
-                            ]
-                        }
-                    },
-                    total_cars_listing: {
-                        $sum: {
-                            $cond: [
-                                { $eq: ['$type', 'Car'] }, // Check if the type is 'Car'
-                                1, 0
-                            ]
-                        }
-                    },
+                    // total_stays_listing: {
+                    //     $sum: {
+                    //         $cond: [
+                    //             { $eq: ['$type', 'Hotel'] }, // Check if the type is 'Hotel'
+                    //             1, 0
+                    //         ]
+                    //     }
+                    // },
+                    // total_cars_listing: {
+                    //     $sum: {
+                    //         $cond: [
+                    //             { $eq: ['$type', 'Car'] }, // Check if the type is 'Car'
+                    //             1, 0
+                    //         ]
+                    //     }
+                    // },
                     in_progress_bookings: {
                         $sum: {
                             $cond: [
@@ -158,14 +158,18 @@ export class BookingsService {
                     total_sales: 1,
                     pending_payments: 1,
                     pending_payments_count: 1,
-                    total_stays_listing: 1,
-                    total_cars_listing: 1,
+                    // total_stays_listing: 1,
+                    // total_cars_listing: 1,
                     in_progress_bookings: 1,
                     total_completed_bookings: 1, // Include completed bookings count
                     _id: 0
                 }
             }
         ]);
+
+        const total_stays_listing = await this.hotelAndCarService.getHotelsCount(user?.company_id || null)
+
+        const total_cars_listing = await this.hotelAndCarService.getCarsCount(user?.company_id || null)
 
         const totalData = result[0] || {}; // If no data, default to empty object
 
@@ -178,8 +182,8 @@ export class BookingsService {
                 total_completed_bookings: totalData.total_completed_bookings || 0,
                 total_sales: totalData.total_sales || 0,
                 pending_payment: totalData.pending_payments || 0,
-                total_stays_listing: totalData.total_stays_listing || 0,
-                total_cars_listing: totalData.total_cars_listing || 0,
+                total_stays_listing: total_stays_listing || 0,
+                total_cars_listing: total_cars_listing || 0,
                 in_progress_bookings: totalData.in_progress_bookings || 0,
                 pending_payments_count: totalData.pending_payments_count || 0,
                 total_earnings: total_earnings?.common_cards?.total_earnings || 0,

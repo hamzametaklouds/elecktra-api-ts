@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Inject, Injectable, forwardRef
 import { PlanTripDto } from './dtos/book-trip.dto';
 import { Model, ObjectId } from 'mongoose';
 import { HOTEL_AND_CARS_PROVIDER_TOKEN } from './hotel-and-cars.constants';
-import { IHotelAndCars, RecordType } from './hotel-and-cars.schema';
+import { HotelType, IHotelAndCars, RecordType } from './hotel-and-cars.schema';
 import { CreateHotelAndCarDto } from './dtos/create-hotel-or-car.dto';
 import { matchFilters } from 'src/app/mongo.utils';
 import { WhishlistService } from 'src/whishlist/whishlist.service';
@@ -29,6 +29,30 @@ export class HotelAndCarsService {
     async getHotelOrCarById(id) {
 
         return await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false })
+
+    }
+
+    async getHotelsCount(company_id) {
+
+        let filter = { type: RecordType.H, is_ideal: false, is_deleted: false }
+
+        if (company_id) {
+            filter['company_id'] = company_id
+        }
+
+        return await this.hotelAndCarsModel.countDocuments(filter)
+
+    }
+
+    async getCarsCount(company_id) {
+
+        let filter = { type: RecordType.C, is_ideal: false, is_deleted: false }
+
+        if (company_id) {
+            filter['company_id'] = company_id
+        }
+
+        return await this.hotelAndCarsModel.countDocuments(filter)
 
     }
 
