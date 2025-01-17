@@ -197,10 +197,13 @@ export class UsersService {
     if (ifEmailExists) {
       throw new ConflictException('Email already exists')
     }
-    const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
-    if (ifPhoneExists) {
-      throw new ConflictException('Phone number already exists')
+    if (phone_no) {
+      const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
+      if (ifPhoneExists) {
+        throw new ConflictException('Phone number already exists')
+      }
     }
+
 
     const ifUuidExists = await this.userModel.findOne({ uuid: uuid });
     if (ifUuidExists) {
@@ -216,8 +219,8 @@ export class UsersService {
       email,
       dob,
       uuid,
-      country_code,
-      phone_no,
+      country_code: country_code ? country_code : null,
+      phone_no: phone_no ? phone_no : null,
     }).save();
 
 

@@ -51,6 +51,7 @@ export class CreateUserDto {
     default: '',
   })
   @IsString()
+  @IsOptional()
   dob: string;
 
   @ApiProperty({
@@ -59,6 +60,7 @@ export class CreateUserDto {
     default: '',
   })
   @IsString()
+  @IsOptional()
   country_code: string;
 
   @ApiProperty({
@@ -67,6 +69,7 @@ export class CreateUserDto {
     default: '',
   })
   @IsString()
+  @IsOptional()
   phone_no: string;
 
 
