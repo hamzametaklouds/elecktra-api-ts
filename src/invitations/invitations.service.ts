@@ -241,7 +241,7 @@ export class InvitationsService {
     const resetLinkId = uuidv4();
 
     // Generate a JWT token with the `reset_link_id`
-    const token = jwt.sign({ link_id: resetLinkId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ link_id: resetLinkId }, process.env.JWT_SECRET, { expiresIn: '4d' });
 
     console.log('token-----', token)
 
