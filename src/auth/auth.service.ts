@@ -11,6 +11,7 @@ import { verifyIdToken } from 'apple-signin-auth';
 import * as appleSigninAuth from 'apple-signin-auth';
 import { InvitationsService } from 'src/invitations/invitations.service';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password';
 
 
 
@@ -130,6 +131,23 @@ export class AuthService {
 
   async forgetPassword(body: ForgotPasswordDto) {
     return await this.invitationsService.sendForgotPasswordEmail(body.email)
+  }
+
+  async resetPassword(body: ResetPasswordDto) {
+
+    const user = await this.systemUsersService.getUserByEmail(body.email)
+
+    if (!user) {
+      throw new BadRequestException('Invalid email')
+    }
+
+    const invitation = await this.invitationsService.getinvitationByLinkId(body.link_id)
+
+    if (!invitation) {
+      throw new BadRequestException('Invalid link id')
+    }
+
+    return await this.systemUsersService.updateUserPassword(user._id, body.password)
   }
 
   async validateSystemUser(email: string, pass: string): Promise<any> {

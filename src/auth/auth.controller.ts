@@ -9,6 +9,7 @@ import { AdminLoginDto } from './dtos/admin-log-in.dto';
 import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
 import { AppleLoginDto } from './dtos/apple-log-in';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password';
 
 
 UseFilters(HttpExceptionFilter);
@@ -90,6 +91,15 @@ export class AuthController {
     @ApiBody({ type: ForgotPasswordDto })
     @Post('forgot-password')
     async forgotPassword(@Body() body: ForgotPasswordDto) {
+        const createAuth = await this.authService.forgetPassword(body);
+        return { message: 'User joined successfully', data: createAuth };
+    }
+
+
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    @ApiBody({ type: ResetPasswordDto })
+    @Post('reset-password')
+    async resetPassword(@Body() body: ResetPasswordDto) {
         const createAuth = await this.authService.forgetPassword(body);
         return { message: 'User joined successfully', data: createAuth };
     }

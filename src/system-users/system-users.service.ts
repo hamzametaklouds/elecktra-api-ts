@@ -269,6 +269,13 @@ export class SystemUsersService {
 
   }
 
+  async updateUserPassword(id, password) {
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    return await this.userModel.findByIdAndUpdate({ _id: id }, { password: hashPassword })
+  }
+
   async updateUser(id, userObject: DeleteSystemUserDto, user: { userId?: ObjectId }) {
     const {
       email,

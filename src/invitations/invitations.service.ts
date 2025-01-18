@@ -33,6 +33,13 @@ export class InvitationsService {
   }
 
 
+  async getinvitationByLinkId(id): Promise<IInvitations> {
+    return await this.invitationModel
+      .findOne({ link_id: id, invitation_status: { $ne: InvitationStatus.A }, is_deleted: false });
+  }
+
+
+
   async validateInvitationLink(token: string) {
     try {
       // Decode the token to get the `link_id`
