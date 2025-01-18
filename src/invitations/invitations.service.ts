@@ -225,6 +225,7 @@ export class InvitationsService {
   async sendForgotPasswordEmail(email: string) {
     // Check if the user exists
     const user = await this.systemUserService.getUserByEmail(email);
+    console.log('user-----', user)
     if (!user) {
       return { message: 'Password reset email sent successfully' };
     }
@@ -264,7 +265,9 @@ export class InvitationsService {
   `;
 
     // Send the email
-    await this.sendEmail(email, emailSubject, emailMessage);
+    const x = await this.sendEmail(email, emailSubject, emailMessage);
+
+    console.log('x-----', x)
 
     return { message: 'Password reset email sent successfully' };
   }

@@ -39,7 +39,8 @@ export const InvitationsSchema = new Schema<IInvitations>(
     role: {
       type: String,
       required: false,
-      enum: Role
+      default: null
+
     },
     link_id: {
       type: String,
