@@ -9,6 +9,8 @@ import * as bcrypt from 'bcrypt'
 import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
 import { verifyIdToken } from 'apple-signin-auth';
 import * as appleSigninAuth from 'apple-signin-auth';
+import { InvitationsService } from 'src/invitations/invitations.service';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 
 
 
@@ -18,6 +20,7 @@ export class AuthService {
     private usersService: UsersService,
     private systemUsersService: SystemUsersService,
     private jwtService: JwtService,
+    private invitationsService: InvitationsService
   ) {   // Initialize Firebase Admin SDK
   }
 
@@ -123,6 +126,10 @@ export class AuthService {
       access_token: this.jwtService.sign({ userName: 'Guest', sub: '67272691b1673e7c1353639a' }), message: 'Login Successful', user: { _id: '66d065e1guest0339427e4f8', first_name: 'Guest User' }
     };
 
+  }
+
+  async forgetPassword(body: ForgotPasswordDto) {
+    return await this.invitationsService.sendForgotPasswordEmail(body.email)
   }
 
   async validateSystemUser(email: string, pass: string): Promise<any> {

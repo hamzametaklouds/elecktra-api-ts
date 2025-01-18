@@ -32,6 +32,7 @@ export class InvitationsService {
       .findOne({ _id: id, is_deleted: false });
   }
 
+
   async validateInvitationLink(token: string) {
     try {
       // Decode the token to get the `link_id`
@@ -220,6 +221,54 @@ export class InvitationsService {
 
     return invitation;
   }
+
+  async sendForgotPasswordEmail(email: string) {
+    // Check if the user exists
+    const user = await this.systemUserService.getUserByEmail(email);
+    if (!user) {
+      return { message: 'Password reset email sent successfully' };
+    }
+
+    // Generate unique reset link ID
+    const resetLinkId = uuidv4();
+
+    // Generate a JWT token with the `reset_link_id`
+    const token = jwt.sign({ reset_link_id: resetLinkId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Generate the reset password link
+    const resetPasswordLink = `https://portal.voyagevite.com/reset-password/${token}`;
+
+    const invitation = await new this.invitationModel({
+      email,
+      company_id: null,
+      company_name: null,
+      link_id: resetLinkId,
+      role: null,
+      invitation_status: InvitationStatus.P,
+      is_forget_password: true,
+      created_by: null,
+    }).save();
+
+    // Define a template for the forgot password email
+    const emailSubject = 'Reset Your Password';
+    const emailMessage = `
+      <html>
+          <body>
+              <h1>Password Reset Request</h1>
+              <p>We received a request to reset your password. Click the link below to reset it:</p>
+              <a href="${resetPasswordLink}" style="color: blue; text-decoration: underline;">Reset Password</a>
+              <p>If you did not request this, please ignore this email.</p>
+              <p>Thank you,<br>VoyageVite Team</p>
+          </body>
+      </html>
+  `;
+
+    // Send the email
+    await this.sendEmail(email, emailSubject, emailMessage);
+
+    return { message: 'Password reset email sent successfully' };
+  }
+
 
   async updateInvitationUser(invitationId) {
     return await this.invitationModel.findByIdAndUpdate({ _id: invitationId }, { invitation_status: InvitationStatus.A, is_used: true })

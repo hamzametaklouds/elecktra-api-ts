@@ -8,9 +8,10 @@ import { JwtStrategy } from './jwt-strategy';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { UsersModule } from 'src/users/users.module';
+import { InvitationsModule } from 'src/invitations/invitations.module';
 
 @Module({
-  imports: [UsersModule, SystemUsersModule, UsersModule, PassportModule, JwtModule.registerAsync({
+  imports: [UsersModule, SystemUsersModule, UsersModule, InvitationsModule, PassportModule, JwtModule.registerAsync({
     imports: [ConfigModule],
     useFactory: async (configService: ConfigService) => ({
       secret: configService.get<string>('JWT_SECRET'),

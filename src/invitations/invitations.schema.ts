@@ -22,6 +22,7 @@ export interface IInvitations {
   is_used?: boolean;
   is_disabled?: boolean;
   is_deleted?: boolean;
+  is_forget_password: boolean;
   created_at: Date
 }
 
@@ -61,6 +62,11 @@ export const InvitationsSchema = new Schema<IInvitations>(
       default: false,
     },
     is_deleted: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    is_forget_password: {
       type: Boolean,
       required: false,
       default: false,
