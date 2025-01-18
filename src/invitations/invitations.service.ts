@@ -60,15 +60,16 @@ export class InvitationsService {
         throw new BadRequestException('Invalid or expired invitation link');
       }
 
+
       // Check if the invitation is older than 2 days
-      const twoDaysInMillis = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
-      const currentTime = new Date().getTime();
-      const createdTime = new Date(invitation.created_at).getTime();
+      // const twoDaysInMillis = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
+      // const currentTime = new Date().getTime();
+      // const createdTime = new Date(invitation.created_at).getTime();
 
-      if (currentTime - createdTime > twoDaysInMillis) {
-        throw new BadRequestException('Invitation has expired');
+      // if (currentTime - createdTime > twoDaysInMillis) {
+      //   throw new BadRequestException('Invitation has expired');
 
-      }
+      // }
 
       const updatedInvitation = await this.invitationModel.findByIdAndUpdate({ _id: invitation._id }, { invitation_status: InvitationStatus.O }, { new: true })
 
@@ -99,6 +100,11 @@ export class InvitationsService {
   async getinvitationByBandId(id: string): Promise<IInvitations> {
     return await this.invitationModel
       .findOne({ band_id: id, is_deleted: false });
+  }
+
+  async deleteInvitation(id): Promise<IInvitations> {
+    return await this.invitationModel
+      .findByIdAndUpdate({ _id: id }, { is_deleted: true });
   }
 
   async getinvitationBySectionId(id: string): Promise<IInvitations> {

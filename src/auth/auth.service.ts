@@ -147,6 +147,7 @@ export class AuthService {
       throw new BadRequestException('Invalid link id')
     }
 
+    await this.invitationsService.deleteInvitation(user._id)
     return await this.systemUsersService.updateUserPassword(user._id, body.password)
   }
 
