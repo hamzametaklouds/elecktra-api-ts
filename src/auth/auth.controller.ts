@@ -100,7 +100,7 @@ export class AuthController {
     @ApiBody({ type: ResetPasswordDto })
     @Post('reset-password')
     async resetPassword(@Body() body: ResetPasswordDto) {
-        const createAuth = await this.authService.forgetPassword(body);
+        const createAuth = await this.authService.resetPassword(body);
         return { message: 'User joined successfully', data: createAuth };
     }
 
