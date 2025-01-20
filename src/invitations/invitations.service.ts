@@ -252,7 +252,9 @@ export class InvitationsService {
     console.log('token-----', token)
 
     // Generate the reset password link
-    const resetPasswordLink = `https://portal.voyagevite.com/reset-password/${token}`;
+
+    const resetPasswordLink =
+      process.env.DB_URL === 'mongodb+srv://raoarsalanlatif:dxSCi8DLrHsBUprf@cluster0.ohwlwoi.mongodb.net/test' ? `https://staging.voyagevite.com/reset-password/${token}` : `https://portal.voyagevite.com/reset-password/${token}`;
 
     const invitation = await new this.invitationModel({
       email,
