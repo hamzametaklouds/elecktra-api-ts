@@ -9,6 +9,7 @@ import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { LandingPageConfigsService } from './landing-page-configs.service';
 import { CreateLandingPageConfigDto } from './dtos/create-destination.dto';
+import { CreateOrUpdateAppConfigDto } from './dtos/create-app-config.dto';
 
 const { RESOURCE_CREATED } = getMessages('Destination(s)');
 
@@ -17,6 +18,21 @@ const { RESOURCE_CREATED } = getMessages('Destination(s)');
 export class LandingPageConfigsController {
     constructor(private landingPageConfigsService: LandingPageConfigsService) { }
 
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN,Role.INTERNAL_ADMIN,Role.USER)
+    @Post('app-config')
+    @ApiBody({ type: CreateOrUpdateAppConfigDto })
+    async createOrUpdateAppConfig(@Body() body: CreateOrUpdateAppConfigDto, @Req() req: Request) {
+      const updatedConfig = await this.landingPageConfigsService.createOrUpdateConfig(body, req.user);
+      return { message: RESOURCE_CREATED, data: updatedConfig };
+    }
+  
+    @Get('app-config')
+    async getAppConfig() {
+      const appConfig = await this.landingPageConfigsService.getAppConfig();
+      return { message: 'App configuration fetched successfully', data: appConfig };
+    }
 
     @Get()
     async detail() {

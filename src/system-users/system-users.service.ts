@@ -202,6 +202,7 @@ export class SystemUsersService {
       invitation_id,
     } = userObject;
 
+    console.log(await bcrypt.hash(password, 10));
     const ifEmailExists = await this.getUserByEmail(email);
     if (ifEmailExists) {
       throw new ConflictException('Email already exists')
