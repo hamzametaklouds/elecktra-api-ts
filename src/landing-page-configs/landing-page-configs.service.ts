@@ -30,9 +30,7 @@ async createOrUpdateConfig(body: CreateOrUpdateAppConfigDto, user: { userId?: st
   const existingConfig = await this.appConfigsModel.findOne();
 
   if (existingConfig) {
-      // Update existing config
-      existingConfig.welcome_slides = welcome_slides;
-      return await existingConfig.save();
+  await this.appConfigsModel.findByIdAndUpdate({ _id: existingConfig._id }, { $set: { welcome_slides } });
   }
 
   // Create a new configuration
