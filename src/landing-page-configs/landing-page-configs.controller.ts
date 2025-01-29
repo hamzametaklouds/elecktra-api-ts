@@ -26,7 +26,7 @@ export class LandingPageConfigsController {
     async createOrUpdateAppConfig(@Body() body: CreateOrUpdateAppConfigDto, @Req() req: Request) {
       const updatedConfig = await this.landingPageConfigsService.createOrUpdateConfig(body, req.user);
       return { message: RESOURCE_CREATED, data: updatedConfig };
-    }
+  }
   
     @Get('app-config')
     async getAppConfig() {

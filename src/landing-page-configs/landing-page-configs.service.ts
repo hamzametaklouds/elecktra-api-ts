@@ -22,32 +22,28 @@ export class LandingPageConfigsService {
             .findOne({ is_deleted: false, is_disabled: false }, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
             .sort({ created_at: -1 })
     }
+// Service Methods
+async createOrUpdateConfig(body: CreateOrUpdateAppConfigDto, user: { userId?: string }) {
+  const { welcome_slides } = body;
 
-    async createOrUpdateConfig(body: CreateOrUpdateAppConfigDto, user: { userId?: string }) {
-        const { welcome_slides, is_disabled, is_deleted } = body;
-    
-        // Check if a configuration already exists
-        const existingConfig = await this.appConfigsModel.findOne();
-    
-        if (existingConfig) {
-          // Update existing config
-          existingConfig.welcome_slides = welcome_slides;
-          existingConfig.is_disabled = is_disabled;
-          existingConfig.is_deleted = is_deleted;
-    
-          return await existingConfig.save();
-        }
-    
-        // Create a new configuration
-        const newConfig = new this.appConfigsModel({
-          welcome_slides,
-          is_disabled,
-          is_deleted,
-          created_by: user.userId,
-        });
-    
-        return await newConfig.save();
-      }
+  // Check if a configuration already exists
+  const existingConfig = await this.appConfigsModel.findOne();
+
+  if (existingConfig) {
+      // Update existing config
+      existingConfig.welcome_slides = welcome_slides;
+      return await existingConfig.save();
+  }
+
+  // Create a new configuration
+  const newConfig = new this.appConfigsModel({
+      welcome_slides,
+      created_by: user.userId,
+  });
+
+  return await newConfig.save();
+}
+
     
       /**
        * Fetch the app configuration

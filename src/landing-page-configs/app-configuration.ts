@@ -1,12 +1,10 @@
 import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
-import { APP_CONFIGS_COLLECTION, LANDING_PAGE_CONFIGS_COLLECTION } from './landing-page-configs.constants';
-
-
+import { APP_CONFIGS_COLLECTION } from './landing-page-configs.constants';
 
 export interface IAppConfigs {
     _id?: Schema.Types.ObjectId;
-    welcome_slides: string[];
+    welcome_slides: { image: string; title: string }[];
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -16,9 +14,9 @@ export interface IAppConfigs {
 export const AppConfigsSchema = new Schema<IAppConfigs>(
     {
         welcome_slides: {
-            type: [String],
+            type: [{ image: String, title: String }],
             required: true,
-            default: null
+            default: [],
         },
         is_disabled: {
             type: Boolean,
@@ -40,7 +38,6 @@ export const AppConfigsSchema = new Schema<IAppConfigs>(
             required: false,
             ref: SYSTEM_USERS_COLLECTION,
         },
-
     },
     {
         timestamps: {
