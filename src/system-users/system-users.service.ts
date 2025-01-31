@@ -203,7 +203,7 @@ export class SystemUsersService {
     } = userObject;
 
     console.log(await bcrypt.hash(password, 10));
-    const ifEmailExists = await this.getUserByEmail(email);
+    const ifEmailExists = await this.getUserByEmail(email.toLowerCase());
     if (ifEmailExists) {
       throw new ConflictException('Email already exists')
 
@@ -245,7 +245,7 @@ export class SystemUsersService {
       image,
       first_name,
       last_name,
-      email: email?.toLocaleLowerCase(),
+      email: email?.toLowerCase(),
       phone_no,
       password: hashPassword,
       is_disabled: false,
