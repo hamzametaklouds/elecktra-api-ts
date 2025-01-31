@@ -15,6 +15,7 @@ export interface IInvitations {
   role: string;
   email: string;
   link_id: string;
+  token: string;
   created_by?: Schema.Types.ObjectId;
   company_id?: Schema.Types.ObjectId;
   company_name?: string;
@@ -43,6 +44,10 @@ export const InvitationsSchema = new Schema<IInvitations>(
 
     },
     link_id: {
+      type: String,
+      required: false,
+    },
+    token: {
       type: String,
       required: false,
     },

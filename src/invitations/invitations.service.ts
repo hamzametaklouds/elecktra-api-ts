@@ -201,7 +201,7 @@ export class InvitationsService {
     const generatedLinkId = uuidv4();
 
     // Generate a JWT token with the `link_id`
-    const token = jwt.sign({ link_id: generatedLinkId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ link_id: generatedLinkId }, process.env.JWT_SECRET, { expiresIn: '3d' });
     // const invitationLink = `https://voyage-vite-admi-panel.vercel.app/signup/${token}`;
     let invitationLink = process.env.DB_URL === 'mongodb+srv://raoarsalanlatif:dxSCi8DLrHsBUprf@cluster0.ohwlwoi.mongodb.net/test' ? `https://staging.voyagevite.com//signup/${token}` : `https://portal.voyagevite.com/signup/${token}`;
 
@@ -211,6 +211,7 @@ export class InvitationsService {
       company_id: company_id ? company_id : null,
       company_name: company_id ? companyExists?.title : null,
       link_id: generatedLinkId,
+      token:token,
       role,
       invitation_status: InvitationStatus.P,
       created_by: user.userId ?? null,
