@@ -183,7 +183,7 @@ export class InvitationsService {
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
     const { email, company_id, role } = invitationObject;
 
-    const userWithEmail = await this.systemUserService.getUserByEmail(email)
+    const userWithEmail = await this.systemUserService.getUserByEmail(email.toLowerCase())
 
     if (userWithEmail) {
       throw new BadRequestException('User with this email already exists')
@@ -207,7 +207,7 @@ export class InvitationsService {
 
     // Save the invitation in the database
     const invitation = await new this.invitationModel({
-      email,
+      email: email.toLowerCase(),
       company_id: company_id ? company_id : null,
       company_name: company_id ? companyExists?.title : null,
       link_id: generatedLinkId,

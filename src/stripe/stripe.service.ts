@@ -58,7 +58,7 @@ export class StripeService {
     }
 
     async createPaymentIntentPro(body: CreatePaymentDto, user: { userId?: ObjectId }) {
-
+        //adding payment method id
         const { amount, currency, email, name, booking_id } = body;
 
         const bookingExists = await this.bookingService.getBookingById(booking_id)
