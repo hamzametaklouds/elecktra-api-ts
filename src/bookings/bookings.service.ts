@@ -7,11 +7,12 @@ import { StripeService } from 'src/stripe/stripe.service';
 import { HotelAndCarsService } from 'src/hotel-and-cars/hotel-and-cars.service';
 import { CreatePaymentDto } from './dtos/create-payment';
 import { UsersService } from 'src/users/users.service';
-import { RecordType } from 'src/hotel-and-cars/hotel-and-cars.schema';
+const postmark = require("postmark");
 import { UpdateCompanyPaymentDto } from './dtos/update-company-payment';
 import { matchFilters } from 'src/app/mongo.utils';
 import { CompaniesService } from 'src/companies/companies.service';
 import { CreateCompanyPaymentDto } from './dtos/company-payment.dto';
+import { SystemUsersService } from 'src/system-users/system-users.service';
 
 @Injectable()
 export class BookingsService {
@@ -23,6 +24,7 @@ export class BookingsService {
         private stripeService: StripeService,
         private hotelAndCarService: HotelAndCarsService,
         private userService: UsersService,
+        private systemUserService: SystemUsersService,
         private companiesService: CompaniesService
     ) { }
 
@@ -1010,10 +1012,147 @@ export class BookingsService {
 
     }
 
+    async sendBookingConfirmationEmails(adminEmails: string[], bookingDetails: { bookingId: string; customerName: string; date: string }) {
+        const { bookingId, customerName, date } = bookingDetails;
+      
+        const client = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
+      
+        const emailSubject = `🎉 New Booking Confirmation - ID: ${bookingId}`;
+      
+        const emailMessage = `
+          <html>
+            <head>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  background-color: #f4f4f7;
+                  color: #333333;
+                  margin: 0;
+                  padding: 0;
+                }
+                .email-container {
+                  width: 100%;
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: #ffffff;
+                  border-radius: 8px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+                .email-header {
+                  background-color: #4a90e2;
+                  color: #ffffff;
+                  padding: 20px;
+                  text-align: center;
+                }
+                .email-header img {
+                  max-width: 150px;
+                  margin-bottom: 10px;
+                  border-radius: 8px;
+                }
+                .email-content {
+                  padding: 20px;
+                  line-height: 1.6;
+                }
+                .email-content h1 {
+                  font-size: 24px;
+                  margin-bottom: 10px;
+                }
+                .email-content p {
+                  font-size: 16px;
+                  margin-bottom: 20px;
+                }
+                .booking-details {
+                  background-color: #f9f9f9;
+                  padding: 15px;
+                  border-radius: 5px;
+                  margin-bottom: 20px;
+                }
+                .booking-details li {
+                  margin-bottom: 8px;
+                }
+                .email-footer {
+                  text-align: center;
+                  padding: 15px;
+                  font-size: 12px;
+                  color: #777777;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="email-container">
+                <div class="email-header">
+                  <img src="https://voyagevite.s3.eu-north-1.amazonaws.com/25263f43-956d-4863-9a5d-db3b4054262d.png" alt="VoyageVite Logo" />
+                  <h2>VoyageVite</h2>
+                </div>
+      
+                <div class="email-content">
+                  <h1>🎉 New Booking Confirmation!</h1>
+                  <p>A new booking has been successfully made. Here are the details:</p>
+      
+                  <div class="booking-details">
+                    <ul>
+                      <li><strong>Booking ID:</strong> ${bookingId}</li>
+                      <li><strong>Customer Name:</strong> ${customerName}</li>
+                      <li><strong>Date:</strong> ${date}</li>
+                    </ul>
+                  </div>
+      
+                  <p>Please log in to the admin panel for more details.</p>
+      
+                  <p>If you have any questions, feel free to reach out to our support team.</p>
+                </div>
+      
+                <div class="email-footer">
+                  <p>Thank you for choosing VoyageVite!<br>&copy; 2025 VoyageVite Inc. All rights reserved.</p>
+                </div>
+              </div>
+            </body>
+          </html>
+        `;
+      
+        for (const email of adminEmails) {
+          try {
+            const result = await client.sendEmail({
+              From: 'armel@voyagevite.com', // Verified sender email
+              To: email,
+              Subject: emailSubject,
+              HtmlBody: emailMessage,
+              MessageStream: 'outbound',
+            });
+            console.log(`Booking confirmation email sent to ${email}: ${result.Message}`);
+          } catch (error) {
+            console.error(`Error sending booking confirmation email to ${email}:`, error);
+          }
+        }
+      }
+      
+      
+    
+
     async verifyPayment(body: CreatePaymentDto, user: { userId?: ObjectId }) {
 
         try {
             const intent = await this.stripeService.createPaymentIntentPro(body, user)
+
+            if(intent){
+
+                const adminEmails = await this.systemUserService.getSystemUserByEmail(intent.company_id)
+                const consumer = await this.userService.getUserById(intent.created_by)
+
+                  // Format date to a more readable format, e.g., "February 5, 2025, 2:30 PM"
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'UTC',  // Adjust timezone if needed
+    }).format(new Date());
+
+                 this.sendBookingConfirmationEmails(adminEmails, {bookingId: intent?._id?.toString(), customerName: consumer.first_name + " " + consumer.last_name, date: formattedDate})
+            }
 
             return intent
 

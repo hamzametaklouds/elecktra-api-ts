@@ -190,6 +190,23 @@ export class SystemUsersService {
       .sort($orderBy)
 
   }
+  async getSystemUserByEmail(company_id: ObjectId) {
+    try {
+      const users = await this.userModel.find({
+        $or: [
+          { companies: company_id },
+        ],
+        is_deleted: false,
+        is_disabled: false,
+      }, { email: 1, _id: 0 }); // Fetching only the email field
+
+      return users.map(user => user.email);
+    } catch (error) {
+      console.error('Error fetching system users:', error);
+      throw new Error('Failed to fetch system users');
+    }
+  }
+  
 
   async insertUser(userObject: CreateSystemUserDto) {
     const {
