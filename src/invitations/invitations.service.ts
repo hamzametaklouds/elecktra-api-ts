@@ -27,12 +27,22 @@ export class InvitationsService {
     SendGrid.setApiKey(this.configService.get('sendGridEmail.sendGridApiKey'));
   }
 
+  /**
+   * Retrieves an invitation by its ID
+   * @param id The invitation ID
+   * @returns Promise containing the invitation if found
+   */
   async getinvitationById(id): Promise<IInvitations> {
     return await this.invitationModel
       .findOne({ _id: id, is_deleted: false });
   }
 
 
+  /**
+   * Retrieves an invitation by its link ID, excluding accepted invitations
+   * @param id The link ID
+   * @returns Promise containing the invitation if found
+   */
   async getinvitationByLinkId(id): Promise<IInvitations> {
     return await this.invitationModel
       .findOne({ link_id: id, invitation_status: { $ne: InvitationStatus.A }, is_deleted: false });
@@ -40,11 +50,20 @@ export class InvitationsService {
 
 
 
+  /**
+   * Validates an invitation link token and updates invitation status to Opened
+   * @param token JWT token containing the link_id
+   * @returns Promise containing the updated invitation
+   * @throws BadRequestException if token is invalid or invitation expired
+   */
   async validateInvitationLink(token: string) {
     try {
       // Decode the token to get the `link_id`
       const decoded = jwt.verify(token, process.env.JWT_SECRET) as { link_id: string };
+
+      console.log(decoded)
       const { link_id } = decoded;
+      console.log(link_id)
 
       console.log('link id----', link_id)
 
@@ -81,6 +100,12 @@ export class InvitationsService {
 
 
 
+  /**
+   * Sends an email using Postmark service
+   * @param to Recipient email address
+   * @param subject Email subject
+   * @param message HTML email content
+   */
   async sendEmail(to: string, subject: string, message: string) {
     try {
       const client = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
@@ -97,21 +122,41 @@ export class InvitationsService {
     }
   }
 
+  /**
+   * Retrieves an invitation by band ID
+   * @param id The band ID
+   * @returns Promise containing the invitation if found
+   */
   async getinvitationByBandId(id: string): Promise<IInvitations> {
     return await this.invitationModel
       .findOne({ band_id: id, is_deleted: false });
   }
 
+  /**
+   * Marks an invitation as deleted
+   * @param id The invitation ID
+   * @returns Promise containing the updated invitation
+   */
   async deleteInvitation(id): Promise<IInvitations> {
     return await this.invitationModel
       .findByIdAndUpdate({ _id: id }, { is_deleted: true });
   }
 
+  /**
+   * Retrieves an invitation by section ID for section staff
+   * @param id The section ID
+   * @returns Promise containing the invitation if found
+   */
   async getinvitationBySectionId(id: string): Promise<IInvitations> {
     return await this.invitationModel
       .findOne({ section: id, is_for_section_staff: true });
   }
 
+  /**
+   * Retrieves an invitation by name
+   * @param name The invitation name
+   * @returns Promise containing the invitation if found
+   */
   async getinvitationByName(name: string): Promise<IInvitations> {
     return await this.invitationModel
       .findOne({ invitation_name: name, is_deleted: false });
@@ -180,6 +225,13 @@ export class InvitationsService {
   */
 
 
+  /**
+   * Creates and sends a new invitation to a user
+   * @param invitationObject DTO containing invitation details
+   * @param user Current user making the request
+   * @returns Promise containing the created invitation
+   * @throws BadRequestException if email exists or company is invalid
+   */
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
     const { email, company_id, role } = invitationObject;
 
@@ -236,6 +288,11 @@ export class InvitationsService {
     return invitation;
   }
 
+  /**
+   * Sends a forgot password email with reset link
+   * @param email User's email address
+   * @returns Promise containing success message
+   */
   async sendForgotPasswordEmail(email: string) {
     // Check if the user exists
     const user = await this.systemUserService.getUserByEmail(email);
@@ -291,10 +348,20 @@ export class InvitationsService {
   }
 
 
+  /**
+   * Updates an invitation status to Accepted and marks it as used
+   * @param invitationId The invitation ID
+   * @returns Promise containing the updated invitation
+   */
   async updateInvitationUser(invitationId) {
     return await this.invitationModel.findByIdAndUpdate({ _id: invitationId }, { invitation_status: InvitationStatus.A, is_used: true })
   }
 
+  /**
+   * Retrieves an active invitation by ID
+   * @param invitationId The invitation ID
+   * @returns Promise containing the invitation if found
+   */
   async getInvitationById(invitationId: ObjectId) {
     return await this.invitationModel.findOne({ _id: invitationId, is_disabled: false, is_deleted: false, invitation_status: { $ne: InvitationStatus.A } });
   }

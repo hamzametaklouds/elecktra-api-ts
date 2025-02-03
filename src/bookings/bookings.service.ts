@@ -1094,7 +1094,6 @@ export class BookingsService {
                     <ul>
                       <li><strong>Booking ID:</strong> ${bookingId}</li>
                       <li><strong>Customer Name:</strong> ${customerName}</li>
-                      <li><strong>Date:</strong> ${date}</li>
                     </ul>
                   </div>
       
