@@ -977,6 +977,16 @@ export class HotelAndCarsService {
             throw new BadRequestException('Longitude must be between -180 and 180');
         }
 
+        // Validate hotel_details if provided for hotels
+        if (type === RecordType.H && hotel_details) {
+            if (hotel_details['cancellation_days'] !== undefined) {
+                // Ensure cancellation_days is a positive number
+                if (typeof hotel_details['cancellation_days'] !== 'number' || hotel_details['cancellation_days'] < 0) {
+                    throw new BadRequestException('Cancellation days must be a positive number');
+                }
+            }
+        }
+
         const screen = await new this.hotelAndCarsModel({
             title,
             description,
@@ -1127,6 +1137,16 @@ export class HotelAndCarsService {
 
         if (!location.coordinates || location.coordinates.length !== 2) {
             throw new BadRequestException('Latitude and Longitude must be specified');
+        }
+
+        // Validate hotel_details if provided for hotels
+        if (type === RecordType.H && hotel_details) {
+            if (hotel_details['cancellation_days'] !== undefined) {
+                // Ensure cancellation_days is a positive number
+                if (typeof hotel_details['cancellation_days'] !== 'number' || hotel_details['cancellation_days'] < 0) {
+                    throw new BadRequestException('Cancellation days must be a positive number');
+                }
+            }
         }
 
         console.log('hotel_details----', hotel_details)

@@ -96,6 +96,7 @@ export interface IHighlights {
 export interface IHotelDetails {
     _id?: Schema.Types.ObjectId;
     cancellation_policy: string;
+    cancellation_days: number;
     ground_rules: string;
 }
 
@@ -106,6 +107,11 @@ export const HotelDetailsSchema = new Schema<IHotelDetails>(
     {
         cancellation_policy: {
             type: String,
+            required: false,
+            default: null
+        },
+        cancellation_days: {
+            type: Number,
             required: false,
             default: null
         },

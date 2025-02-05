@@ -221,6 +221,7 @@ export class CreateHotelAndCarDto {
         default:
         {
             cancellation_policy: '',
+            cancellation_days: 0,
             ground_rules: '',
         },
     })
@@ -232,4 +233,18 @@ export class CreateHotelAndCarDto {
 
 
 
+}
+
+export class HotelDetailsDto {
+    @IsOptional()
+    @IsString()
+    cancellation_policy: string;
+
+    @IsOptional()
+    @IsNumber()
+    cancellation_days: number;
+
+    @IsOptional()
+    @IsString()
+    ground_rules: string;
 }
