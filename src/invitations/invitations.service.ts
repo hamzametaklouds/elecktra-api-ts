@@ -241,6 +241,16 @@ export class InvitationsService {
       throw new BadRequestException('User with this email already exists')
     }
 
+    // Delete any existing pending invitations for this email
+    await this.invitationModel.deleteMany({
+      email: email.toLowerCase(),
+      invitation_status: InvitationStatus.P,
+      $or: [
+        { company_id: company_id }, // Same company
+        { role: { $in: ['INTERNAL_ADMIN', 'SUPER_ADMIN'] } } // Internal or Super admin roles
+      ]
+    });
+
     let companyExists;
     if (company_id) {
       companyExists = await this.companiesService.getCompanyById(company_id);
