@@ -23,6 +23,7 @@ import { CompaniesModule } from './companies/companies.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { LandingPageConfigsModule } from './landing-page-configs/landing-page-configs.module';
 import { QueriesModule } from './queries/queries.module';
+import { FeaturedCitiesModule } from './featured-cities/featured-cities.module';
 
 
 
@@ -73,7 +74,8 @@ import { QueriesModule } from './queries/queries.module';
     RolesModule,
     CompaniesModule,
     LandingPageConfigsModule,
-    QueriesModule
+    QueriesModule,
+    FeaturedCitiesModule
   ],
   controllers: [AppController],
   providers: [AppService],
