@@ -31,7 +31,7 @@ export class FeaturedCitiesService {
     }
 
     async update(id: string, body: UpdateFeaturedCityDto, user: { userId?: ObjectId }) {
-        const { title, description, address, lat, long, images, is_deleted } = body;
+        const { title, description, address, lat, long, images, is_disabled, is_deleted } = body;
 
         const cityExists = await this.featuredCityModel.findOne({ _id: id, is_deleted: false });
 
@@ -50,7 +50,7 @@ export class FeaturedCitiesService {
                     coordinates: [long, lat]
                 },
                 images,
-                is_deleted,
+                is_deleted,is_disabled,
                 updated_by: user.userId || null
             },
             { new: true }

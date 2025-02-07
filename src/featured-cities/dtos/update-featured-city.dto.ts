@@ -51,6 +51,14 @@ export class UpdateFeaturedCityDto {
     long: number;
 
     @ApiProperty({
+        description: 'Is disabled flag',
+        required: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    is_disabled: boolean;
+
+    @ApiProperty({
         description: 'Is deleted flag',
         required: false,
     })
