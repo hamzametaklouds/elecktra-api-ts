@@ -13,6 +13,7 @@ import { matchFilters } from 'src/app/mongo.utils';
 import { CompaniesService } from 'src/companies/companies.service';
 import { CreateCompanyPaymentDto } from './dtos/company-payment.dto';
 import { SystemUsersService } from 'src/system-users/system-users.service';
+import { ErrorMessages } from 'src/app/error-messages';
 
 @Injectable()
 export class BookingsService {
@@ -826,31 +827,33 @@ export class BookingsService {
     }
 
     async checkoutBooking(booking_id, user: { userId?: ObjectId }) {
-
         const bookingExists = await this.bookingModel.findOne({ _id: booking_id, is_deleted: false })
 
         if (!bookingExists) {
-            throw new BadRequestException('Invalid booking id')
+            throw new BadRequestException(ErrorMessages.BOOKING_NOT_FOUND);
         }
 
-        if (bookingExists?.created_by?.toString() !== user.userId.toString()) {
-            throw new UnauthorizedException('Unauthorized to checkout this booking')
+        if (bookingExists.status === BookingStatus.C) {
+            throw new BadRequestException(ErrorMessages.BOOKING_ALREADY_CANCELLED);
         }
 
         const currentDate = new Date();
         const startsAtDate = new Date(bookingExists.start_date);
         const endsAtDate = new Date(bookingExists.end_date);
 
-        // if (startsAtDate > currentDate) {
-        //     throw new BadRequestException('Booking cannot be checked out as it has not yet started');
-        // }
+        if (currentDate < startsAtDate) {
+            throw new BadRequestException('Booking cannot be checked out before its start date');
+        }
 
-        // if (endsAtDate <= currentDate) {
-        //     throw new BadRequestException('Booking cannot be checked out as it has already ended');
-        // }
+        if (endsAtDate < currentDate) {
+            throw new BadRequestException('Booking cannot be checked out after its end date');
+        }
 
-        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.C, checked_out: true }, { new: true })
-
+        return await this.bookingModel.findByIdAndUpdate(
+            { _id: bookingExists._id }, 
+            { status: BookingStatus.C, checked_out: true }, 
+            { new: true }
+        );
     }
 
     async updateBookingCompanyStatus(id, body: UpdateCompanyPaymentDto, user: { userId?: ObjectId }) {

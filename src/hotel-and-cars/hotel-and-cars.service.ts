@@ -12,6 +12,7 @@ import { CreateIdealCarDto } from './dtos/create-car-ideal.dto';
 import { UpdateIdealCarDto } from './dtos/update-car-ideal.dto';
 import { UpdateHotelAndCarDto } from './dtos/update-hotel-or-car.dto';
 import { PlatformAccessStatus } from 'src/app/global-enums';
+import { ErrorMessages } from 'src/app/error-messages';
 const moment = require('moment');
 
 @Injectable()
@@ -1104,12 +1105,10 @@ export class HotelAndCarsService {
     }
 
     async updateOption(id, body: UpdateHotelAndCarDto, user) {
-
-
         const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false });
 
         if (!optionExist) {
-            throw new BadRequestException('Invalid Id');
+            throw new BadRequestException(ErrorMessages.RESOURCE_NOT_FOUND);
         }
 
         const {
@@ -1146,6 +1145,20 @@ export class HotelAndCarsService {
                 if (typeof hotel_details['cancellation_days'] !== 'number' || hotel_details['cancellation_days'] < 0) {
                     throw new BadRequestException('Cancellation days must be a positive number');
                 }
+            }
+        }
+
+        if (body.price && body.price < 0) {
+            throw new BadRequestException(ErrorMessages.INVALID_PRICE);
+        }
+
+        // Validate dates if provided
+        if (body.availability_from && body.availability_till) {
+            const startDate = new Date(body.availability_from);
+            const endDate = new Date(body.availability_till);
+            
+            if (startDate >= endDate) {
+                throw new BadRequestException('End date must be after start date');
             }
         }
 

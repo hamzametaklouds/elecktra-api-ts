@@ -6,6 +6,7 @@ import { COMPANIES_PROVIDER_TOKEN } from './companies.constant';
 import { ICompanies } from './companies.schema';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import { SystemUsersService } from 'src/system-users/system-users.service';
+import { ErrorMessages } from 'src/app/error-messages';
 
 @Injectable()
 export class CompaniesService {
@@ -92,32 +93,33 @@ export class CompaniesService {
 
 
     async updateComapny(id, body: UpdateCompanyDto, user: { userId?: ObjectId }) {
-
-
-        const companyExists = await this.companyModel.findOne({ _id: id, is_deleted: false })
-
+        const companyExists = await this.companyModel.findOne({ _id: id, is_deleted: false });
 
         if (!companyExists) {
-            throw new BadRequestException('Invalid id')
+            throw new BadRequestException(ErrorMessages.COMPANY_NOT_FOUND);
         }
 
-        const { title, description, icon, is_deleted, is_disabled } = body;
+        // Check if company name already exists (if title is being updated)
+        if (body.title && body.title !== companyExists.title) {
+            const existingCompany = await this.companyModel.findOne({ 
+                title: body.title, 
+                is_deleted: false,
+                _id: { $ne: id }
+            });
+            
+            if (existingCompany) {
+                throw new BadRequestException(ErrorMessages.COMPANY_ALREADY_EXISTS);
+            }
+        }
 
-        const screen = await this.companyModel.findByIdAndUpdate({ _id: companyExists._id },
+        return await this.companyModel.findByIdAndUpdate(
+            { _id: companyExists._id },
             {
-                title,
-                description,
-                icon,
-                is_deleted, is_disabled,
-                created_by: user?.userId || null
+                ...body,
+                updated_by: user?.userId || null
             },
-            {
-                new: true
-            })
-
-
-        return screen
-
+            { new: true }
+        );
     }
 
 

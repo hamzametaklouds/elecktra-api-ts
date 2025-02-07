@@ -6,6 +6,7 @@ import { IReviewAndRatings } from './rating-reviews.schema';
 import { BookingsService } from 'src/bookings/bookings.service';
 import { CreateCustomRatingReviewDto } from './dtos/create-custom-rating-reviews.dto';
 import { UpdateCustomRatingReviewDto } from './dtos/update-custom-rating-reviews.dto';
+import { ErrorMessages } from 'src/app/error-messages';
 
 @Injectable()
 export class RatingReviewsService {
@@ -97,49 +98,28 @@ export class RatingReviewsService {
     }
 
     async updateCustomRatingReview(id, body: UpdateCustomRatingReviewDto, user: { userId?: ObjectId }) {
-
-        const customReview = await this.ratingAndReviewsModel.findOne({ _id: id, is_deleted: false })
+        const customReview = await this.ratingAndReviewsModel.findOne({ _id: id, is_deleted: false });
 
         if (!customReview) {
-            throw new BadRequestException('Invalid Id')
+            throw new BadRequestException(ErrorMessages.REVIEW_NOT_FOUND);
         }
 
-        const {
-            review,
-            rating,
-            image,
-            name,
-            user_type,
-            designation,
-            is_deleted,
-            is_disabled
+        if (body.rating && (body.rating < 1 || body.rating > 5)) {
+            throw new BadRequestException(ErrorMessages.INVALID_RATING);
+        }
 
-        } = body;
+        if (body.review && body.review.trim().length === 0) {
+            throw new BadRequestException('Review text cannot be empty');
+        }
 
-
-        const screen = await this.ratingAndReviewsModel.findByIdAndUpdate(
+        return await this.ratingAndReviewsModel.findByIdAndUpdate(
+            { _id: id },
             {
-                _id: customReview._id
-            },
-            {
-                review,
-                rating,
-                image,
-                name,
-                user_type,
-                designation,
-                custom_review: true,
-                is_deleted,
-                is_disabled,
+                ...body,
                 updated_by: user?.userId || null
             },
-            {
-                new: true
-            }
-        )
-
-        return screen
-
+            { new: true }
+        );
     }
 
 

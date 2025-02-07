@@ -29,7 +29,7 @@ export class FeaturedCitiesController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.SUPER_ADMIN)
+    @Roles(Role.SUPER_ADMIN,Role.INTERNAL_ADMIN)
     @Post()
     @ApiBody({ type: CreateFeaturedCityDto })
     async create(@Body() body: CreateFeaturedCityDto, @Req() req: Request) {

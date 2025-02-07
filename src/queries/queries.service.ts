@@ -4,6 +4,7 @@ import { CreateQueryDto } from './dtos/create-queries.dto';
 import { QUERY_PROVIDER_TOKEN } from './queries.constants';
 import { IQuery, QueryStatus } from './queries.schema';
 import { UpdateQueryDto } from './dtos/update-queries.dto';
+import { ErrorMessages } from '../app/error-messages';
 
 @Injectable()
 export class QueriesService {
@@ -82,47 +83,33 @@ export class QueriesService {
 
 
     async updateOption(id, body: UpdateQueryDto, user) {
+        const queryExists = await this.queryModel.findOne({ _id: id });
 
-        const {
-            first_name,
-            last_name,
-            is_mobile,
-            email,
-            query,
-            is_deleted,
-            platform_access_status,
-            is_disabled,
-            status
-        } = body;
-
-        const screenExits = await this.queryModel.findOne({ _id: id, is_deleted: false })
-
-        if (!screenExits) {
-            throw new BadRequestException('Invalid screen id')
+        if (!queryExists) {
+            throw new BadRequestException(ErrorMessages.QUERY_NOT_FOUND);
         }
 
-
-        if (platform_access_status && user?.company_id) {
-            throw new ForbiddenException('Company admin is not allowed to modify the platform access');
+        if (body.email && !this.isValidEmail(body.email)) {
+            throw new BadRequestException(ErrorMessages.INVALID_EMAIL);
         }
 
-        const screen = await this.queryModel.findByIdAndUpdate({ _id: screenExits._id },
+        if (body.status && !Object.values(QueryStatus).includes(body.status as QueryStatus)) {
+            throw new BadRequestException('Invalid query status');
+        }
+
+        return await this.queryModel.findByIdAndUpdate(
+            { _id: id },
             {
-                first_name,
-                last_name,
-                email,
-                query,
-                is_mobile,
-                platform_access_status,
-                is_deleted,
-                is_disabled,
-                status,
+                ...body,
                 updated_by: user?.userId || null
-            }, { new: true })
+            },
+            { new: true }
+        );
+    }
 
-
-        return screen
-
+    private isValidEmail(email: string): boolean {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
 }
