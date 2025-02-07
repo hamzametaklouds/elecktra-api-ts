@@ -63,7 +63,7 @@ export class FeaturedCitiesService {
         return await this.featuredCityModel
             .find(
                 { is_deleted: false },
-                { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 }
+                { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, created_by: 0, updated_by: 0 }
             )
             .sort({ created_at: -1 });
     }
@@ -71,7 +71,7 @@ export class FeaturedCitiesService {
     async findOne(id: string) {
         const city = await this.featuredCityModel.findOne(
             { _id: id, is_deleted: false },
-            { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 }
+            { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, created_by: 0, updated_by: 0 }
         );
 
         if (!city) {
