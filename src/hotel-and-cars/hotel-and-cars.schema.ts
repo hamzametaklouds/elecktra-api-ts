@@ -113,7 +113,7 @@ export const HotelDetailsSchema = new Schema<IHotelDetails>(
         cancellation_days: {
             type: Number,
             required: false,
-            default: null
+            default: 2
         },
         ground_rules: {
             type: String,
