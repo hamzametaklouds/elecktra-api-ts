@@ -804,26 +804,28 @@ export class BookingsService {
     }
 
     async cancelBooking(booking_id, user: { userId?: ObjectId }) {
-
-        const bookingExists = await this.bookingModel.findOne({ _id: booking_id, is_deleted: false })
+        const bookingExists = await this.bookingModel.findOne({ _id: booking_id, is_deleted: false });
 
         if (!bookingExists) {
-            throw new BadRequestException('Invalid booking id')
+            throw new BadRequestException('Invalid booking id');
         }
 
         if (bookingExists?.created_by?.toString() !== user.userId.toString()) {
-            throw new UnauthorizedException('Unauthorized to cancel this booking')
+            throw new UnauthorizedException('Unauthorized to cancel this booking');
         }
 
-        // const currentDate = new Date();
-        // const startsAtDate = new Date(bookingExists.start_date);
+        const currentDate = new Date();
+        
+        // Check if cancellation is still allowed based on cancellation_ending_at
+        if (bookingExists.cancellation_ending_at && currentDate > bookingExists.cancellation_ending_at) {
+            throw new BadRequestException('Cancellation period has ended. You cannot cancel this booking now.');
+        }
 
-        // if (startsAtDate <= currentDate) {
-        //     throw new BadRequestException('Booking cannot be cancelled as it has already started or passed');
-        // }
-
-        return await this.bookingModel.findByIdAndUpdate({ _id: bookingExists._id }, { status: BookingStatus.CN }, { new: true })
-
+        return await this.bookingModel.findByIdAndUpdate(
+            { _id: bookingExists._id }, 
+            { status: BookingStatus.CN }, 
+            { new: true }
+        );
     }
 
     async checkoutBooking(booking_id, user: { userId?: ObjectId }) {
@@ -924,6 +926,16 @@ export class BookingsService {
             );
         }
 
+        // Calculate cancellation_ending_at based on cancellation_days if type is Hotel
+        let cancellation_ending_at = null;
+        if (hotelExists.type === 'Hotel' && 'cancellation_days' in hotelExists) {
+            const startDate = new Date(start_date);
+            cancellation_ending_at = new Date(startDate.getTime());
+            cancellation_ending_at.setDate(startDate.getDate() - (hotelExists as any).cancellation_days);
+            // Set to end of day (23:59:59.999)
+            cancellation_ending_at.setHours(23, 59, 59, 999);
+        }
+
         const reference_number = Array.from(
             { length: 15 },
             () =>
@@ -955,6 +967,7 @@ export class BookingsService {
         const company = await this.companiesService.getCompanyById(hotelExists.company_id);
 
         let booking = await new this.bookingModel({
+            cancellation_ending_at,
             hotel_or_car,
             start_date,
             end_date,

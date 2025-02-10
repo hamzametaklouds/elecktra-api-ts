@@ -163,6 +163,7 @@ export interface IBookings {
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
     is_deleted?: boolean;
+    cancellation_ending_at?: Date;
 }
 
 export const BookingSchema = new Schema<IBookings>(
@@ -297,7 +298,11 @@ export const BookingSchema = new Schema<IBookings>(
             required: false,
             ref: SYSTEM_USERS_COLLECTION,
         },
-
+        cancellation_ending_at: {
+            type: Date,
+            required: false,
+            default: null
+        },
     },
     {
         timestamps: {
