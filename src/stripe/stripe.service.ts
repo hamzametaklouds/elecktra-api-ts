@@ -57,9 +57,50 @@ export class StripeService {
         }
     }
 
+    async chargePayment(booking_id: string): Promise<{ status: string }> {
+        try {
+
+            const bookingExists = await this.bookingService.getBookingById(booking_id)
+
+            if (!bookingExists) {
+                throw new BadRequestException('Invalid booking id')
+            }
+                   // Create a PaymentIntent for a one-time payment
+        const paymentIntent = await this.stripe.paymentIntents.create({
+            amount: Math.round(bookingExists.sub_total * 100),
+            currency: bookingExists?.currency,
+            customer: bookingExists?.payment?.customer_id,
+            payment_method: bookingExists?.payment?.payment_method_id,
+            off_session: true, // Charge the payment immediately without customer involvement
+            confirm: true, // Automatically confirm the payment
+
+        });
+
+        // Determine if payment succeeded
+        const paymentStatus = paymentIntent.status === "succeeded";
+
+       let updatedBooking
+
+        if (paymentIntent.status === "succeeded") {
+            updatedBooking = await this.bookingService.updateBooking({
+                customer_id: bookingExists?.payment?.customer_id,
+                payment_method_id: bookingExists?.payment?.payment_method_id,
+                payment_id: paymentIntent.id,
+                amount: paymentIntent.amount,
+                currency: paymentIntent.currency,
+                payment_status: paymentIntent.status,
+            }, bookingExists._id)
+        }
+
+            return { status: paymentIntent.status };
+        } catch (error) {
+            throw new Error(`Error verifying payment: ${error.message}`);
+        }
+    }
+
     async createPaymentIntentPro(body: CreatePaymentDto, user: { userId?: ObjectId }) {
         //adding payment method id
-        const { amount, currency, email, name, booking_id } = body;
+        const { amount, currency, email, name, booking_id, payment_method_id, save_payment } = body;
 
         const bookingExists = await this.bookingService.getBookingById(booking_id)
 
@@ -71,83 +112,44 @@ export class StripeService {
         let customer;
 
         // Check if a customer with this email already exists
-        // const existingCustomers = await this.stripe.customers.list({ email: email, limit: 1 });
+        const existingCustomers = await this.stripe.customers.list({ email: email, limit: 1 });
 
-        // if (existingCustomers.data.length > 0) {
-        //     customer = existingCustomers.data[0];
-        // } else {
-        //     // Create a new customer if one doesn't exist
-        //     customer = await this.stripe.customers.create({
-        //         payment_method: payment_method_id,
-        //         email: email,
-        //         name: name,
-        //         description: `One-time payment of ${amount} ${currency}`,
-        //         invoice_settings: {
-        //             default_payment_method: payment_method_id,
-        //         },
-        //     });
-        // }
+        if (existingCustomers.data.length > 0) {
+            customer = existingCustomers.data[0];
+        } else {
+            // Create a new customer if one doesn't exist
+            customer = await this.stripe.customers.create({
+                payment_method: payment_method_id,
+                email: email,
+                name: name,
+                description: `One-time payment of ${amount} ${currency}`,
+                invoice_settings: {
+                    default_payment_method: payment_method_id,
+                },
+            });
+        }
 
-        // // Attach and save the payment method if required
-        // if (save_payment) {
-        //     await this.stripe.paymentMethods.attach(payment_method_id, {
-        //         customer: customer.id,
-        //     });
-        //     await this.stripe.customers.update(customer.id, {
-        //         invoice_settings: { default_payment_method: payment_method_id },
-        //     });
-        // }
+        // Attach and save the payment method if required
+        if (save_payment) {
+            await this.stripe.paymentMethods.attach(payment_method_id, {
+                customer: customer.id,
+            });
+            await this.stripe.customers.update(customer.id, {
+                invoice_settings: { default_payment_method: payment_method_id },
+            });
+        }
 
-        // // Create a PaymentIntent for a one-time payment
-        // const paymentIntent = await this.stripe.paymentIntents.create({
-        //     amount: Math.round(amount * 100),
-        //     currency: currency,
-        //     customer: customer.id,
-        //     payment_method: payment_method_id,
-        //     off_session: true, // Charge the payment immediately without customer involvement
-        //     confirm: true, // Automatically confirm the payment
 
-        // });
+        let updatedBooking;
 
-        // // Determine if payment succeeded
-        // const paymentStatus = paymentIntent.status === "succeeded";
-
-        // let updatedBooking;
-
-        // if (paymentIntent.status === "succeeded") {
-        //     updatedBooking = await this.bookingService.updateBooking({
-        //         customer_id: customer.id,
-        //         payment_method_id: payment_method_id,
-        //         payment_id: paymentIntent.id,
-        //         amount: paymentIntent.amount,
-        //         currency: paymentIntent.currency,
-        //         payment_status: paymentIntent.status,
-        //     }, bookingExists._id)
-        // }
-
-        const updatedBooking = await this.bookingService.updateBooking({
-            customer_id: 'dummy',
-            payment_method_id: 'dummy',
-            payment_id: 'dummy',
+        updatedBooking = await this.bookingService.updateBooking({
+            customer_id: customer.id,
+            payment_method_id: payment_method_id,
+            payment_id: null,
             amount: bookingExists.sub_total,
-            currency: 'usd',
-            payment_status: 'succeeded',
+            currency: currency,
+            payment_status: 'Pending',
         }, bookingExists._id)
-
-
-        // Save the payment details to your database
-        // const userPayment = new Payment({
-        //   userId,
-        //   paymentId: paymentIntent.id,
-        //   customerId: customer.id,
-        //   paymentMethodId,
-        //   amount: paymentIntent.amount,
-        //   currency: paymentIntent.currency,
-        //   status: paymentIntent.status,
-        //   paymentStatus,
-        // });
-
-        // await userPayment.save();
 
         // Respond to the client with the payment details
         return updatedBooking;

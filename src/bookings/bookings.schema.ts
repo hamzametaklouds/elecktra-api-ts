@@ -146,6 +146,7 @@ export interface IBookings {
     type: string;
     status: string;
     sub_total: number;
+    currency?: string;
     payment: IPayment;
     company_payment: string;
     taxes_and_fees: ITaxAndFee;
@@ -181,6 +182,11 @@ export const BookingSchema = new Schema<IBookings>(
         end_date: {
             type: Date,
             required: true,
+            default: null
+        },
+        currency: {
+            type: String,
+            required: false,
             default: null
         },
         payment: {

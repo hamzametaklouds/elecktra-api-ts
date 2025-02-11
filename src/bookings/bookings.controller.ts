@@ -119,6 +119,15 @@ export class BookingsController {
 
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN,Role.USER)
+    @Post('withdraw-payment')
+    async withDrawPayment(@Query('booking_id') booking_id: string, @Req() req: Request) {
+        const cancelBooking = await this.bookingsService.withdrawPayment(booking_id, req.user);
+        return { message: 'Payment Withdrawn', data: cancelBooking };
+    }
+
+    @ApiBearerAuth(AuthorizationHeader)
+    @UseGuards(JWTAuthGuard, RolesGuard)
     @Roles(Role.SUPER_ADMIN, Role.INTERNAL_ADMIN, Role.COMPANY_ADMIN, Role.USER)
     @Post('payment')
     @ApiBody({ type: CreatePaymentDto })

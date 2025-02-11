@@ -799,7 +799,7 @@ export class BookingsService {
 
     async updateBooking(body: IPayment, booking_id) {
 
-        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, company_payment_amount: body?.amount, status: BookingStatus.C })
+        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, currency: body?.currency, company_payment_amount: body?.amount, status: body.payment_status })
 
     }
 
@@ -856,6 +856,13 @@ export class BookingsService {
             { status: BookingStatus.C, checked_out: true }, 
             { new: true }
         );
+    }
+
+    async withdrawPayment(booking_id, user: { userId?: ObjectId }) {
+       
+        return await this.stripeService.chargePayment(booking_id)
+
+
     }
 
     async updateBookingCompanyStatus(id, body: UpdateCompanyPaymentDto, user: { userId?: ObjectId }) {
