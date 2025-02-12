@@ -801,7 +801,7 @@ export class BookingsService {
 
     async updateBooking(body: IPayment, booking_id) {
 
-        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, currency: body?.currency, company_payment_amount: body?.amount, status: body.payment_status })
+        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, currency: body?.currency, company_payment_amount: body?.amount, status: body.payment_status==='succeeded'?BookingStatus.C:body.payment_status,booking_status: body.payment_status==='succeeded'?BookingStatus.C:body.payment_status,payment_withdrawable:body.payment_status==='succeeded'?false:true })
 
     }
 
@@ -879,6 +879,7 @@ export class BookingsService {
             { _id: bookingExists._id },
             {
                 status: body.client_payment_status,
+                payment_withdrawable:body.client_payment_status || body.booking_status?false:true,
                 company_payment: body.company_payment,
                 updated_by: user.userId,
                 booking_status: body.booking_status,

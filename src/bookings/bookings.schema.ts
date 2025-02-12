@@ -155,6 +155,7 @@ export interface IBookings {
     currency?: string;
     payment: IPayment;
     company_payment: string;
+    payment_withdrawable:boolean;
     taxes_and_fees: ITaxAndFee;
     reference_number: string;
     check_in_time?: string;
@@ -281,6 +282,11 @@ export const BookingSchema = new Schema<IBookings>(
             default: BookingStatus.CR,
         },
         checked_out: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        payment_withdrawable: {
             type: Boolean,
             required: false,
             default: false,
