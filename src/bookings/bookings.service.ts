@@ -353,7 +353,7 @@ export class BookingsService {
 
         const bookings = await this.bookingModel
             .find(filter, {
-                _id: 1, status: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1, company_payment_paid_on: 1,
+                _id: 1, status: 1, company_payment: 1, booking_status: 1,payment_withdrawable:1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1, company_payment_paid_on: 1,
                 company_payment_amount: 1,
                 company_payment_comment: 1,
 
@@ -441,7 +441,7 @@ export class BookingsService {
 
         return await this.bookingModel
             .find($filter, {
-                _id: 1, status: 1, company_payment: 1, booking_status: 1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1, company_payment_paid_on: 1,
+                _id: 1, status: 1, company_payment: 1, booking_status: 1,payment_withdrawable:1, nights: 1, sub_total: 1, reference_number: 1, check_in_time: 1, check_out_time: 1, start_date: 1, hotel_details: 1, car_details: 1, end_date: 1, type: 1, created_at: 1, company_payment_paid_on: 1,
                 company_payment_amount: 1,
                 company_payment_comment: 1,
             })
@@ -801,7 +801,7 @@ export class BookingsService {
 
     async updateBooking(body: IPayment, booking_id) {
 
-        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, currency: body?.currency, company_payment_amount: body?.amount, status: body.payment_status==='succeeded'?BookingStatus.C:body.payment_status,booking_status: body.payment_status==='succeeded'?BookingStatus.C:body.payment_status,payment_withdrawable:body.payment_status==='succeeded'?false:true })
+        return await this.bookingModel.findByIdAndUpdate({ _id: booking_id }, { payment: body, currency: body?.currency, company_payment_amount: body?.amount, status: body.payment_status==='succeeded'?BookingStatus.C:body.payment_status,booking_status: body.payment_status==='succeeded'?BookingStatus.C:body.payment_status,payment_withdrawable:body.payment_status==='succeeded'?false:true,company_payment_paid_on:body.payment_status==='succeeded'?new Date():null })
 
     }
 
@@ -923,7 +923,7 @@ export class BookingsService {
     
         let cancellation_ending_at: Date | null = null;
         if (hotelExists.type === 'Hotel' && hotelExists?.hotel_details?.cancellation_days) {
-            const startDate = new Date(start_date);
+            const startDate = new Date();
             if (!isNaN(startDate.getTime())) {
                 cancellation_ending_at = new Date(startDate);
                 cancellation_ending_at.setDate(startDate.getDate() - hotelExists?.hotel_details?.cancellation_days);

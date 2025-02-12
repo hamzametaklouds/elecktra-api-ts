@@ -1106,81 +1106,99 @@ export class HotelAndCarsService {
 
     async updateOption(id, body: UpdateHotelAndCarDto, user) {
         const optionExist = await this.hotelAndCarsModel.findOne({ _id: id, is_deleted: false });
-
+    
         if (!optionExist) {
             throw new BadRequestException(ErrorMessages.RESOURCE_NOT_FOUND);
         }
-
+    
         const {
             title, description, images, address, highlights, amenities, car_options, type, lat, long,
-            price, total_rooms, rooms_reserved, hotel_type, availability_from, availability_till,
-            unavailability_calendar, check_in_time,
-            check_out_time,
-            host_or_owner, car_details, hotel_details, is_deleted, is_disabled, platform_access_status
+            price, total_rooms, rooms_reserved, hotel_type, unavailability_calendar, check_in_time,
+            check_out_time, host_or_owner, car_details, hotel_details, is_deleted, is_disabled, platform_access_status
         } = body;
-
-
+    
         if (platform_access_status && user?.company_id) {
             throw new ForbiddenException('Company admin is not allowed to modify the platform access');
         }
-
+    
         // Validate latitude and longitude
-        if (lat < -90 || lat > 90) {
+        if (lat !== undefined && (lat < -90 || lat > 90)) {
             throw new BadRequestException('Latitude must be between -90 and 90');
         }
-        if (long < -180 || long > 180) {
+        if (long !== undefined && (long < -180 || long > 180)) {
             throw new BadRequestException('Longitude must be between -180 and 180');
         }
-        // Check if both lat and long are provided, else set a default or throw an error
-        const location = lat && long ? { type: 'Point', coordinates: [long, lat] } : optionExist.location;
-
+    
+        // Check if both lat and long are provided, else keep the existing location
+        const location = lat !== undefined && long !== undefined ? { type: 'Point', coordinates: [long, lat] } : optionExist.location;
+    
         if (!location.coordinates || location.coordinates.length !== 2) {
             throw new BadRequestException('Latitude and Longitude must be specified');
         }
-
+    
         // Validate hotel_details if provided for hotels
         if (type === RecordType.H && hotel_details) {
             if (hotel_details['cancellation_days'] !== undefined) {
-                // Ensure cancellation_days is a positive number
                 if (typeof hotel_details['cancellation_days'] !== 'number' || hotel_details['cancellation_days'] < 0) {
                     throw new BadRequestException('Cancellation days must be a positive number');
                 }
             }
         }
-
-        if (body.price && body.price < 0) {
+    
+        if (body.price !== undefined && body.price < 0) {
             throw new BadRequestException(ErrorMessages.INVALID_PRICE);
         }
-
+    
         // Validate dates if provided
         if (body.availability_from && body.availability_till) {
             const startDate = new Date(body.availability_from);
             const endDate = new Date(body.availability_till);
-            
+    
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                throw new BadRequestException('Invalid date format for availability_from or availability_till');
+            }
+    
             if (startDate >= endDate) {
                 throw new BadRequestException('End date must be after start date');
             }
         }
-
-        console.log('hotel_details----', hotel_details)
-
+    
+        // Build update fields conditionally to avoid overwriting with null values
+        const updateFields: any = {
+            title, description, images, address, highlights, amenities, unavailability_calendar, hotel_type, car_options, type,
+            lat, long, price, total_rooms, rooms_reserved, check_in_time, platform_access_status,
+            check_out_time, location, host_or_owner, car_details, hotel_details, is_deleted, is_disabled,
+            created_by: user?.userId || null
+        };
+    
+        // Conditionally add availability_from and availability_till if they exist in the request body
+        if (body.availability_from) {
+            const startDate = new Date(body.availability_from);
+            if (!isNaN(startDate.getTime())) {
+                updateFields.availability_from = startDate;
+            } else {
+                throw new BadRequestException('Invalid availability_from date format');
+            }
+        }
+    
+        if (body.availability_till) {
+            const endDate = new Date(body.availability_till);
+            if (!isNaN(endDate.getTime())) {
+                updateFields.availability_till = endDate;
+            } else {
+                throw new BadRequestException('Invalid availability_till date format');
+            }
+        }
+    
         const updatedOption = await this.hotelAndCarsModel.findByIdAndUpdate(
             { _id: optionExist._id },
-            {
-                title, description, images, address, highlights, amenities, unavailability_calendar, hotel_type, car_options, type,
-                lat, long, price, total_rooms, rooms_reserved, check_in_time, platform_access_status,
-                check_out_time,
-                location, // Pass the validated or existing location here
-                availability_from: availability_from ? new Date(availability_from) : null,
-                availability_till: availability_till ? new Date(availability_till) : null,
-                host_or_owner, car_details, hotel_details, is_deleted, is_disabled,
-                created_by: user?.userId || null
-            },
+            updateFields,
             { new: true }
         );
-
+    
         return updatedOption;
     }
+    
 
 
 }
