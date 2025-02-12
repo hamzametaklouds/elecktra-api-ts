@@ -51,6 +51,7 @@ export interface IPayment {
     payment_id: string;
     amount: number;
     currency: string;
+    client_payment_date:Date;
     payment_status: string;
 }
 
@@ -83,6 +84,11 @@ export const PaymentSchema = new Schema<IPayment>(
         },
         payment_status: {
             type: String,
+            required: false,
+            default: null
+        },
+        client_payment_date: {
+            type: Date,
             required: false,
             default: null
         },
