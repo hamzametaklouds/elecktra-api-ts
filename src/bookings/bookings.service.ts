@@ -900,110 +900,80 @@ export class BookingsService {
 
 
     async insertBooking(body: CreateBookingsDto, user: { userId?: ObjectId }) {
-        const {
-            hotel_or_car,
-            start_date,
-            end_date,
-            adults,
-            children,
-            infants,
-        } = body;
-
+        const { hotel_or_car, start_date, end_date, adults, children, infants } = body;
+    
         const hotelExists = await this.hotelAndCarService.getHotelOrCarById(hotel_or_car);
-
-        if (!hotelExists) {
-            throw new BadRequestException('Invalid hotel Id');
-        }
-
-        if (adults && adults === 0) {
-            throw new BadRequestException('There should be at least 1 adult');
-        }
-
-        // Check if availability_from has been reached
+        if (!hotelExists) throw new BadRequestException('Invalid hotel Id');
+        if (adults === 0) throw new BadRequestException('There should be at least 1 adult');
+    
         const startOf = new Date(start_date);
         const endOf = new Date(end_date);
+        if (isNaN(startOf.getTime()) || isNaN(endOf.getTime())) {
+            throw new BadRequestException('Invalid start or end date');
+        }
+    
         if (hotelExists.availability_from && new Date(hotelExists.availability_from) > startOf) {
-            throw new BadRequestException(
-                `Booking is not allowed before ${hotelExists.availability_from}`
-            );
+            throw new BadRequestException(`Booking is not allowed before ${hotelExists.availability_from}`);
         }
-
-        // Check if availability_till has passed
+    
         if (hotelExists.availability_till && new Date(hotelExists.availability_till) < endOf) {
-            throw new BadRequestException(
-                `Booking is not allowed after ${hotelExists.availability_till}`
-            );
+            throw new BadRequestException(`Booking is not allowed after ${hotelExists.availability_till}`);
         }
-
-        // Calculate cancellation_ending_at based on cancellation_days if type is Hotel
-        let cancellation_ending_at = null;
-        if (hotelExists.type === 'Hotel') {
+    
+        let cancellation_ending_at: Date | null = null;
+        if (hotelExists.type === 'Hotel' && hotelExists?.hotel_details?.cancellation_days) {
             const startDate = new Date(start_date);
-            cancellation_ending_at = new Date(startDate.getTime());
-            cancellation_ending_at.setDate(startDate.getDate() - (hotelExists as any).cancellation_days);
-            // Set to end of day (23:59:59.999)
-            cancellation_ending_at.setHours(23, 59, 59, 999);
+            if (!isNaN(startDate.getTime())) {
+                cancellation_ending_at = new Date(startDate);
+                cancellation_ending_at.setDate(startDate.getDate() - hotelExists?.hotel_details?.cancellation_days);
+                cancellation_ending_at.setHours(23, 59, 59, 999);
+            }
         }
-
-        const reference_number = Array.from(
-            { length: 15 },
-            () =>
-                'abcdefghijk123455678990lmnopqr0928340483stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[
-                Math.floor(Math.random() * 62)
-                ]
+    
+        const reference_number = Array.from({ length: 15 }, () =>
+            'abcdefghijk123455678990lmnopqr0928340483stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            .charAt(Math.floor(Math.random() * 62))
         ).join('').toLowerCase();
-
+    
         const start = new Date(start_date);
         const end = new Date(end_date);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            throw new Error('Invalid date format');
-        }
-
-        // Set both dates to midnight
         start.setHours(0, 0, 0, 0);
         end.setHours(0, 0, 0, 0);
-
+    
         const diffInMs = end.getTime() - start.getTime();
         const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-
+    
         let sub_total = hotelExists?.price * diffInDays;
-
         const tax = sub_total * 0.17;
-
-        sub_total = sub_total + tax;
-
+        sub_total += tax;
+    
         const company = await this.companiesService.getCompanyById(hotelExists.company_id);
-
-        let booking = await new this.bookingModel({
-            cancellation_ending_at,
+    
+        const booking = await new this.bookingModel({
+            cancellation_ending_at: cancellation_ending_at || undefined,
             hotel_or_car,
             start_date,
             end_date,
             type: hotelExists?.type,
             company_id: hotelExists.company_id,
             company_name: company?.title,
-            reference_number: reference_number,
-            guests: {
-                adults: adults,
-                children: children,
-                infants: infants,
-            },
+            reference_number,
+            guests: { adults, children, infants },
             taxes_and_fees: {
                 tax_percentage: 17,
                 total_tax_applied: tax,
             },
-            sub_total: sub_total,
+            sub_total,
             check_in_time: hotelExists.check_in_time,
             check_out_time: hotelExists.check_out_time,
             nights: diffInDays,
-            created_by: user.userId ? user.userId : null,
+            created_by: user.userId || null,
         }).save();
-
+    
         booking['rating'] = 4.3;
-
         return booking;
     }
+    
 
 
     async insertBookingPayment(booking_id, body: CreateCompanyPaymentDto, user: { userId?: ObjectId }) {
