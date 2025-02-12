@@ -926,7 +926,7 @@ export class BookingsService {
             const startDate = new Date();
             if (!isNaN(startDate.getTime())) {
                 cancellation_ending_at = new Date(startDate);
-                cancellation_ending_at.setDate(startDate.getDate() - hotelExists?.hotel_details?.cancellation_days);
+                cancellation_ending_at.setDate(startDate.getDate() + hotelExists?.hotel_details?.cancellation_days);
                 cancellation_ending_at.setHours(23, 59, 59, 999);
             }
         }
