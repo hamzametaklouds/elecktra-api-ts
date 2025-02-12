@@ -937,7 +937,7 @@ export class BookingsService {
 
         // Calculate cancellation_ending_at based on cancellation_days if type is Hotel
         let cancellation_ending_at = null;
-        if (hotelExists.type === 'Hotel' && 'cancellation_days' in hotelExists) {
+        if (hotelExists.type === 'Hotel') {
             const startDate = new Date(start_date);
             cancellation_ending_at = new Date(startDate.getTime());
             cancellation_ending_at.setDate(startDate.getDate() - (hotelExists as any).cancellation_days);
