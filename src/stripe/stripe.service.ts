@@ -142,61 +142,85 @@ export class StripeService {
     
 
 
-
     async createPaymentIntentPro(body: CreatePaymentDto, user: { userId?: ObjectId }) {
-        //adding payment method id
-        const { amount, currency, email, name, booking_id, payment_method_id, save_payment } = body;
-
-        const bookingExists = await this.bookingService.getBookingById(booking_id)
-
-
-        if (!bookingExists) {
-            throw new BadRequestException('Invalid booking id')
-        }
-
-        let customer;
-
-        // Check if a customer with this email already exists
-        const existingCustomers = await this.stripe.customers.list({ email: email, limit: 1 });
-
-        if (existingCustomers.data.length > 0) {
-            customer = existingCustomers.data[0];
-        } else {
-            // Create a new customer if one doesn't exist
-            customer = await this.stripe.customers.create({
-                payment_method: payment_method_id,
-                email: email,
-                name: name,
-                description: `One-time payment of ${amount} ${currency}`,
-                invoice_settings: {
-                    default_payment_method: payment_method_id,
-                },
-            });
-        }
-
-        // Attach and save the payment method if required
-            await this.stripe.paymentMethods.attach(payment_method_id, {
-                customer: customer.id,
-            });
-            await this.stripe.customers.update(customer.id, {
-                invoice_settings: { default_payment_method: payment_method_id },
-            });
-
-        let updatedBooking;
-
-        updatedBooking = await this.bookingService.updateBooking({
-            customer_id: customer.id,
-            payment_method_id: payment_method_id,
-            payment_id: null,
-            amount: bookingExists.sub_total,
-            currency: currency,
-            payment_status: 'Pending',
-            client_payment_date:null
-        }, bookingExists._id)
-
-        // Respond to the client with the payment details
-        return updatedBooking;
-    };
+      const { amount, currency, email, name, booking_id, payment_method_id, save_payment } = body;
+  
+      try {
+          // Step 1: Validate Booking
+          const bookingExists = await this.bookingService.getBookingById(booking_id);
+          if (!bookingExists) {
+              throw new BadRequestException('Invalid booking ID');
+          }
+  
+          // Step 2: Check if a customer with this email already exists
+          let customer;
+          const existingCustomers = await this.stripe.customers.list({ email: email, limit: 1 });
+  
+          if (existingCustomers.data.length > 0) {
+              customer = existingCustomers.data[0];
+          } else {
+              // Create a new customer if one doesn't exist
+              customer = await this.stripe.customers.create({
+                  email,
+                  name,
+                  description: `Customer for booking ID ${booking_id}`,
+              });
+          }
+  
+          // Step 3: Attach the payment method to the customer
+          try {
+              await this.stripe.paymentMethods.attach(payment_method_id, {
+                  customer: customer.id,
+              });
+  
+              // Set the payment method as the default for invoices
+              await this.stripe.customers.update(customer.id, {
+                  invoice_settings: { default_payment_method: payment_method_id },
+              });
+          } catch (error) {
+              if (error instanceof this.stripe.errors.StripeInvalidRequestError) {
+                  throw new BadRequestException(`Invalid PaymentMethod: ${error.message}`);
+              }
+              throw new InternalServerErrorException(`Failed to attach payment method: ${error.message}`);
+          }
+  
+          // Step 4: Update Booking with Payment Information
+          const updatedBooking = await this.bookingService.updateBooking(
+              {
+                  customer_id: customer.id,
+                  payment_method_id: payment_method_id,
+                  payment_id: null,
+                  amount: bookingExists.sub_total,
+                  currency: currency,
+                  payment_status: 'Pending',
+                  client_payment_date: null,
+              },
+              bookingExists._id
+          );
+  
+          // Respond with updated booking details
+          return updatedBooking;
+  
+      } catch (error: any) {
+          console.error(`❌ Error in createPaymentIntentPro: ${error.message}`);
+  
+          if (error instanceof this.stripe.errors.StripeCardError) {
+              throw new BadRequestException(`Card Error: ${error.message}`);
+          } else if (error instanceof this.stripe.errors.StripeInvalidRequestError) {
+              throw new BadRequestException(`Invalid Request: ${error.message}`);
+          } else if (error instanceof this.stripe.errors.StripeAPIError) {
+              throw new InternalServerErrorException(`Stripe API Error: ${error.message}`);
+          } else if (error instanceof this.stripe.errors.StripeConnectionError) {
+              throw new InternalServerErrorException(`Connection Error: ${error.message}`);
+          } else if (error instanceof this.stripe.errors.StripeRateLimitError) {
+              throw new BadRequestException(`Rate Limit Exceeded: ${error.message}`);
+          } else {
+              // Catch-all for unexpected errors
+              throw new InternalServerErrorException(`Unexpected Error: ${error.message}`);
+          }
+      }
+  }
+  
 
 
 
