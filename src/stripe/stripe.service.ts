@@ -65,6 +65,8 @@ export class StripeService {
         if (!bookingExists) {
           throw new BadRequestException('Invalid booking id');
         }
+
+       
     
         // Step 2: Check if withdrawal is allowed
         if (
@@ -75,6 +77,12 @@ export class StripeService {
             'Withdraw Payment is permanently disabled for this booking as the status is no longer Pending.'
           );
         }
+
+        const paymentMethod = await this.stripe.paymentMethods.retrieve(bookingExists?.payment?.payment_method_id);
+
+        if (!paymentMethod?.customer) {
+         throw new BadRequestException('The provided PaymentMethod is not attached to any customer.');
+         }
     
         // Step 3: Create a PaymentIntent for a one-time payment
         const paymentIntent = await this.stripe.paymentIntents.create({
@@ -167,15 +175,12 @@ export class StripeService {
         }
 
         // Attach and save the payment method if required
-        if (save_payment) {
             await this.stripe.paymentMethods.attach(payment_method_id, {
                 customer: customer.id,
             });
             await this.stripe.customers.update(customer.id, {
                 invoice_settings: { default_payment_method: payment_method_id },
             });
-        }
-
 
         let updatedBooking;
 
