@@ -68,239 +68,152 @@ export class HotelAndCarsService {
                 children,
                 infants,
                 lat,
-                long
+                long,
             } = body;
-
+    
             let hotel = [];
-
             $filter = matchFilters($filter);
-
             console.log('$filter-------', $filter);
-
-            let rating = 5// Default filter
-            if ($filter['rating']) {
-
-                rating = $filter['rating']['$lt']
-                delete $filter.rating; // Remove rating from the original filter
-            }
-
-
+    
             const userWishList = await this.wishListService.getWishlistById(user.userId);
-
+            const currentDate = new Date();
+    
             if (start_date && end_date) {
                 // Validate and parse start_date and end_date
-                if (!moment(start_date, moment.ISO_8601, true).isValid() ||
-                    !moment(end_date, moment.ISO_8601, true).isValid()) {
-                    throw new BadRequestException("Invalid date format. Please use ISO 8601 format (e.g., 2024-12-04T00:00:00.000Z).");
-                }
-
-                const startDate = moment.utc(start_date).startOf('day').toDate();
-                const endDate = moment.utc(end_date).endOf('day').toDate();
-
-                try {
-                    hotel = await this.hotelAndCarsModel.aggregate([
-                        {
-                            $geoNear: {
-                                near: { type: "Point", coordinates: [long, lat] },
-                                distanceField: "dist.calculated",
-                                maxDistance: 50000, // Correct placement of maxDistance
-                                spherical: true,
-                                query: {
-                                    is_deleted: false,
-                                    is_disabled: false,
-                                    platform_access_status: PlatformAccessStatus.A,
-                                    ...$filter,
-                                    type: RecordType.H,
-                                },
-                            },
-                        },
-                        { $sort: { "dist.calculated": 1 } },
-                        {
-                            $match: {
-                                $or: [
-                                    { unavailability_calendar: { $exists: false } },
-                                    { unavailability_calendar: { $eq: null } },
-                                    {
-                                        $expr: {
-                                            $not: {
-                                                $in: [new Date(), "$unavailability_calendar"],
-                                            },
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "rating_reviews",
-                                localField: "_id",
-                                foreignField: "hotel_or_car",
-                                pipeline: [{ $sort: { created_at: -1 } }],
-                                as: "reviews",
-                            },
-                        },
-                        {
-                            $unwind: {
-                                path: "$reviews",
-                                preserveNullAndEmptyArrays: true,
-                            },
-                        },
-                        {
-                            $group: {
-                                _id: "$_id",
-                                title: { $first: "$title" },
-                                description: { $first: "$description" },
-                                address: { $first: "$address" },
-                                images: { $first: "$images" },
-                                highlights: { $first: "$highlights" },
-                                price: { $first: "$price" },
-                                location: { $first: "$location" },
-                                hotel_type: { $first: "$hotel_type" },
-                                is_deleted: { $first: "$is_deleted" },
-                                distance: { $first: "$dist.calculated" },
-                                created_by: { $first: "$created_by" },
-                                total_reviews: {
-                                    $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] },
-                                },
-                                rating: { $avg: "$reviews.rating" }, // Calculate the average rating
-                            },
-                        },
-                        {
-                            $project: {
-                                _id: 1,
-                                title: 1,
-                                description: 1,
-                                address: 1,
-                                images: 1,
-                                highlights: 1,
-                                price: 1,
-                                ratings: { $ifNull: ["$rating", 0] }, // Use 0 if there are no reviews
-                                total_reviews: 1,
-                                location: 1,
-                                hotel_type: 1,
-                                is_in_wishlist: { $literal: false },
-                                distance: 1,
-                                created_by: 1,
-                            },
-                        },
-                        {
-                            $match: { ratings: { $lte: 5 } },
-                        },
-                    ]);
-
-                } catch (error) {
-                    console.error("Error during aggregation:", error);
-                    throw new BadRequestException("Could not fetch hotels");
+                if (
+                    !moment(start_date, moment.ISO_8601, true).isValid() ||
+                    !moment(end_date, moment.ISO_8601, true).isValid()
+                ) {
+                    throw new BadRequestException(
+                        "Invalid date format. Please use ISO 8601 format (e.g., 2024-12-04T00:00:00.000Z)."
+                    );
                 }
             }
-
-            else {
-                try {
-                    hotel = await this.hotelAndCarsModel.aggregate([
-                        {
-                            $geoNear: {
-                                near: { type: "Point", coordinates: [long, lat] },
-                                distanceField: "dist.calculated",
-                                maxDistance: 50000, // Correct placement of maxDistance
-                                spherical: true,
-                                query: {
-                                    is_deleted: false,
-                                    ...$filter,
-                                    type: RecordType.H,
-                                },
+    
+            try {
+                hotel = await this.hotelAndCarsModel.aggregate([
+                    {
+                        $geoNear: {
+                            near: { type: "Point", coordinates: [long, lat] },
+                            distanceField: "dist.calculated",
+                            maxDistance: 50000,
+                            spherical: true,
+                            query: {
+                                is_deleted: false,
+                                is_disabled: false,
+                                platform_access_status: PlatformAccessStatus.A,
+                                ...$filter,
+                                type: RecordType.H,
                             },
                         },
-                        { $sort: { "dist.calculated": 1 } },
-                        {
-                            $match: {
-                                $or: [
-                                    { unavailability_calendar: { $exists: false } },
-                                    { unavailability_calendar: { $eq: null } },
-                                    {
-                                        $expr: {
-                                            $not: {
-                                                $in: [new Date(), "$unavailability_calendar"],
+                    },
+                    { $sort: { "dist.calculated": 1 } },
+                    {
+                        $match: {
+                            $and: [
+                                // Filter for availability range
+                                {
+                                    $or: [
+                                        { availability_from: { $exists: false }, availability_till: { $exists: false } },
+                                        {
+                                            $and: [
+                                                { availability_from: { $lte: currentDate } },
+                                                { availability_till: { $gte: currentDate } },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                // Filter for unavailability_calendar to exclude unavailable dates
+                                {
+                                    $or: [
+                                        { unavailability_calendar: { $exists: false } },
+                                        { unavailability_calendar: { $eq: null } },
+                                        {
+                                            $expr: {
+                                                $not: {
+                                                    $in: [currentDate, "$unavailability_calendar"],
+                                                },
                                             },
                                         },
-                                    },
-                                ],
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "rating_reviews",
-                                localField: "_id",
-                                foreignField: "hotel_or_car",
-                                pipeline: [{ $sort: { created_at: -1 } }],
-                                as: "reviews",
-                            },
-                        },
-                        {
-                            $unwind: {
-                                path: "$reviews",
-                                preserveNullAndEmptyArrays: true,
-                            },
-                        },
-                        {
-                            $group: {
-                                _id: "$_id",
-                                title: { $first: "$title" },
-                                description: { $first: "$description" },
-                                address: { $first: "$address" },
-                                images: { $first: "$images" },
-                                highlights: { $first: "$highlights" },
-                                price: { $first: "$price" },
-                                location: { $first: "$location" },
-                                hotel_type: { $first: "$hotel_type" },
-                                is_deleted: { $first: "$is_deleted" },
-                                distance: { $first: "$dist.calculated" },
-                                created_by: { $first: "$created_by" },
-                                total_reviews: {
-                                    $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] },
+                                    ],
                                 },
-                                rating: { $avg: "$reviews.rating" }, // Calculate the average rating
+                            ],
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "rating_reviews",
+                            localField: "_id",
+                            foreignField: "hotel_or_car",
+                            pipeline: [{ $sort: { created_at: -1 } }],
+                            as: "reviews",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$reviews",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$_id",
+                            title: { $first: "$title" },
+                            description: { $first: "$description" },
+                            address: { $first: "$address" },
+                            images: { $first: "$images" },
+                            highlights: { $first: "$highlights" },
+                            price: { $first: "$price" },
+                            location: { $first: "$location" },
+                            hotel_type: { $first: "$hotel_type" },
+                            is_deleted: { $first: "$is_deleted" },
+                            distance: { $first: "$dist.calculated" },
+                            created_by: { $first: "$created_by" },
+                            total_reviews: {
+                                $sum: { $cond: [{ $ifNull: ["$reviews", false] }, 1, 0] },
                             },
+                            rating: { $avg: "$reviews.rating" },
                         },
-                        {
-                            $project: {
-                                _id: 1,
-                                title: 1,
-                                description: 1,
-                                address: 1,
-                                images: 1,
-                                highlights: 1,
-                                price: 1,
-                                ratings: { $ifNull: ["$rating", 0] }, // Use 0 if there are no reviews
-                                total_reviews: 1,
-                                location: 1,
-                                hotel_type: 1,
-                                is_in_wishlist: { $literal: false },
-                                distance: 1,
-                                created_by: 1,
-                            },
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            description: 1,
+                            address: 1,
+                            images: 1,
+                            highlights: 1,
+                            price: 1,
+                            ratings: { $ifNull: ["$rating", 0] },
+                            total_reviews: 1,
+                            location: 1,
+                            hotel_type: 1,
+                            is_in_wishlist: { $literal: false },
+                            distance: 1,
+                            created_by: 1,
                         },
-                        {
-                            $match: { ratings: { $lte: 5 } },
-                        },
-                    ]);
-
-
-                } catch (error) {
-                    console.error("Error during aggregation without date filters:", error);
-                    throw new Error("Could not fetch hotels");
-                }
+                    },
+                    {
+                        $match: { ratings: { $lte: 5 } },
+                    },
+                ]);
+            } catch (error) {
+                console.error("Error during aggregation:", error);
+                throw new BadRequestException("Could not fetch hotels");
             }
-
+    
+            // Update wishlist status for each hotel
             if (userWishList) {
                 hotel.forEach((value) => {
-                    userWishList.hotels.forEach((hotel) => {
-                        if (hotel.toString() === value._id.toString()) {
+                    userWishList.hotels.forEach((wishlistHotel) => {
+                        if (wishlistHotel.toString() === value._id.toString()) {
                             value.is_in_wishlist = true;
                         }
                     });
                 });
             }
-
+    
+            // Save recent search
             this.recentSearchService.insertSearch(
                 {
                     title: place_title || null,
@@ -310,20 +223,19 @@ export class HotelAndCarsService {
                     infants,
                     start_date,
                     end_date,
-                    type: 'Stay',
-                    location: { type: 'Point', coordinates: [long, lat] }
+                    type: "Stay",
+                    location: { type: "Point", coordinates: [long, lat] },
                 },
                 user
             );
-
-
+    
             return hotel;
-
         } catch (err) {
             console.error("Error during the plan trip process:", err);
             throw new BadRequestException(err.message);
         }
     }
+    
 
 
 
