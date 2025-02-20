@@ -24,9 +24,7 @@ import { InvitationsModule } from './invitations/invitations.module';
 import { LandingPageConfigsModule } from './landing-page-configs/landing-page-configs.module';
 import { QueriesModule } from './queries/queries.module';
 import { FeaturedCitiesModule } from './featured-cities/featured-cities.module';
-
-
-
+import { sentry } from './config/env.config/sentry.config';
 
 @Module({
   imports: [
@@ -52,7 +50,8 @@ import { FeaturedCitiesModule } from './featured-cities/featured-cities.module';
           otpForgotPasswordBaseUrl,
           jwtSecret,
           onboardingInvitationBaseUrl,
-          firebase
+          firebase,
+          sentry
         ],
     }),
     DatabaseModule,
