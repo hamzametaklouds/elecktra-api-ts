@@ -913,13 +913,13 @@ export class BookingsService {
             throw new BadRequestException('Invalid start or end date');
         }
     
-        if (hotelExists.availability_from && new Date(hotelExists.availability_from) > startOf) {
-            throw new BadRequestException(`Booking is not allowed before ${hotelExists.availability_from}`);
-        }
+        // if (hotelExists.availability_from && new Date(hotelExists.availability_from) > startOf) {
+        //     throw new BadRequestException(`Booking is not allowed before ${hotelExists.availability_from}`);
+        // }
     
-        if (hotelExists.availability_till && new Date(hotelExists.availability_till) < endOf) {
-            throw new BadRequestException(`Booking is not allowed after ${hotelExists.availability_till}`);
-        }
+        // if (hotelExists.availability_till && new Date(hotelExists.availability_till) < endOf) {
+        //     throw new BadRequestException(`Booking is not allowed after ${hotelExists.availability_till}`);
+        // }
     
         let cancellation_ending_at: Date | null = null;
         if (hotelExists.type === 'Hotel' && hotelExists?.hotel_details?.cancellation_days) {

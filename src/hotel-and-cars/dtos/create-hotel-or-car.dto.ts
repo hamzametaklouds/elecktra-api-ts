@@ -150,32 +150,23 @@ export class CreateHotelAndCarDto {
     @IsOptional()
     total_rooms: number;
 
-    @ApiProperty({
-        description: 'rooms_reserved number e.g rooms_reserved=676',
-        required: true,
-        default: 0,
-    })
-    @IsNumber()
-    @IsOptional()
-    rooms_reserved: number;
+    // @ApiProperty({
+    //     description: 'rooms_reserved number e.g rooms_reserved=676',
+    //     required: true,
+    //     default: 0,
+    // })
+    // @IsString()
+    // @IsOptional()
+    // availability_from: string;
 
-    @ApiProperty({
-        description: 'rooms_reserved number e.g rooms_reserved=676',
-        required: true,
-        default: 0,
-    })
-    @IsString()
-    @IsOptional()
-    availability_from: string;
-
-    @ApiProperty({
-        description: 'availability_till number e.g availability_till=676',
-        required: true,
-        default: 0,
-    })
-    @IsString()
-    @IsOptional()
-    availability_till: string;
+    // @ApiProperty({
+    //     description: 'availability_till number e.g availability_till=676',
+    //     required: true,
+    //     default: 0,
+    // })
+    // @IsString()
+    // @IsOptional()
+    // availability_till: string;
 
     @ApiProperty({
         description: 'unavailability_calendar number e.g unavailability_calendar=676',

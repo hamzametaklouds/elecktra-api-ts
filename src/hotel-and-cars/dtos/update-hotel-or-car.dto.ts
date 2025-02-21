@@ -128,24 +128,6 @@ export class UpdateHotelAndCarDto {
     rooms_reserved: number;
 
     @ApiProperty({
-        description: 'rooms_reserved number e.g rooms_reserved=676',
-        required: true,
-        default: 0,
-    })
-    @IsString()
-    @IsOptional()
-    availability_from: string;
-
-    @ApiProperty({
-        description: 'availability_till number e.g availability_till=676',
-        required: true,
-        default: 0,
-    })
-    @IsString()
-    @IsOptional()
-    availability_till: string;
-
-    @ApiProperty({
         description: 'hotel_type string e.g hotel_type=xyzabc',
         required: true,
         default: '',

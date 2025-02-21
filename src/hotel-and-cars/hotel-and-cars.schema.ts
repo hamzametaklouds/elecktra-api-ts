@@ -159,8 +159,6 @@ export interface IHotelAndCars {
     check_out_time?: string;
     unavailability_calendar?: Date[];
     rooms_reserved: number;
-    availability_from: Date;
-    availability_till: Date;
     platform_access_status: string
     host_or_owner: Schema.Types.ObjectId
     car_details: ICarDetails
@@ -285,16 +283,6 @@ export const HotelAndCarSchema = new Schema<IHotelAndCars>(
         },
         unavailability_calendar: {
             type: [Date],
-            required: false,
-            default: null
-        },
-        availability_from: {
-            type: Date,
-            required: false,
-            default: null
-        },
-        availability_till: {
-            type: Date,
             required: false,
             default: null
         },

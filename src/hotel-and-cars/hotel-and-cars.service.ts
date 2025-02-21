@@ -872,11 +872,11 @@ export class HotelAndCarsService {
             check_out_time,
             price,
             total_rooms,
-            rooms_reserved,
+           // rooms_reserved,
             hotel_type,
             company_id,
-            availability_from,
-            availability_till,
+            // availability_from,
+            // availability_till,
             host_or_owner,
             car_details,
             hotel_details,
@@ -922,9 +922,9 @@ export class HotelAndCarsService {
             price,
             total_rooms,
             company_id,
-            rooms_reserved,
-            availability_from: availability_from ? new Date(availability_from) : null,
-            availability_till: availability_till ? new Date(availability_till) : null,
+            //rooms_reserved,
+           // availability_from: availability_from ? new Date(availability_from) : null,
+           // availability_till: availability_till ? new Date(availability_till) : null,
             host_or_owner,
             car_details,
             hotel_details,
@@ -1061,20 +1061,6 @@ export class HotelAndCarsService {
             throw new BadRequestException(ErrorMessages.INVALID_PRICE);
         }
     
-        // Validate dates if provided
-        if (body.availability_from && body.availability_till) {
-            const startDate = new Date(body.availability_from);
-            const endDate = new Date(body.availability_till);
-    
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                throw new BadRequestException('Invalid date format for availability_from or availability_till');
-            }
-    
-            if (startDate >= endDate) {
-                throw new BadRequestException('End date must be after start date');
-            }
-        }
-    
         // Build update fields conditionally to avoid overwriting with null values
         const updateFields: any = {
             title, description, images, address, highlights, amenities, unavailability_calendar, hotel_type, car_options, type,
@@ -1082,25 +1068,6 @@ export class HotelAndCarsService {
             check_out_time, location, host_or_owner, car_details, hotel_details, is_deleted, is_disabled,
             created_by: user?.userId || null
         };
-    
-        // Conditionally add availability_from and availability_till if they exist in the request body
-        if (body.availability_from) {
-            const startDate = new Date(body.availability_from);
-            if (!isNaN(startDate.getTime())) {
-                updateFields.availability_from = startDate;
-            } else {
-                throw new BadRequestException('Invalid availability_from date format');
-            }
-        }
-    
-        if (body.availability_till) {
-            const endDate = new Date(body.availability_till);
-            if (!isNaN(endDate.getTime())) {
-                updateFields.availability_till = endDate;
-            } else {
-                throw new BadRequestException('Invalid availability_till date format');
-            }
-        }
     
         const updatedOption = await this.hotelAndCarsModel.findByIdAndUpdate(
             { _id: optionExist._id },
