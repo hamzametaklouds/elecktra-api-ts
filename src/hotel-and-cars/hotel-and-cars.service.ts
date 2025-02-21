@@ -112,17 +112,17 @@ export class HotelAndCarsService {
                         $match: {
                             $and: [
                                 // Filter for availability range
-                                {
-                                    $or: [
-                                        { availability_from: { $exists: false }, availability_till: { $exists: false } },
-                                        {
-                                            $and: [
-                                                { availability_from: { $lte: currentDate } },
-                                                { availability_till: { $gte: currentDate } },
-                                            ],
-                                        },
-                                    ],
-                                },
+                                // {
+                                //     $or: [
+                                //         { availability_from: { $exists: false }, availability_till: { $exists: false } },
+                                //         {
+                                //             $and: [
+                                //                 { availability_from: { $lte: currentDate } },
+                                //                 { availability_till: { $gte: currentDate } },
+                                //             ],
+                                //         },
+                                //     ],
+                                // },
                                 // Filter for unavailability_calendar to exclude unavailable dates
                                 {
                                     $or: [
