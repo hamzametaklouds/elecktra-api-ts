@@ -795,8 +795,10 @@ export class BookingsService {
             }
         ]);
 
+        const cardInfo = await this.stripeService.getCardInfoForBookingDetail(hotels[0]._id);
 
-        return hotels[0];
+
+        return { ...hotels[0], cardInfo: cardInfo };
     }
 
 
