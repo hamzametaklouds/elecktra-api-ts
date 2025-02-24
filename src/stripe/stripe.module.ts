@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
-import { BookingsModule } from 'src/bookings/bookings.module';
+import { BookingsModule } from '../bookings/bookings.module';
 
 @Module({
   imports: [forwardRef(() => BookingsModule)],

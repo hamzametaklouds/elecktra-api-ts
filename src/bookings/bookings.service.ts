@@ -24,6 +24,7 @@ export class BookingsService {
         @Inject(forwardRef(() => StripeService))
         private stripeService: StripeService,
         private hotelAndCarService: HotelAndCarsService,
+        @Inject(forwardRef(() => UsersService))
         private userService: UsersService,
         private systemUserService: SystemUsersService,
         private companiesService: CompaniesService
@@ -1160,5 +1161,10 @@ export class BookingsService {
 
     }
 
+    async getPaymentIdBooking(filter: Object) {
+        return await this.bookingModel
+            .findOne(filter)
+            .sort({ created_at: -1 });
+    }
 
 }

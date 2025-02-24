@@ -10,7 +10,14 @@ import { CompaniesModule } from 'src/companies/companies.module';
 import { SystemUsersModule } from 'src/system-users/system-users.module';
 
 @Module({
-  imports: [DatabaseModule, forwardRef(() => StripeModule), HotelAndCarsModule, CompaniesModule, UsersModule,SystemUsersModule],
+  imports: [
+    DatabaseModule, 
+    forwardRef(() => StripeModule),
+    HotelAndCarsModule, 
+    CompaniesModule, 
+    forwardRef(() => UsersModule) ,
+    SystemUsersModule
+  ],
   controllers: [BookingsController],
   providers: [BookingsService, ...BookingModel],
   exports: [BookingsService]

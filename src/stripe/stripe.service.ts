@@ -226,4 +226,46 @@ export class StripeService {
 
 
 
+    async getCardInfo(user: { userId?: ObjectId }) {
+      try {
+        // Get the latest completed booking with payment info for this user
+        const latestBooking = await this.bookingService.getPaymentIdBooking({
+          created_by: user.userId,
+          'payment.payment_method_id': { $exists: true },
+          'payment.payment_status': 'succeeded',
+          status: 'Completed'
+        })
+     
+
+        if (!latestBooking?.payment?.payment_method_id) {
+          throw new BadRequestException('No payment method found for this user');
+        }
+
+        const paymentMethod = await this.stripe.paymentMethods.retrieve(latestBooking.payment.payment_method_id);
+        
+        if (!paymentMethod || paymentMethod.type !== 'card') {
+          throw new BadRequestException('Invalid payment method or not a card');
+        }
+
+        // Extract relevant card information
+        const cardInfo = {
+          brand: paymentMethod.card.brand,
+          last4: paymentMethod.card.last4,
+          expMonth: paymentMethod.card.exp_month,
+          expYear: paymentMethod.card.exp_year,
+          cardholderName: paymentMethod.billing_details.name,
+          country: paymentMethod.card.country,
+          funding: paymentMethod.card.funding, // 'credit' or 'debit'
+          customerId: latestBooking.payment.customer_id
+        };
+
+        return cardInfo;
+      } catch (error) {
+        if (error instanceof Stripe.errors.StripeInvalidRequestError) {
+          throw new BadRequestException(`Invalid Request: ${error.message}`);
+        }
+        throw new InternalServerErrorException(`Error retrieving card info: ${error.message}`);
+      }
+    }
+
 }

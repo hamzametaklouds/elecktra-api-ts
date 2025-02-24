@@ -13,6 +13,7 @@ import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { RolesGuard } from 'src/app/guards/role-guard';
 import { UpdateHostDto } from './dtos/update-host.dto';
+import { StripeService } from 'src/stripe/stripe.service';
 
 
 UseFilters(HttpExceptionFilter);
@@ -21,7 +22,10 @@ UseFilters(HttpExceptionFilter);
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
-  constructor(private userService: UsersService) { }
+  constructor(
+    private userService: UsersService,
+    private stripeService: StripeService,
+  ) { }
 
   //   /**
   //    * The purpose of this method is to return user either paginated or filtered based on the query received
@@ -165,4 +169,18 @@ export class UsersController {
   //     const user = await this.userService.pullContacts(datasetId, body);
   //     return user;
   //   }
+
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard)
+  @Get('card-info')
+  @Roles(Role.USER)
+  async getCardInfo(@Req() req: Request) {
+    const cardInfo = await this.stripeService.getCardInfo( req.user);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Card information retrieved successfully',
+      data: cardInfo
+    };
+  }
 }
