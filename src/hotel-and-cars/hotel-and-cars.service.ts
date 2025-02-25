@@ -110,21 +110,17 @@ export class HotelAndCarsService {
                     { $sort: { "dist.calculated": 1 } },
                     {
                         $match: {
-                    
-                            $and: [
-                             
+                            $or: [
+                                { unavailability_calendar: null },
+                                { unavailability_calendar: [] },
                                 {
-                                    unavailability_calendar: {
-                                        $not: {
-                                            $elemMatch: {
-                                                $gte: start_date,
-                                                $lte: end_date,
-                                            }
-                                        }
-                                    }
+                                    $and: [
+                                        { unavailability_calendar: { $exists: true } },
+                                        { unavailability_calendar: { $not: { $elemMatch: { $gte: new Date(start_date), $lte: new Date(end_date) } } } }
+                                    ]
                                 }
                             ]
-                        },
+                        }
                     },
                     {
                         $lookup: {
