@@ -110,16 +110,9 @@ export class HotelAndCarsService {
                     { $sort: { "dist.calculated": 1 } },
                     {
                         $match: {
-                            is_disabled: false,
-                            is_deleted: false,
-                            platform_access_status: PlatformAccessStatus.A,
+                    
                             $and: [
-                                {
-                                    $or: [
-                                        { unavailability_calendar: { $exists: false } },
-                                        { unavailability_calendar: { $eq: null } },
-                                    ]
-                                },
+                             
                                 {
                                     unavailability_calendar: {
                                         $not: {
