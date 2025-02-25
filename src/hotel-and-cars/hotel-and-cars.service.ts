@@ -110,34 +110,21 @@ export class HotelAndCarsService {
                     { $sort: { "dist.calculated": 1 } },
                     {
                         $match: {
-                            $and: [
-                                // Filter for availability range
-                                // {
-                                //     $or: [
-                                //         { availability_from: { $exists: false }, availability_till: { $exists: false } },
-                                //         {
-                                //             $and: [
-                                //                 { availability_from: { $lte: currentDate } },
-                                //                 { availability_till: { $gte: currentDate } },
-                                //             ],
-                                //         },
-                                //     ],
-                                // },
-                                // Filter for unavailability_calendar to exclude unavailable dates
-                                {
-                                    $or: [
-                                        { unavailability_calendar: { $exists: false } },
-                                        { unavailability_calendar: { $eq: null } },
-                                        {
-                                            $expr: {
-                                                $not: {
-                                                    $in: [currentDate, "$unavailability_calendar"],
-                                                },
+                            is_disabled: false,
+                            is_deleted: false,
+                            platform_access_status: PlatformAccessStatus.A,
+                                $or: [
+                                    { unavailability_calendar: { $exists: false } },
+                                    { unavailability_calendar: { $eq: null } },
+                                    {
+                                        $expr: {
+                                            $not: {
+                                                $in: [currentDate, "$unavailability_calendar"],
                                             },
                                         },
-                                    ],
-                                },
-                            ],
+                                    },
+                                ],
+                            
                         },
                     },
                     {
