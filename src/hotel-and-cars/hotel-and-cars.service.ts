@@ -113,18 +113,24 @@ export class HotelAndCarsService {
                             is_disabled: false,
                             is_deleted: false,
                             platform_access_status: PlatformAccessStatus.A,
-                                $or: [
-                                    { unavailability_calendar: { $exists: false } },
-                                    { unavailability_calendar: { $eq: null } },
-                                    {
-                                        $expr: {
-                                            $not: {
-                                                $in: [currentDate, "$unavailability_calendar"],
-                                            },
-                                        },
-                                    },
-                                ],
-                            
+                            $and: [
+                                {
+                                    $or: [
+                                        { unavailability_calendar: { $exists: false } },
+                                        { unavailability_calendar: { $eq: null } },
+                                    ]
+                                },
+                                {
+                                    unavailability_calendar: {
+                                        $not: {
+                                            $elemMatch: {
+                                                $gte: start_date,
+                                                $lte: end_date,
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         },
                     },
                     {
