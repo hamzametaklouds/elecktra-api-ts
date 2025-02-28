@@ -1,15 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEnum, IsArray, IsOptional } from 'class-validator';
-import { ValidForType } from '../faq.schema';
+import { IsString, IsEnum, IsArray, IsOptional, Matches, ValidateIf } from 'class-validator';
+import { ValidForType, FAQType } from '../faq.schema';
 
 export class CreateFaqDto {
-    @ApiProperty({ description: 'Question text' })
+    @ApiProperty({ 
+        description: 'Question text',
+        required: false 
+    })
+    @IsOptional()
     @IsString()
-    question: string;
+    question?: string;
 
-    @ApiProperty({ description: 'Answer text' })
+    @ApiProperty({ 
+        description: 'Answer text',
+        required: false 
+    })
+    @IsOptional()
     @IsString()
-    answer: string;
+    answer?: string;
+
+    @ApiProperty({ 
+        enum: FAQType,
+        description: 'Type of FAQ content',
+        example: FAQType.TEXT
+    })
+    @IsEnum(FAQType)
+    type: FAQType;
 
     @ApiProperty({ 
         enum: ValidForType,
@@ -26,6 +42,17 @@ export class CreateFaqDto {
     })
     @IsOptional()
     @IsArray()
+    @ValidateIf((o) => o.files && o.files.length > 0)
     @IsString({ each: true })
+    @Matches(/^.*\.(pdf)$/i, { 
+        each: true,
+        message: 'All files must be PDFs',
+        groups: ['pdf']
+    })
+    @Matches(/^.*\.(mp4|mov|avi|wmv|flv|mkv)$/i, { 
+        each: true,
+        message: 'All files must be videos',
+        groups: ['video']
+    })
     files?: string[];
 } 

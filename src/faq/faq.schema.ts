@@ -4,15 +4,23 @@ import { FAQ_COLLECTION } from './faq.constants';
 
 export enum ValidForType {
     MOBILE = 'mobile',
-    COMPANY = 'company'
+    COMPANY = 'company',
+    BOTH = 'both'
+}
+
+export enum FAQType {
+    VIDEO = 'video',
+    PDF = 'pdf',
+    TEXT = 'text'
 }
 
 export interface IFAQ {
     _id?: Schema.Types.ObjectId;
-    question: string;
-    answer: string;
-    valid_for: string[];
-    files: string[];
+    question?: string;
+    answer?: string;
+    type: FAQType;
+    valid_for: ValidForType;
+    files?: string[];
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -23,21 +31,42 @@ export const FAQSchema = new Schema<IFAQ>(
     {
         question: {
             type: String,
-            required: true,
+            required: false,
         },
         answer: {
             type: String,
-            required: true,
+            required: false,
+        },
+        type: {
+            type: String,
+            enum: Object.values(FAQType),
+            required: true
         },
         files: {
             type: [String],
             required: false,
+            validate: {
+                validator: function(files: string[]) {
+                    if (!files || files.length === 0) return true;
+                    
+                    const type = this.type;
+                    if (type === FAQType.PDF) {
+                        return files.every(file => file.toLowerCase().endsWith('.pdf'));
+                    }
+                    if (type === FAQType.VIDEO) {
+                        return files.every(file => 
+                            file.toLowerCase().match(/\.(mp4|mov|avi|wmv|flv|mkv)$/));
+                    }
+                    return true;
+                },
+                message: 'Files must match the specified type (PDF/Video)'
+            }
         },
         valid_for: {
-            type: [String],
+            type: String,
             enum: Object.values(ValidForType),
             required: true,
-            default: [ValidForType.MOBILE, ValidForType.COMPANY]
+            default: ValidForType.BOTH
         },
         is_disabled: {
             type: Boolean,
