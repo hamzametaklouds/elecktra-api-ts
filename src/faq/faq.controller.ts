@@ -29,7 +29,9 @@ export class FAQController {
         @Body() createFaqDto: CreateFaqDto,
         @Req() req: Request & { user: any }
     ) {
+        console.log(createFaqDto);
         const faq = await this.faqService.create(createFaqDto, req.user);
+
         return { message: 'FAQ created successfully', data: faq };
     }
 

@@ -34,7 +34,9 @@ export class FAQService {
     }
 
     async create(createFaqDto: CreateFaqDto, user: { userId?: ObjectId }) {
+        console.log(createFaqDto);
         if (createFaqDto.files) {
+            console.log(createFaqDto.files.map(f => f.url));
             this.validateFiles(createFaqDto.files.map(f => f.url), createFaqDto.type);
         }
 

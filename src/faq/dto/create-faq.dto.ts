@@ -18,15 +18,6 @@ class FileDto {
     })
     @IsString()
     @IsNotEmpty()
-    @ValidateIf((o) => o.url && o.url.length > 0)
-    @Matches(/^.*\.(pdf)$/i, { 
-        message: 'URL must be a PDF file',
-        groups: ['pdf']
-    })
-    @Matches(/^.*\.(mp4|mov|avi|wmv|flv|mkv)$/i, { 
-        message: 'URL must be a video file',
-        groups: ['video']
-    })
     url: string;
 }
 
