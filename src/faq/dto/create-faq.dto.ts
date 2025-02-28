@@ -1,6 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEnum, IsArray, IsOptional, Matches, ValidateIf } from 'class-validator';
+import { IsString, IsEnum, IsArray, IsOptional, Matches, ValidateIf, ValidateNested, IsNotEmpty } from 'class-validator';
 import { ValidForType, FAQType } from '../faq.schema';
+import { Type } from 'class-transformer';
+
+class FileDto {
+    @ApiProperty({
+        description: 'Title of the file',
+        example: 'User Guide'
+    })
+    @IsString()
+    @IsNotEmpty()
+    title: string;
+
+    @ApiProperty({
+        description: 'URL of the file',
+        example: 'https://example.com/file.pdf'
+    })
+    @IsString()
+    @IsNotEmpty()
+    @ValidateIf((o) => o.url && o.url.length > 0)
+    @Matches(/^.*\.(pdf)$/i, { 
+        message: 'URL must be a PDF file',
+        groups: ['pdf']
+    })
+    @Matches(/^.*\.(mp4|mov|avi|wmv|flv|mkv)$/i, { 
+        message: 'URL must be a video file',
+        groups: ['video']
+    })
+    url: string;
+}
 
 export class CreateFaqDto {
     @ApiProperty({ 
@@ -36,23 +64,13 @@ export class CreateFaqDto {
     valid_for: ValidForType;
 
     @ApiProperty({ 
-        type: [String],
+        type: [FileDto],
         required: false,
-        description: 'Array of file URLs'
+        description: 'Array of files with title and URL'
     })
     @IsOptional()
     @IsArray()
-    @ValidateIf((o) => o.files && o.files.length > 0)
-    @IsString({ each: true })
-    @Matches(/^.*\.(pdf)$/i, { 
-        each: true,
-        message: 'All files must be PDFs',
-        groups: ['pdf']
-    })
-    @Matches(/^.*\.(mp4|mov|avi|wmv|flv|mkv)$/i, { 
-        each: true,
-        message: 'All files must be videos',
-        groups: ['video']
-    })
-    files?: string[];
+    @ValidateNested({ each: true })
+    @Type(() => FileDto)
+    files?: FileDto[];
 } 

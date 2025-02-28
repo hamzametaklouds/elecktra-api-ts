@@ -35,7 +35,7 @@ export class FAQService {
 
     async create(createFaqDto: CreateFaqDto, user: { userId?: ObjectId }) {
         if (createFaqDto.files) {
-            this.validateFiles(createFaqDto.files, createFaqDto.type);
+            this.validateFiles(createFaqDto.files.map(f => f.url), createFaqDto.type);
         }
 
         const faq = await new this.faqModel({
@@ -48,7 +48,7 @@ export class FAQService {
 
     async update(id: string, updateFaqDto: UpdateFaqDto, user: { userId?: ObjectId }) {
         if (updateFaqDto.files && updateFaqDto.type) {
-            this.validateFiles(updateFaqDto.files, updateFaqDto.type);
+            this.validateFiles(updateFaqDto.files.map(f => f.url), updateFaqDto.type);
         }
 
         const existingFaq = await this.faqModel.findById(id);

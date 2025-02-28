@@ -14,13 +14,18 @@ export enum FAQType {
     TEXT = 'text'
 }
 
+interface IFile {
+    title: string;
+    url: string;
+}
+
 export interface IFAQ {
     _id?: Schema.Types.ObjectId;
     question?: string;
     answer?: string;
     type: FAQType;
     valid_for: ValidForType;
-    files?: string[];
+    files?: IFile[];
     created_by?: Schema.Types.ObjectId;
     updated_by?: Schema.Types.ObjectId;
     is_disabled?: boolean;
@@ -43,24 +48,31 @@ export const FAQSchema = new Schema<IFAQ>(
             required: true
         },
         files: {
-            type: [String],
-            required: false,
-            validate: {
-                validator: function(files: string[]) {
-                    if (!files || files.length === 0) return true;
-                    
-                    const type = this.type;
-                    if (type === FAQType.PDF) {
-                        return files.every(file => file.toLowerCase().endsWith('.pdf'));
-                    }
-                    if (type === FAQType.VIDEO) {
-                        return files.every(file => 
-                            file.toLowerCase().match(/\.(mp4|mov|avi|wmv|flv|mkv)$/));
-                    }
-                    return true;
+            type: [{
+                title: {
+                    type: String,
+                    required: true
                 },
-                message: 'Files must match the specified type (PDF/Video)'
-            }
+                url: {
+                    type: String,
+                    required: true,
+                    validate: {
+                        validator: function(url: string) {
+                            const type = (this as any).parent().parent().type;
+                            if (type === FAQType.PDF) {
+                                return url.toLowerCase().endsWith('.pdf');
+                            }
+                            if (type === FAQType.VIDEO) {
+                                return url.toLowerCase().match(/\.(mp4|mov|avi|wmv|flv|mkv)$/);
+                            }
+                            return true;
+                        },
+                        message: 'File URL must match the specified type (PDF/Video)'
+                    }
+                }
+            }],
+            required: false,
+            default: undefined
         },
         valid_for: {
             type: String,
