@@ -25,6 +25,7 @@ import { LandingPageConfigsModule } from './landing-page-configs/landing-page-co
 import { QueriesModule } from './queries/queries.module';
 import { FeaturedCitiesModule } from './featured-cities/featured-cities.module';
 import { sentry } from './config/env.config/sentry.config';
+import { FAQModule } from './faq/faq.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { sentry } from './config/env.config/sentry.config';
     BookingsModule,
     OptionsModule,
     WhishlistModule,
+    FAQModule,
     InvitationsModule,
     RecentSearchsModule,
     StripeModule,
