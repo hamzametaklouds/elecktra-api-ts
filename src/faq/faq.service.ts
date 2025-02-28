@@ -73,20 +73,27 @@ export class FAQService {
         return faq;
     }
 
-    async getAll(validFor?: ValidForType) {
+    async getAll(validFor?: ValidForType, type?: FAQType) {
         const query: any = { is_deleted: false };
         if (validFor) {
             query.valid_for = { $in: [validFor, ValidForType.BOTH] };
+        }
+        if (type) {
+            query.type = type;
         }
         return await this.faqModel.find(query)
             .sort({ order: 1, created_at: -1 });
     }
 
-    async getById(id: string) {
-        const faq = await this.faqModel.findOne({ 
+    async getById(id: string, type?: FAQType) {
+        const query: any = { 
             _id: id, 
             is_deleted: false 
-        });
+        };
+        if (type) {
+            query.type = type;
+        }
+        const faq = await this.faqModel.findOne(query);
         
         if (!faq) {
             throw new NotFoundException('FAQ not found');

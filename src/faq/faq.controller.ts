@@ -3,7 +3,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiParam }
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { FAQService } from './faq.service';
-import { ValidForType } from './faq.schema';
+import { ValidForType, FAQType } from './faq.schema';
 import { Request } from 'express';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { UpdateFaqDto } from './dto/update-faq.dto';
@@ -63,18 +63,33 @@ export class FAQController {
         required: false,
         description: 'Filter FAQs by platform'
     })
+    @ApiQuery({ 
+        name: 'type',
+        enum: FAQType,
+        required: false,
+        description: 'Filter FAQs by type'
+    })
     @ApiResponse({ 
         status: 200, 
         description: 'Returns all FAQs'
     })
-    async getAll(@Query('valid_for') validFor?: ValidForType) {
-        const faqs = await this.faqService.getAll(validFor);
+    async getAll(
+        @Query('valid_for') validFor?: ValidForType,
+        @Query('type') type?: FAQType
+    ) {
+        const faqs = await this.faqService.getAll(validFor, type);
         return { message: 'FAQs fetched successfully', data: faqs };
     }
 
     @Get(':id')
     @ApiOperation({ summary: 'Get FAQ by ID' })
     @ApiParam({ name: 'id', description: 'FAQ ID' })
+    @ApiQuery({ 
+        name: 'type',
+        enum: FAQType,
+        required: false,
+        description: 'Filter FAQ by type'
+    })
     @ApiResponse({ 
         status: 200, 
         description: 'Returns a single FAQ'
@@ -83,8 +98,11 @@ export class FAQController {
         status: 404, 
         description: 'FAQ not found'
     })
-    async getById(@Param('id') id: string) {
-        const faq = await this.faqService.getById(id);
+    async getById(
+        @Param('id') id: string,
+        @Query('type') type?: FAQType
+    ) {
+        const faq = await this.faqService.getById(id, type);
         return { message: 'FAQ fetched successfully', data: faq };
     }
 } 
