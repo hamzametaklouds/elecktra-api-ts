@@ -24,7 +24,7 @@ export class FAQService {
 
         if (type === FAQType.VIDEO) {
             const allVideos = files.every(file => 
-                file.toLowerCase().match(/\.(mp4|mov|avi|wmv|flv|mkv)$/));
+                file.toLowerCase().match(/\.(mp4|mov|avi|wmv|flv|mkv|webm|3gp|mpg|mpeg|ogv|ts|mts|m2ts|asf|vob|f4v|divx|rmvb)$/));
             if (!allVideos) {
                 throw new BadRequestException('All files must be videos when type is VIDEO');
             }
