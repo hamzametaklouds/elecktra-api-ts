@@ -75,7 +75,12 @@ export class FAQService {
         return faq;
     }
 
-    async getAll(validFor?: ValidForType, type?: FAQType) {
+    async getAll(
+        validFor?: ValidForType, 
+        type?: FAQType,
+        page: number = 1,
+        limit: number = 10
+    ) {
         const query: any = { is_deleted: false };
         if (validFor) {
             query.valid_for = { $in: [validFor, ValidForType.BOTH] };
@@ -83,8 +88,27 @@ export class FAQService {
         if (type) {
             query.type = type;
         }
-        return await this.faqModel.find(query)
-            .sort({ order: 1, created_at: -1 });
+
+        // Convert page and limit to numbers and ensure they're valid
+        const pageNum = Math.max(1, Number(page));
+        const limitNum = Math.max(1, Math.min(100, Number(limit))); // Max 100 items per page
+        const skip = (pageNum - 1) * limitNum;
+
+        const [faqs, total] = await Promise.all([
+            this.faqModel.find(query)
+                .sort({ order: 1, created_at: -1 })
+                .skip(skip)
+                .limit(limitNum),
+            this.faqModel.countDocuments(query)
+        ]);
+
+        const totalPages = Math.ceil(total / limitNum);
+
+        return {
+            faqs,
+            total,
+            totalPages
+        };
     }
 
     async getById(id: string, type?: FAQType) {

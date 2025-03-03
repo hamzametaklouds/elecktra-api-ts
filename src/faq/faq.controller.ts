@@ -26,7 +26,7 @@ export class FAQController {
         description: 'Bad Request.' 
     })
     async create(
-        @Body() createFaqDto: CreateFaqDto,
+        @Body() createFaqDto: CreateFaqDto, 
         @Req() req: Request & { user: any }
     ) {
         console.log(createFaqDto);
@@ -71,16 +71,46 @@ export class FAQController {
         required: false,
         description: 'Filter FAQs by type'
     })
+    @ApiQuery({
+        name: 'page',
+        type: Number,
+        required: false,
+        description: 'Page number (starts from 1)',
+        example: 1
+    })
+    @ApiQuery({
+        name: 'limit',
+        type: Number,
+        required: false,
+        description: 'Number of items per page',
+        example: 10
+    })
     @ApiResponse({ 
         status: 200, 
-        description: 'Returns all FAQs'
+        description: 'Returns paginated FAQs'
     })
     async getAll(
         @Query('valid_for') validFor?: ValidForType,
-        @Query('type') type?: FAQType
+        @Query('type') type?: FAQType,
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 10
     ) {
-        const faqs = await this.faqService.getAll(validFor, type);
-        return { message: 'FAQs fetched successfully', data: faqs };
+        const { faqs, total, totalPages } = await this.faqService.getAll(
+            validFor, 
+            type, 
+            page, 
+            limit
+        );
+        return { 
+            message: 'FAQs fetched successfully', 
+            data: faqs,
+            pagination: {
+                total,
+                totalPages,
+                currentPage: page,
+                limit
+            }
+        };
     }
 
     @Get(':id')
