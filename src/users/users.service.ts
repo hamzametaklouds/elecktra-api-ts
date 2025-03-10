@@ -182,22 +182,22 @@ export class UsersService {
       last_name,
       email,
       business_name,
-      dob,
+      //dob,
       password,
-      country_code,
-      phone_no,
+      // country_code,
+      // phone_no,
     } = userObject;
 
     const ifEmailExists = await this.getUserByEmail(email);
     if (ifEmailExists) {
       throw new ConflictException('Email already exists')
     }
-    if (phone_no) {
-      const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
-      if (ifPhoneExists) {
-        throw new ConflictException('Phone number already exists')
-      }
-    }
+    // if (phone_no) {
+    //   const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
+    //   if (ifPhoneExists) {
+    //     throw new ConflictException('Phone number already exists')
+    //   }
+    // }
 
     const hashPassword = await bcrypt.hash(password, 10);
 
@@ -210,11 +210,11 @@ export class UsersService {
       first_name,
       last_name,
       email,
-      dob,
+     // dob,
       password:hashPassword,
       business_name,
-      country_code: country_code ? country_code : null,
-      phone_no: phone_no ? phone_no : null,
+      // country_code: country_code ? country_code : null,
+      // phone_no: phone_no ? phone_no : null,
     }).save();
 
 

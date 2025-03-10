@@ -45,32 +45,32 @@ export class SignUpUserDto {
     email: string;
 
 
-    @ApiProperty({
-        description: 'dob string e.g dob= ',
-        required: true,
-        default: '',
-    })
-    @IsString()
-    @IsOptional()
-    dob: string;
+    // @ApiProperty({
+    //     description: 'dob string e.g dob= ',
+    //     required: true,
+    //     default: '',
+    // })
+    // @IsString()
+    // @IsOptional()
+    // dob: string;
 
-    @ApiProperty({
-        description: 'country_code string e.g country_code= +2',
-        required: true,
-        default: '',
-    })
-    @IsString()
-    @IsOptional()
-    country_code: string;
+    // @ApiProperty({
+    //     description: 'country_code string e.g country_code= +2',
+    //     required: true,
+    //     default: '',
+    // })
+    // @IsString()
+    // @IsOptional()
+    // country_code: string;
 
-    @ApiProperty({
-        description: 'phone_no string e.g phone_no= +(555) 555-1234',
-        required: true,
-        default: '',
-    })
-    @IsString()
-    @IsOptional()
-    phone_no: string;
+    // @ApiProperty({
+    //     description: 'phone_no string e.g phone_no= +(555) 555-1234',
+    //     required: true,
+    //     default: '',
+    // })
+    // @IsString()
+    // @IsOptional()
+    // phone_no: string;
 
     @ApiProperty({
         description: 'password string e.g password= ',
