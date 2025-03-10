@@ -1,5 +1,6 @@
 import { Schema } from 'mongoose';
 import { USERS_COLLECTION } from './users.constants';
+import { Role } from 'src/roles/roles.schema';
 
 
 export interface IUsers {
@@ -12,6 +13,7 @@ export interface IUsers {
   country_code: string;
   password: string;
   phone_no: string;
+  role: string;
   gender?: string
   address: string;
   emergency_contact?: string;
@@ -56,6 +58,12 @@ export const UsersSchema = new Schema<IUsers>(
       type: String,
       required: false,
       default: ''
+    },
+    role: {
+      type: String,
+      required: false,
+      enum: Role,
+      default: Role.BUSINESS_ADMIN
     },
     email: {
       type: String,
