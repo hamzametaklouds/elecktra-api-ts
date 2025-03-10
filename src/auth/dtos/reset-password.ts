@@ -1,32 +1,20 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-
 export class ResetPasswordDto {
-
   @ApiProperty({
-    description: 'email string e.g email=jonathan.charles@electra.com',
+    description: 'Reset password token from the email link',
     required: true,
-    default: 'xyz@electra.com',
-  })
-  @IsEmail()
-  email: string
-
-  @ApiProperty({
-    description: 'link_id string e.g link_id=jonathan.charles@electra.com',
-    required: true,
-    default: 'dfknsdfsjdnfisdnfi',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   @IsString()
-  link_id: string;
-
+  token: string;
 
   @ApiProperty({
-    description: 'password string e.g password=1234s',
+    description: 'New password',
     required: true,
-    default: '123456',
+    example: 'newPassword123',
   })
   @IsString()
   password: string;
-
 }

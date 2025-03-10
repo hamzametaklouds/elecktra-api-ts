@@ -80,7 +80,7 @@ export class AuthController {
     @Post('forgot-password')
     async forgotPassword(@Body() body: ForgotPasswordDto) {
         const createAuth = await this.authService.forgetPassword(body);
-        return { message: 'User joined successfully', data: createAuth };
+        return { message: 'Link sent successfully', data: createAuth };
     }
 
 
@@ -88,8 +88,8 @@ export class AuthController {
     @ApiBody({ type: ResetPasswordDto })
     @Post('reset-password')
     async resetPassword(@Body() body: ResetPasswordDto) {
-        const createAuth = await this.authService.resetPassword(body);
-        return { message: 'User joined successfully', data: createAuth };
+        const result = await this.authService.resetPassword(body);
+        return { message: 'Password reset successfully', data: result };
     }
 
     @Get('verify-email/:token')

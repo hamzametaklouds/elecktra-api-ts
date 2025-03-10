@@ -33,6 +33,13 @@ export class UsersService {
     );
   }
 
+  async updateUserPassword(id, password) {
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    return await this.userModel.findByIdAndUpdate({ _id: id }, { password: hashPassword })
+  }
+
 
   async getUserByUUID(uuid: string): Promise<IUsers> {
     return await this.userModel

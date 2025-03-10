@@ -275,21 +275,38 @@ export class AuthService {
   }
 
   async resetPassword(body: ResetPasswordDto) {
+    try {
+      // Verify and decode the token
+      const decoded = await this.jwtService.verify(body.token);
 
-    const user = await this.systemUsersService.getUserByEmail(body.email)
+      console.log(decoded)
 
-    if (!user) {
-      throw new BadRequestException('Invalid email')
+
+        // Get and verify the invitation
+        const invitation = await this.invitationsService.getinvitationByLinkId(decoded.link_id);
+        if (!invitation || invitation.is_used) {
+          throw new BadRequestException('Invalid or expired reset password link');
+        }
+      
+      // Get user from decoded email
+      const user = await this.usersService.getUserByEmail(invitation.email);
+      if (!user) {
+        throw new BadRequestException('Invalid reset password link');
+      }
+
+    
+
+      // Update password and mark invitation as used
+      await this.usersService.updateUserPassword(user._id, body.password);
+      await this.invitationsService.deleteInvitation(invitation._id);
+
+      return { message: 'Password reset successfully' };
+    } catch (error) {
+      if (error.name === 'JsonWebTokenError') {
+        throw new BadRequestException('Invalid reset password link');
+      }
+      throw error;
     }
-
-    const invitation = await this.invitationsService.getinvitationByLinkId(body.link_id)
-
-    if (!invitation) {
-      throw new BadRequestException('Invalid link id')
-    }
-
-    await this.invitationsService.deleteInvitation(user._id)
-    return await this.systemUsersService.updateUserPassword(user._id, body.password)
   }
 
   async verifyEmail(token: string) {

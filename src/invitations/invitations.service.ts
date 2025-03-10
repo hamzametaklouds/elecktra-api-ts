@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 const postmark = require("postmark");
 import * as jwt from 'jsonwebtoken';
 import { SystemUsersService } from 'src/system-users/system-users.service';
-
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class InvitationsService {
@@ -20,7 +20,8 @@ export class InvitationsService {
     private invitationModel: Model<IInvitations>,
     private configService: ConfigService,
     @Inject(forwardRef(() => SystemUsersService))
-    private systemUserService: SystemUsersService
+    private systemUserService: SystemUsersService,
+    private usersService: UsersService
   ) {
     SendGrid.setApiKey(this.configService.get('sendGridEmail.sendGridApiKey'));
   }
@@ -257,7 +258,7 @@ export class InvitationsService {
     // Generate a JWT token with the `link_id`
     const token = jwt.sign({ link_id: generatedLinkId }, process.env.JWT_SECRET, { expiresIn: '3d' });
     // const invitationLink = `https://voyage-vite-admi-panel.vercel.app/signup/${token}`;
-    let invitationLink = process.env.DB_URL === 'mongodb+srv://raoarsalanlatif:dxSCi8DLrHsBUprf@cluster0.ohwlwoi.mongodb.net/test' ? `https://staging.voyagevite.com//signup/${token}` : `https://portal.voyagevite.com/signup/${token}`;
+    let invitationLink = process.env.DB_URL === 'mongodb+srv://raoarsalanlatif:dxSCi8DLrHsBUprf@cluster0.ohwlwoi.mongodb.net/test' ? `https://staging.electra.com//signup/${token}` : `https://portal.electra.com/signup/${token}`;
 
     // Save the invitation in the database
     const invitation = await new this.invitationModel({
@@ -270,14 +271,14 @@ export class InvitationsService {
     }).save();
 
     // Define a template for the invitation email
-    const emailSubject = "You're Invited to Join VoyageVite!";
+    const emailSubject = "You're Invited to Join electra!";
     const emailMessage = `
       <html>
           <body>
-              <h1>Welcome to VoyageVite!</h1>
+              <h1>Welcome to electra!</h1>
               <p>You have been invited to join our platform. Click the link below to accept your invitation:</p>
               <a href="${invitationLink}" style="color: blue; text-decoration: underline;">Accept Invitation</a>
-              <p>Thank you,<br>VoyageVite Team</p>
+              <p>Thank you,<br>electra Team</p>
           </body>
       </html>
   `;
@@ -295,7 +296,7 @@ export class InvitationsService {
    */
   async sendForgotPasswordEmail(email: string) {
     // Check if the user exists
-    const user = await this.systemUserService.getUserByEmail(email);
+    const user = await this.usersService.getUserByEmail(email);
     console.log('user-----', user)
     if (!user) {
       return { message: 'Password reset email sent successfully' };
@@ -311,8 +312,7 @@ export class InvitationsService {
 
     // Generate the reset password link
 
-    const resetPasswordLink =
-      process.env.DB_URL === 'mongodb+srv://raoarsalanlatif:dxSCi8DLrHsBUprf@cluster0.ohwlwoi.mongodb.net/test' ? `https://staging.voyagevite.com/reset-password/${token}` : `https://portal.voyagevite.com/reset-password/${token}`;
+    const resetPasswordLink = `https://portal.electra.com/reset-password/${token}`;
 
     const invitation = await new this.invitationModel({
       email,
@@ -334,7 +334,7 @@ export class InvitationsService {
               <p>We received a request to reset your password. Click the link below to reset it:</p>
               <a href="${resetPasswordLink}" style="color: blue; text-decoration: underline;">Reset Password</a>
               <p>If you did not request this, please ignore this email.</p>
-              <p>Thank you,<br>VoyageVite Team</p>
+              <p>Thank you,<br>Electra Team</p>
           </body>
       </html>
   `;
@@ -397,12 +397,12 @@ export class InvitationsService {
     const emailMessage = `
         <html>
             <body>
-                <h1>Welcome to VoyageVite!</h1>
+                <h1>Welcome to electra!</h1>
                 <p>Please verify your email address by clicking the link below:</p>
                 <a href="${verificationLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Verify Email Address</a>
-                <p>If you did not create an account with VoyageVite, please ignore this email.</p>
+                <p>If you did not create an account with electra, please ignore this email.</p>
                 <p>This link will expire in 3 days.</p>
-                <p>Thank you,<br>VoyageVite Team</p>
+                <p>Thank you,<br>electra Team</p>
             </body>
         </html>
     `;
