@@ -1,6 +1,6 @@
-# voyagevite-admin-service Platform adding linting and eslint to package
+# electra-admin-service Platform adding linting and eslint to package
 
-For convience we have base eslint and tsconfig file included in the project. Every new package must extend these files and add their own configuraiton. 
+For convience we have base eslint and tsconfig file included in the project. Every new package must extend these files and add their own configuraiton.
 
 ## Adding tslint
 
@@ -21,7 +21,7 @@ Create a new `.tsconfig.json` file in the root of your paakcge. Following are th
 
 ## Adding eslint
 
-eslint is used for linting of the package and the whole proejct. Eslint cli is added as workspace in project root. For any new package create a .eslintrc.json. Following are configuration which needs to be included in any new package. 
+eslint is used for linting of the package and the whole proejct. Eslint cli is added as workspace in project root. For any new package create a .eslintrc.json. Following are configuration which needs to be included in any new package.
 
 ```
 {

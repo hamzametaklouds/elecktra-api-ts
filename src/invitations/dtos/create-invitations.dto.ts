@@ -14,15 +14,6 @@ export class CreateInvitationDto {
   email: string;
 
   @ApiProperty({
-    description: 'company_id mongo id e.g company_id=624ea2841cd832e0db8466da',
-    required: false,
-    default: null,
-  })
-  @IsMongoId()
-  @IsOptional()
-  company_id?: ObjectId;
-
-  @ApiProperty({
     description: 'role string e.g role=624ea2841cd832e0db8466da',
     required: false,
     default: null,

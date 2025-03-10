@@ -7,7 +7,6 @@ import { CreateInvitationDto } from './dtos/create-invitations.dto';
 import * as SendGrid from '@sendgrid/mail';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import { CompaniesService } from 'src/companies/companies.service';
 const postmark = require("postmark");
 import * as jwt from 'jsonwebtoken';
 import { SystemUsersService } from 'src/system-users/system-users.service';
@@ -20,7 +19,6 @@ export class InvitationsService {
     @Inject(INVITATIONS_PROVIDER_TOKEN)
     private invitationModel: Model<IInvitations>,
     private configService: ConfigService,
-    private companiesService: CompaniesService,
     @Inject(forwardRef(() => SystemUsersService))
     private systemUserService: SystemUsersService
   ) {
@@ -110,7 +108,7 @@ export class InvitationsService {
     try {
       const client = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
       const result = await client.sendEmail({
-        From: "armel@voyagevite.com", // Verified sender email
+        From: "hamza@metaklouds.com", // Verified sender email
         To: to,
         Subject: subject,
         HtmlBody: message,
@@ -233,7 +231,7 @@ export class InvitationsService {
    * @throws BadRequestException if email exists or company is invalid
    */
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
-    const { email, company_id, role } = invitationObject;
+    const { email, role } = invitationObject;
 
     const userWithEmail = await this.systemUserService.getUserByEmail(email.toLowerCase())
 
@@ -246,18 +244,12 @@ export class InvitationsService {
       email: email.toLowerCase(),
       invitation_status: InvitationStatus.P,
       $or: [
-        { company_id: company_id }, // Same company
+       
         { role: { $in: ['INTERNAL_ADMIN', 'SUPER_ADMIN'] } } // Internal or Super admin roles
       ]
     });
 
     let companyExists;
-    if (company_id) {
-      companyExists = await this.companiesService.getCompanyById(company_id);
-      if (!companyExists) {
-        throw new BadRequestException('Invalid company id');
-      }
-    }
 
     // Generate unique invitation link ID
     const generatedLinkId = uuidv4();
@@ -270,8 +262,6 @@ export class InvitationsService {
     // Save the invitation in the database
     const invitation = await new this.invitationModel({
       email: email.toLowerCase(),
-      company_id: company_id ? company_id : null,
-      company_name: company_id ? companyExists?.title : null,
       link_id: generatedLinkId,
       token:token,
       role,
@@ -374,6 +364,53 @@ export class InvitationsService {
    */
   async getInvitationById(invitationId: ObjectId) {
     return await this.invitationModel.findOne({ _id: invitationId, is_disabled: false, is_deleted: false, invitation_status: { $ne: InvitationStatus.A } });
+  }
+
+  /**
+   * Sends an email verification link to a user
+   * @param email User's email address
+   * @returns Promise containing success message
+   */
+  async sendVerificationEmail(email: string) {
+    // Generate unique verification link ID
+    const verificationLinkId = uuidv4();
+
+    // Generate a JWT token with the link_id
+    const token = jwt.sign({ link_id: verificationLinkId }, process.env.JWT_SECRET, { expiresIn: '3d' });
+
+    // Generate the verification link
+    const verificationLink = 
+             `https://portal.electra.com/verify-email/${token}`;
+
+    // Create a new invitation record for verification
+    const invitation = await new this.invitationModel({
+        email: email.toLowerCase(),
+        link_id: verificationLinkId,
+        token: token,
+        invitation_status: InvitationStatus.P,
+        is_used: false,
+        created_by: null,
+    }).save();
+
+    // Define email template
+    const emailSubject = 'Verify Your Email Address';
+    const emailMessage = `
+        <html>
+            <body>
+                <h1>Welcome to VoyageVite!</h1>
+                <p>Please verify your email address by clicking the link below:</p>
+                <a href="${verificationLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Verify Email Address</a>
+                <p>If you did not create an account with VoyageVite, please ignore this email.</p>
+                <p>This link will expire in 3 days.</p>
+                <p>Thank you,<br>VoyageVite Team</p>
+            </body>
+        </html>
+    `;
+
+    // Send the verification email
+    await this.sendEmail(email, emailSubject, emailMessage);
+
+    return { message: 'Verification email sent successfully' };
   }
 
 }

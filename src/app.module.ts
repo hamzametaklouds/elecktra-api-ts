@@ -3,80 +3,32 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { db, root, server, sendGridEmail, twilioAuthToken, twilioSid, twilioPhoneNumber, emailFrom, otpExpiryInMinutes, platformInvitationExpiryInDays, customDomainBaseUrl, s3AccessKeyId, s3SecretAccessKey, s3Region, s3BucketName, otpEmailLinkBaseUrl, otpForgotPasswordBaseUrl, jwtSecret, onboardingInvitationBaseUrl, firebase } from './config/env.config';
-import { HealthModule } from './health/health.module';
+import { db, root, server, sendGridEmail, jwtSecret } from './config/env.config';
 import { AuthModule } from './auth/auth.module';
-import { FileUploadModule } from './file-upload/file-upload.module';
 import { SystemUsersModule } from './system-users/system-users.module';
 import { UsersModule } from './users/users.module';
-import { ScreenConfigsModule } from './screen-configs/screen-configs.module';
-import { HotelAndCarsModule } from './hotel-and-cars/hotel-and-cars.module';
-import { DestinationsModule } from './destinations/destinations.module';
-import { BookingsModule } from './bookings/bookings.module';
-import { OptionsModule } from './options/options.module';
-import { WhishlistModule } from './whishlist/whishlist.module';
-import { RecentSearchsModule } from './recent-searchs/recent-searchs.module';
-import { StripeModule } from './stripe/stripe.module';
-import { RatingReviewsModule } from './rating-reviews/rating-reviews.module';
-import { RolesModule } from './roles/roles.module';
-import { CompaniesModule } from './companies/companies.module';
-import { InvitationsModule } from './invitations/invitations.module';
-import { LandingPageConfigsModule } from './landing-page-configs/landing-page-configs.module';
-import { QueriesModule } from './queries/queries.module';
-import { FeaturedCitiesModule } from './featured-cities/featured-cities.module';
+import { HealthModule } from './health/health.module';
 import { sentry } from './config/env.config/sentry.config';
-import { FAQModule } from './faq/faq.module';
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load:
-        [
-          root,
-          db,
-          server,
-          sendGridEmail,
-          twilioAuthToken,
-          twilioSid,
-          twilioPhoneNumber,
-          emailFrom,
-          otpExpiryInMinutes,
-          platformInvitationExpiryInDays,
-          customDomainBaseUrl,
-          s3SecretAccessKey,
-          s3AccessKeyId,
-          s3Region,
-          s3BucketName,
-          otpEmailLinkBaseUrl,
-          otpForgotPasswordBaseUrl,
-          jwtSecret,
-          onboardingInvitationBaseUrl,
-          firebase,
-          sentry
-        ],
+      load: [
+        root,
+        db,
+        server,
+        sendGridEmail,
+        jwtSecret,
+        sentry
+      ],
     }),
     DatabaseModule,
     HealthModule,
     AuthModule,
-    FileUploadModule,
     SystemUsersModule,
     UsersModule,
-    ScreenConfigsModule,
-    HotelAndCarsModule,
-    DestinationsModule,
-    BookingsModule,
-    OptionsModule,
-    WhishlistModule,
-    FAQModule,
     InvitationsModule,
-    RecentSearchsModule,
-    StripeModule,
-    RatingReviewsModule,
-    RolesModule,
-    CompaniesModule,
-    LandingPageConfigsModule,
-    QueriesModule,
-    FeaturedCitiesModule
   ],
   controllers: [AppController],
   providers: [AppService],

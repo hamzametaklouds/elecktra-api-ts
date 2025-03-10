@@ -51,20 +51,20 @@ export class SystemUsersController {
   // }
 
 
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard)
+  // @ApiBearerAuth(AuthorizationHeader)
+  // @UseGuards(JWTAuthGuard)
 
-  @Get('internal-admins')
-  async get(@Req() req: Request) {
-    return await this.systemUserService.getUserData(req.user)
-  }
+  // @Get('internal-admins')
+  // async get(@Req() req: Request) {
+  //   return await this.systemUserService.getUserData(req.user)
+  // }
 
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard)
-  @Get('super-admins')
-  async getSuperAdmin(@Req() req: Request) {
-    return await this.systemUserService.getUserDataSuper(req.user)
-  }
+  // @ApiBearerAuth(AuthorizationHeader)
+  // @UseGuards(JWTAuthGuard)
+  // @Get('super-admins')
+  // async getSuperAdmin(@Req() req: Request) {
+  //   return await this.systemUserService.getUserDataSuper(req.user)
+  // }
 
   @Post('sign-up')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))

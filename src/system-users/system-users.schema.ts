@@ -2,28 +2,6 @@ import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from './system-users.constant';
 import { UserRoles } from 'src/app/global-enums';
 import { Role } from 'src/roles/roles.schema';
-import { COMPANIES_COLLECTION } from 'src/companies/companies.constant';
-
-
-export interface IAdditionalInfo {
-  hotel: string;
-  hosting_years: number;
-}
-
-export const AdditionalInfoSchema = new Schema<IAdditionalInfo>(
-  {
-    hotel: {
-      type: String,
-      required: false,
-      default: ''
-    },
-    hosting_years: {
-      type: Number,
-      required: false,
-      default: 0
-    },
-  }
-)
 
 export interface ISystemUsers {
   _id?: Schema.Types.ObjectId;
@@ -35,12 +13,10 @@ export interface ISystemUsers {
   phone_no: string;
   password: string;
   roles: string[];
-  additional_info: IAdditionalInfo
   email_verified: boolean;
   email_verified_at: Date;
   phone_verified: boolean;
   phone_verifed_at: Date;
-  companies?: Schema.Types.ObjectId[];
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
@@ -95,12 +71,6 @@ export const SystemUsersSchema = new Schema<ISystemUsers>(
       enum: Role,
       default: null
     },
-    additional_info:
-    {
-      type: AdditionalInfoSchema,
-      required: false,
-      default: null
-    },
     email_verified_at: {
       type: Date,
       required: false,
@@ -115,12 +85,6 @@ export const SystemUsersSchema = new Schema<ISystemUsers>(
       type: Date,
       required: false,
       default: new Date()
-    },
-    companies: {
-      type: [Schema.Types.ObjectId],
-      required: false,
-      ref: COMPANIES_COLLECTION,
-      default: null
     },
     is_disabled: {
       type: Boolean,

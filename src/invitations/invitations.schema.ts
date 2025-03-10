@@ -2,7 +2,6 @@ import { Schema } from 'mongoose';
 import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { INVITATIONS_COLLECTION } from './invitations.constants';
 import { Role } from 'src/roles/roles.schema';
-import { COMPANIES_COLLECTION } from 'src/companies/companies.constant';
 
 export enum InvitationStatus {
   P = 'Pending',
@@ -17,8 +16,6 @@ export interface IInvitations {
   link_id: string;
   token: string;
   created_by?: Schema.Types.ObjectId;
-  company_id?: Schema.Types.ObjectId;
-  company_name?: string;
   invitation_status: string;
   is_used?: boolean;
   is_disabled?: boolean;
@@ -76,15 +73,6 @@ export const InvitationsSchema = new Schema<IInvitations>(
       type: Boolean,
       required: false,
       default: false,
-    },
-    company_id: {
-      type: Schema.Types.ObjectId,
-      required: false,
-      ref: COMPANIES_COLLECTION,
-    },
-    company_name: {
-      type: String,
-      required: false,
     },
     created_by: {
       type: Schema.Types.ObjectId,

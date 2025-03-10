@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsEmail, } from 'class-validator';
+import { IsOptional, IsString, IsEmail, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SignUpUserDto {
@@ -29,6 +29,14 @@ export class SignUpUserDto {
     last_name: string;
 
     @ApiProperty({
+        description: 'business_name string e.g business_name= ABC Company',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    business_name: string;
+
+    @ApiProperty({
         description: 'email string e.g last_name= jonathan.charles@gmail.com',
         required: true,
         default: '',
@@ -36,13 +44,6 @@ export class SignUpUserDto {
     @IsEmail()
     email: string;
 
-    @ApiProperty({
-        description: 'uuid string e.g uuid= ',
-        required: true,
-        default: '',
-    })
-    @IsString()
-    uuid: string;
 
     @ApiProperty({
         description: 'dob string e.g dob= ',
@@ -50,6 +51,7 @@ export class SignUpUserDto {
         default: '',
     })
     @IsString()
+    @IsOptional()
     dob: string;
 
     @ApiProperty({
@@ -58,6 +60,7 @@ export class SignUpUserDto {
         default: '',
     })
     @IsString()
+    @IsOptional()
     country_code: string;
 
     @ApiProperty({
@@ -66,8 +69,16 @@ export class SignUpUserDto {
         default: '',
     })
     @IsString()
+    @IsOptional()
     phone_no: string;
 
-
+    @ApiProperty({
+        description: 'password string e.g password= ',
+        required: true,
+        default: '',
+    })
+    @IsString()
+    @MinLength(6)
+    password: string;
 
 }

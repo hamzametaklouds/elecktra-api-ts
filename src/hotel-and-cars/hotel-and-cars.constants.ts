@@ -1,2 +1,0 @@
-export const HOTEL_AND_CARS_PROVIDER_TOKEN = 'HOTEL_AND_CARS_PROVIDER_TOKEN';
-export const HOTEL_AND_CARS_COLLECTION = 'hotel_and_cars';

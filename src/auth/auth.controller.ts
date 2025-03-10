@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UnauthorizedException, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException, UseFilters, UsePipes, ValidationPipe, Get, Param } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import { AuthService } from './auth.service';
@@ -6,10 +6,10 @@ import { SignUpUserDto } from './dtos/sign-up.dto';
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import { LoginDto } from './dtos/log-in.dto';
 import { AdminLoginDto } from './dtos/admin-log-in.dto';
-import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
 import { AppleLoginDto } from './dtos/apple-log-in';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password';
+import { RequestVerificationEmailDto } from './dtos/request-verification-email.dto';
 
 
 UseFilters(HttpExceptionFilter);
@@ -29,7 +29,7 @@ export class AuthController {
     @ApiBody({ type: LoginDto })
     @Post('log-in')
     async login(@Body() body: LoginDto) {
-        const createAuth = await this.authService.validateUser(body.uuid);
+        const createAuth = await this.authService.validateUser(body.email, body.password);
         return createAuth;
     }
 
@@ -43,12 +43,7 @@ export class AuthController {
         return customToken
     }
 
-    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    @Post('guest/log-in')
-    async guestLogin() {
-        const createAuth = await this.authService.validateGuestUser();
-        return createAuth;
-    }
+  
 
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: AdminLoginDto })
@@ -79,14 +74,7 @@ export class AuthController {
         return { message: 'User signed up successfully', data: createAuth };
     }
 
-    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    @ApiBody({ type: CreateHostUserDto })
-    @Post('join-us')
-    async joinUs(@Body() body: CreateHostUserDto) {
-        const createAuth = await this.authService.joinUser(body);
-        return { message: 'User joined successfully', data: createAuth };
-    }
-
+    
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: ForgotPasswordDto })
     @Post('forgot-password')
@@ -104,7 +92,16 @@ export class AuthController {
         return { message: 'User joined successfully', data: createAuth };
     }
 
+    @Get('verify-email/:token')
+    async verifyEmail(@Param('token') token: string) {
+        const result = await this.authService.verifyEmail(token);
+        return { message: 'Email verified successfully', data: result };
+    }
 
-
-
+    @Post('request-verification-email')
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    @ApiBody({ type: RequestVerificationEmailDto })
+    async requestVerificationEmail(@Body() body: RequestVerificationEmailDto) {
+        return await this.authService.requestVerificationEmail(body.email);
+    }
 }

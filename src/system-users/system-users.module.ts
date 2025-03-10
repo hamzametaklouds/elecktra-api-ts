@@ -4,10 +4,9 @@ import { DatabaseModule } from 'src/database/database.module';
 import { SystemUsersController } from './system-users.controller';
 import { SystemUsersModel } from './system-users.model';
 import { SystemUsersService } from './system-users.service';
-import { InvitationsModule } from 'src/invitations/invitations.module';
 
 @Module({
-  imports: [DatabaseModule, ConfigModule, InvitationsModule],
+  imports: [DatabaseModule, ConfigModule],
   controllers: [SystemUsersController],
   providers: [SystemUsersService, ...SystemUsersModel],
   exports: [SystemUsersService]

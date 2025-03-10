@@ -6,8 +6,6 @@ import { ISystemUsers } from './system-users.schema';
 import { SYSTEM_USERS_PROVIDER_TOKEN } from './system-users.constant';
 import { ConfigService } from '@nestjs/config';
 import { CreateSystemUserDto } from './dtos/create-system-users.dto';
-import { Role } from 'src/roles/roles.schema';
-import { InvitationsService } from 'src/invitations/invitations.service';
 import { DeleteSystemUserDto } from './dtos/delete-system-users.dto';
 const bcrypt = require('bcryptjs');
 
@@ -18,11 +16,11 @@ export class SystemUsersService {
   constructor(
     @Inject(SYSTEM_USERS_PROVIDER_TOKEN)
     private userModel: Model<ISystemUsers>,
-    private configService: ConfigService,
-    private invitationsService: InvitationsService
+    private configService: ConfigService
   ) { }
 
   async getUserByEmail(email: string): Promise<ISystemUsers> {
+    console.log(email)
     return await this.userModel
       .findOne({ email: email, is_deleted: false, is_disabled: false })
 
@@ -232,9 +230,6 @@ export class SystemUsersService {
 
     let invitation;
 
-
-    invitation = await this.invitationsService.getInvitationById(invitation_id);
-
     if (!invitation) {
       throw new NotFoundException('Invalid invitation id')
     }
@@ -253,9 +248,6 @@ export class SystemUsersService {
     const hashPassword = await bcrypt.hash(password, 10);
 
     let createdUser;
-
-    await this.invitationsService.updateInvitationUser(invitation_id);
-
 
 
     createdUser = await new this.userModel({
@@ -341,5 +333,12 @@ export class SystemUsersService {
 
   }
 
+  async markEmailAsVerified(userId: ObjectId) {
+    return await this.userModel.findByIdAndUpdate(
+      userId,
+      { email_verified: true },
+      { new: true }
+    );
+  }
 
 }

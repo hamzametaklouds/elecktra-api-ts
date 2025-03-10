@@ -6,13 +6,10 @@ import { SystemUsersService } from 'src/system-users/system-users.service';
 import admin from "firebase-admin"
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import * as bcrypt from 'bcrypt'
-import { CreateHostUserDto } from '../users/dtos/create-host-user.dto';
-import { verifyIdToken } from 'apple-signin-auth';
 import * as appleSigninAuth from 'apple-signin-auth';
+import { ResetPasswordDto } from './dtos/reset-password';
 import { InvitationsService } from 'src/invitations/invitations.service';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
-import { ResetPasswordDto } from './dtos/reset-password';
-
 
 
 @Injectable()
@@ -25,29 +22,43 @@ export class AuthService {
   ) {   // Initialize Firebase Admin SDK
   }
 
-  async validateUser(uuid: string): Promise<any> {
-    const user = await this.usersService.getUserByUUID(uuid);
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.usersService.getUserByEmail(email.toLowerCase());
 
     if (!user) {
-      throw new NotFoundException('User not found')
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    // Check if password matches (assuming you're using bcrypt for password hashing)
+    const passwordCorrect = await bcrypt.compare(password, user.password);
+    if (!passwordCorrect) {
+      throw new BadRequestException('Invalid credentials');
     }
 
     if (user.is_disabled) {
-      throw new ForbiddenException('We are sorry, but your account has been temporarily blocked. Please contact our customer support team for further assistance')
-
+      throw new ForbiddenException('We are sorry, but your account has been temporarily blocked. Please contact our customer support team for further assistance');
     }
 
-    return {
-      access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successful', user: user
-    };
+    // Check if email is verified
+    if (!user.email_verified) {
+      throw new BadRequestException('Please verify your email before logging in');
+    }
 
+    // Remove sensitive data before sending response
+    const { password: _, ...userWithoutPassword } = user;
+
+    return {
+      access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), 
+      message: 'Login Successful', 
+      user: userWithoutPassword
+    };
   }
 
   async verifyAndAuthenticate(idToken: string) {
     try {
       // Step 1: Verify the Apple ID token
       const applePayload = await appleSigninAuth.verifyIdToken(idToken, {
-        audience: 'com.apps.voyageviteapp', // Replace with your Apple app's bundle ID
+        audience: 'com.apps.electraapp', // Replace with your Apple app's bundle ID
       });
 
       console.log(applePayload)
@@ -120,42 +131,11 @@ export class AuthService {
   }
 
 
-  async validateGuestUser() {
+ 
 
-
-    return {
-      access_token: this.jwtService.sign({ userName: 'Guest', sub: '67272691b1673e7c1353639a' }), message: 'Login Successful', user: { _id: '66d065e1guest0339427e4f8', first_name: 'Guest User' }
-    };
-
-  }
-
-  async forgetPassword(body: ForgotPasswordDto) {
-    return await this.invitationsService.sendForgotPasswordEmail(body.email)
-  }
-
-  async resetPassword(body: ResetPasswordDto) {
-
-    const user = await this.systemUsersService.getUserByEmail(body.email)
-
-    if (!user) {
-      throw new BadRequestException('Invalid email')
-    }
-
-    const invitation = await this.invitationsService.getinvitationByLinkId(body.link_id)
-
-    if (!invitation) {
-      throw new BadRequestException('Invalid link id')
-    }
-
-    await this.invitationsService.deleteInvitation(user._id)
-    return await this.systemUsersService.updateUserPassword(user._id, body.password)
-  }
 
   async validateSystemUser(email: string, pass: string): Promise<any> {
-
     const user = await this.systemUsersService.getUserByEmail(email.toLocaleLowerCase());
-
-    console.log(user)
 
     if (!user) {
       throw new BadRequestException('Invalid Credentials')
@@ -169,6 +149,11 @@ export class AuthService {
 
     if (user.is_disabled) {
       throw new BadRequestException('Restricted User')
+    }
+
+    // Add email verification check
+    if (!user.email_verified) {
+      throw new BadRequestException('Please verify your email before logging in')
     }
 
     const modules = [];
@@ -281,18 +266,83 @@ export class AuthService {
   async signUpUser(body: SignUpUserDto) {
 
     const user = await this.usersService.insertUser(body)
-
-    const access_token = await this.jwtService.sign({ userName: user.first_name, sub: user._id })
-
-    return { access_token: access_token, user: user }
+    return {user: user}
 
   }
 
-  async joinUser(body: CreateHostUserDto) {
-
-    const user = await this.usersService.joinUser(body)
-
-    return { user: user }
-
+  async forgetPassword(body: ForgotPasswordDto) {
+    return await this.invitationsService.sendForgotPasswordEmail(body.email)
   }
+
+  async resetPassword(body: ResetPasswordDto) {
+
+    const user = await this.systemUsersService.getUserByEmail(body.email)
+
+    if (!user) {
+      throw new BadRequestException('Invalid email')
+    }
+
+    const invitation = await this.invitationsService.getinvitationByLinkId(body.link_id)
+
+    if (!invitation) {
+      throw new BadRequestException('Invalid link id')
+    }
+
+    await this.invitationsService.deleteInvitation(user._id)
+    return await this.systemUsersService.updateUserPassword(user._id, body.password)
+  }
+
+  async verifyEmail(token: string) {
+    try {
+      // Verify the token
+      const decoded = await this.jwtService.verify(token);
+
+      console.log(decoded)
+      
+      // Get the invitation using the link_id from token
+      const invitation = await this.invitationsService.getinvitationByLinkId(decoded.link_id);
+      
+      if (!invitation) {
+        throw new BadRequestException('Invalid or expired verification link');
+      }
+
+      if (invitation.is_used) {
+        throw new BadRequestException('This verification link has already been used');
+      }
+      console.log(invitation)
+
+      // Update the user's email verification status
+      const user = await this.usersService.getUserByEmail(invitation.email);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      // Mark the user's email as verified
+      await this.usersService.markEmailAsVerified(user._id);
+
+      // Mark the invitation as used
+      await this.invitationsService.updateInvitationUser(invitation._id);
+
+      return { success: true };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Invalid or expired verification link');
+    }
+  }
+
+  async requestVerificationEmail(email: string) {
+    const user = await this.usersService.getUserByEmail(email);
+    if (!user) {
+        throw new BadRequestException('User not found');
+    }
+    
+    if (user.email_verified) {
+        throw new BadRequestException('Email is already verified');
+    }
+    
+    return await this.invitationsService.sendVerificationEmail(email);
+  }
+
 }

@@ -2,15 +2,12 @@ import { Injectable, ConflictException, Inject, NotFoundException, BadRequestExc
 import { Model, ObjectId, Types } from 'mongoose';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import getMessages from 'src/app/api-messages';
-import { HostStatus, IUsers } from './users.schema';
+import { IUsers } from './users.schema';
 import { USERS_PROVIDER_TOKEN } from './users.constants';
 import { CreateUserDto } from './dtos/create-users.dto';
 import { UpdateUserDto } from './dtos/update-users.dto';
 import { ConfigService } from '@nestjs/config';
-import { Request } from 'express';
-import { CreateHostUserDto } from 'src/users/dtos/create-host-user.dto';
-import { UpdateHostDto } from './dtos/update-host.dto';
-import { QueriesService } from 'src/queries/queries.service';
+import { SignUpUserDto } from 'src/auth/dtos/sign-up.dto';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -20,7 +17,6 @@ export class UsersService {
   constructor(
     @Inject(USERS_PROVIDER_TOKEN)
     private userModel: Model<IUsers>,
-    private queriesService: QueriesService,
     private configService: ConfigService,
   ) { }
 
@@ -29,14 +25,12 @@ export class UsersService {
       .findOne({ email: email, is_deleted: false });
   }
 
-  async getHostAndPendingApprovals() {
-    const pending_hosts = await this.userModel
-      .countDocuments({ is_host: true, host_status: HostStatus.P });
-
-    const query = await this.queriesService.getQueryReqs()
-
-    return { pending_hosts: pending_hosts, pending_queries: query }
-
+  async markEmailAsVerified(userId: ObjectId) {
+    return await this.userModel.findByIdAndUpdate(
+      userId,
+      { email_verified: true },
+      { new: true }
+    );
   }
 
 
@@ -181,14 +175,15 @@ export class UsersService {
    * @param datasetObject receives user object of interface type IUsers as an argument
    * @returns the created user object
    */
-  async insertUser(userObject: CreateUserDto) {
+  async insertUser(userObject: SignUpUserDto) {
     const {
       image,
       first_name,
       last_name,
       email,
+      business_name,
       dob,
-      uuid,
+      password,
       country_code,
       phone_no,
     } = userObject;
@@ -204,11 +199,9 @@ export class UsersService {
       }
     }
 
+    const hashPassword = await bcrypt.hash(password, 10);
 
-    const ifUuidExists = await this.userModel.findOne({ uuid: uuid });
-    if (ifUuidExists) {
-      throw new ConflictException('UUID already exists')
-    }
+
 
     let createdUser;
 
@@ -218,7 +211,8 @@ export class UsersService {
       last_name,
       email,
       dob,
-      uuid,
+      password:hashPassword,
+      business_name,
       country_code: country_code ? country_code : null,
       phone_no: phone_no ? phone_no : null,
     }).save();
@@ -228,39 +222,6 @@ export class UsersService {
 
   }
 
-  async joinUser(userObject: CreateHostUserDto) {
-    const {
-      image,
-      first_name,
-      last_name,
-      email,
-      country_code,
-      for_car,
-      for_stay,
-      phone_no,
-      address
-    } = userObject;
-
-
-    let createdUser;
-
-    createdUser = await new this.userModel({
-      image,
-      first_name,
-      last_name,
-      email,
-      for_car,
-      for_stay,
-      country_code,
-      is_host: true,
-      phone_no,
-      address
-    }).save();
-
-
-    return createdUser
-
-  }
 
 
   async insertGoogleUser(userObject: CreateUserDto) {
@@ -438,32 +399,19 @@ export class UsersService {
     return { status: true, statusCode: 204, message: `User ${is_deleted ? 'deleted' : is_deleted ? 'deleted' : 'updated'} successfully`, data: updatedUser };
   }
 
-  async updateHostUser(id, userObject: UpdateHostDto, user: { userId?: ObjectId }) {
-
-    const userExists = await this.userModel.findOne({ _id: id })
-
-    if (!userExists) {
-      throw new BadRequestException('Invalid token')
-    }
-
-    const {
-      status
-
-    } = userObject;
-
-
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      { _id: userExists._id },
-      {
-        host_status: status,
-        updated_by: user.userId
-      },
-      { new: true }
+  async updatePassword(email: string, newPassword: string) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const user = await this.userModel.findOneAndUpdate(
+        { email },
+        { password: hashedPassword },
+        { new: true }
     );
-
-    return updatedUser
+    
+    if (!user) {
+        throw new NotFoundException('User not found');
+    }
+    
+    return user;
   }
-
-
 
 }

@@ -46,7 +46,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userId: systemUserExists._id,
       username: systemUserExists.first_name,
       roles: systemUserExists.roles,
-      company_id: systemUserExists?.companies ? systemUserExists?.companies[0] : null
     };
   }
 

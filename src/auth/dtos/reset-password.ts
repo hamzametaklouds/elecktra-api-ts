@@ -5,15 +5,15 @@ import { ApiProperty } from '@nestjs/swagger';
 export class ResetPasswordDto {
 
   @ApiProperty({
-    description: 'email string e.g email=jonathan.charles@voyagevite.com',
+    description: 'email string e.g email=jonathan.charles@electra.com',
     required: true,
-    default: 'xyz@voyagevite.com',
+    default: 'xyz@electra.com',
   })
   @IsEmail()
   email: string
 
   @ApiProperty({
-    description: 'link_id string e.g link_id=jonathan.charles@voyagevite.com',
+    description: 'link_id string e.g link_id=jonathan.charles@electra.com',
     required: true,
     default: 'dfknsdfsjdnfisdnfi',
   })

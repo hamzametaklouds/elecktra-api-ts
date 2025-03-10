@@ -2,39 +2,27 @@ import { Schema } from 'mongoose';
 import { USERS_COLLECTION } from './users.constants';
 
 
-export enum HostStatus {
-  P = 'Pending',
-  A = 'Approved',
-  R = 'Rejected'
-}
-
-export enum HostType {
-  S = 'Stay',
-  C = 'Car'
-}
-
 export interface IUsers {
   _id?: Schema.Types.ObjectId;
   image: string;
   first_name: string;
   last_name: string;
   email: string;
+  business_name: string;
   country_code: string;
+  password: string;
   phone_no: string;
   gender?: string
   address: string;
   emergency_contact?: string;
   country?: string
   street?: string
-  suite?: string
   apple_id: string;
-  is_host: boolean;
-  for_stay?: boolean;
-  for_car?: boolean;
-  host_status: string
   city?: string
   post_code?: string
   dob: string;
+  email_verified?: boolean;
+  email_verified_at?: Date;
   uuid: string;
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
@@ -54,6 +42,11 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       default: ''
     },
+    business_name: {
+      type: String,
+      required: false,
+      default: ''
+    },
     last_name: {
       type: String,
       required: false,
@@ -64,14 +57,22 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       default: ''
     },
-
-    host_status: {
+    email: {
       type: String,
       required: false,
-      enum: HostStatus,
-      default: HostStatus.P
+      default: ''
     },
-    email: {
+    email_verified: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    email_verified_at: {  
+      type: Date,
+      required: false,
+      default: null
+    },
+    password: {
       type: String,
       required: false,
       default: ''
@@ -106,11 +107,6 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       default: ''
     },
-    suite: {
-      type: String,
-      required: false,
-      default: ''
-    },
     city: {
       type: String,
       required: false,
@@ -130,21 +126,6 @@ export const UsersSchema = new Schema<IUsers>(
       type: String,
       required: false,
       default: ''
-    },
-    is_host: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    for_stay: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    for_car: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
     is_disabled: {
       type: Boolean,
