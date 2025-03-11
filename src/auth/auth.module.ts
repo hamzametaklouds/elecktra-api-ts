@@ -1,6 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { SystemUsersModule } from 'src/system-users/system-users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -10,7 +9,7 @@ import { UsersModule } from 'src/users/users.module';
 import { InvitationsModule } from 'src/invitations/invitations.module';
 
 @Module({
-  imports: [UsersModule, SystemUsersModule, UsersModule,InvitationsModule, PassportModule, JwtModule.registerAsync({
+  imports: [UsersModule, UsersModule,InvitationsModule, PassportModule, JwtModule.registerAsync({
     imports: [ConfigModule],
     useFactory: async (configService: ConfigService) => ({
       secret: configService.get<string>('JWT_SECRET'),

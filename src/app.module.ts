@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { db, root, server, sendGridEmail, jwtSecret } from './config/env.config';
 import { AuthModule } from './auth/auth.module';
-import { SystemUsersModule } from './system-users/system-users.module';
 import { UsersModule } from './users/users.module';
 import { HealthModule } from './health/health.module';
 import { sentry } from './config/env.config/sentry.config';
@@ -26,7 +25,6 @@ import { InvitationsModule } from './invitations/invitations.module';
     DatabaseModule,
     HealthModule,
     AuthModule,
-    SystemUsersModule,
     UsersModule,
     InvitationsModule,
   ],
