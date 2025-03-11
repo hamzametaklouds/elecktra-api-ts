@@ -34,6 +34,7 @@ export class SignUpUserDto {
         default: '',
     })
     @IsString()
+    @IsOptional()
     business_name: string;
 
     @ApiProperty({

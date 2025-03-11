@@ -219,7 +219,7 @@ export class UsersService {
       email,
      // dob,
       password:hashPassword,
-      business_name,
+      business_name:business_name?business_name:first_name,
       // country_code: country_code ? country_code : null,
       // phone_no: phone_no ? phone_no : null,
     }).save();
