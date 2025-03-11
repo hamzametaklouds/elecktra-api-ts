@@ -13,7 +13,7 @@ export interface IUsers {
   country_code: string;
   password: string;
   phone_no: string;
-  role: string;
+  roles: string[];
   gender?: string
   address: string;
   emergency_contact?: string;
@@ -59,11 +59,11 @@ export const UsersSchema = new Schema<IUsers>(
       required: false,
       default: ''
     },
-    role: {
-      type: String,
+    roles: {
+      type: [String],
       required: false,
       enum: Role,
-      default: Role.BUSINESS_ADMIN
+      default: [Role.BUSINESS_ADMIN]
     },
     email: {
       type: String,

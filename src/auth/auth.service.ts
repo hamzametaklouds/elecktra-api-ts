@@ -2,7 +2,6 @@ import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpUserDto } from './dtos/sign-up.dto';
-import { SystemUsersService } from 'src/system-users/system-users.service';
 import admin from "firebase-admin"
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import * as bcrypt from 'bcrypt'
@@ -10,13 +9,14 @@ import * as appleSigninAuth from 'apple-signin-auth';
 import { ResetPasswordDto } from './dtos/reset-password';
 import { InvitationsService } from 'src/invitations/invitations.service';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
+import { ObjectId } from 'mongodb';
 
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private systemUsersService: SystemUsersService,
     private jwtService: JwtService,
     private invitationsService: InvitationsService
   ) {   // Initialize Firebase Admin SDK
@@ -134,83 +134,83 @@ export class AuthService {
  
 
 
-  async validateSystemUser(email: string, pass: string): Promise<any> {
-    const user = await this.systemUsersService.getUserByEmail(email.toLocaleLowerCase());
+  // async validateSystemUser(email: string, pass: string): Promise<any> {
+  //   const user = await this.usersService.getUserByEmail(email.toLocaleLowerCase());
 
-    if (!user) {
-      throw new BadRequestException('Invalid Credentials')
-    }
+  //   if (!user) {
+  //     throw new BadRequestException('Invalid Credentials')
+  //   }
 
-    const passwordCorrect = await bcrypt.compare(pass, user.password);
+  //   const passwordCorrect = await bcrypt.compare(pass, user.password);
 
-    if (!passwordCorrect) {
-      throw new BadRequestException('Invalid Credentials')
-    }
+  //   if (!passwordCorrect) {
+  //     throw new BadRequestException('Invalid Credentials')
+  //   }
 
-    if (user.is_disabled) {
-      throw new BadRequestException('Restricted User')
-    }
+  //   if (user.is_disabled) {
+  //     throw new BadRequestException('Restricted User')
+  //   }
 
-    // Add email verification check
-    if (!user.email_verified) {
-      throw new BadRequestException('Please verify your email before logging in')
-    }
+  //   // Add email verification check
+  //   if (!user.email_verified) {
+  //     throw new BadRequestException('Please verify your email before logging in')
+  //   }
 
-    const modules = [];
+  //   const modules = [];
 
-    if (user.roles.includes('super_admin')) {
-      modules.push(
-        { title: 'Dashboard', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Role Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Company Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'End User Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'App Configuration', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Listing Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Booking Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        //{ title: 'Payment Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Landing Page Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Queries', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Host Requests', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Invitations', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Featured Cities', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-      );
-    } else if (user.roles.includes('internal_admin')) {
-      modules.push(
-        { title: 'Dashboard', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' }
-        ,
-        { title: 'Company Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'End User Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        // { title: 'App Configuration', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Listing Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Booking Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        // { title: 'Payment Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Queries', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Host Requests', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        //{ title: 'Invitations', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-      );
-    } else if (user.roles.includes('company_admin')) {
-      modules.push(
-        { title: 'Dashboard', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' }
-        ,
-        { title: 'Listing Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        { title: 'Booking Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-        // { title: 'Payment Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
-      );
-    }
+  //   if (user.roles.includes('super_admin')) {
+  //     modules.push(
+  //       { title: 'Dashboard', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Role Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Company Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'End User Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'App Configuration', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Listing Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Booking Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       //{ title: 'Payment Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Landing Page Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Queries', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Host Requests', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Invitations', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Featured Cities', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //     );
+  //   } else if (user.roles.includes('internal_admin')) {
+  //     modules.push(
+  //       { title: 'Dashboard', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' }
+  //       ,
+  //       { title: 'Company Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'End User Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       // { title: 'App Configuration', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Listing Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Booking Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       // { title: 'Payment Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Queries', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Host Requests', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       //{ title: 'Invitations', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //     );
+  //   } else if (user.roles.includes('company_admin')) {
+  //     modules.push(
+  //       { title: 'Dashboard', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' }
+  //       ,
+  //       { title: 'Listing Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       { title: 'Booking Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //       // { title: 'Payment Management', icon: 'https://s3.amazonaws.com/staging.carnivalist-images/a53f32eb-7f8f-4914-bd36-8c38d673d151.png' },
+  //     );
+  //   }
 
-    user['modules'] = modules
+  //   user['modules'] = modules
 
-    if (passwordCorrect) {
-      const { password, ...result } = user;
+  //   if (passwordCorrect) {
+  //     const { password, ...result } = user;
 
-      const payload = { username: user.first_name, sub: user._id, roles: user.roles };
-      return {
-        status: true, statusCode: 200, access_token: this.jwtService.sign(payload), message: 'Login Successful', user: result
-      };
-    }
+  //     const payload = { username: user.first_name, sub: user._id, roles: user.roles };
+  //     return {
+  //       status: true, statusCode: 200, access_token: this.jwtService.sign(payload), message: 'Login Successful', user: result
+  //     };
+  //   }
 
 
-  }
+  // }
 
   async googleLoginUser(body: GoogleLoginDto): Promise<any> {
 
@@ -360,6 +360,23 @@ export class AuthService {
     }
     
     return await this.invitationsService.sendVerificationEmail(email);
+  }
+
+  async changePassword(user: { userId?: ObjectId} , body: ChangePasswordDto) {
+    const userData = await this.usersService.getUserById(user.userId);
+    if (!userData) {
+        throw new NotFoundException('User not found');
+    }
+
+    // Verify old password
+    const isOldPasswordValid = await bcrypt.compare(body.oldPassword, userData.password);
+    if (!isOldPasswordValid) {
+        throw new BadRequestException('Current password is incorrect');
+    }
+
+    // Update password
+    await this.usersService.updateUserPassword(userData._id, body.newPassword);
+    return { success: true };
   }
 
 }

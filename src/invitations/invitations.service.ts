@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 const postmark = require("postmark");
 import * as jwt from 'jsonwebtoken';
-import { SystemUsersService } from 'src/system-users/system-users.service';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -19,8 +18,6 @@ export class InvitationsService {
     @Inject(INVITATIONS_PROVIDER_TOKEN)
     private invitationModel: Model<IInvitations>,
     private configService: ConfigService,
-    @Inject(forwardRef(() => SystemUsersService))
-    private systemUserService: SystemUsersService,
     private usersService: UsersService
   ) {
     SendGrid.setApiKey(this.configService.get('sendGridEmail.sendGridApiKey'));
@@ -234,7 +231,7 @@ export class InvitationsService {
   async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
     const { email, role } = invitationObject;
 
-    const userWithEmail = await this.systemUserService.getUserByEmail(email.toLowerCase())
+    const userWithEmail = await this.usersService.getUserByEmail(email.toLowerCase())
 
     if (userWithEmail) {
       throw new BadRequestException('User with this email already exists')

@@ -51,7 +51,7 @@ export class UsersService {
       .findOne({ phone_no: phone_no, is_deleted: false })
   }
 
-  async getUserById(id: ObjectId): Promise<IUsers> {
+  async getUserById(id): Promise<IUsers> {
     return await this.userModel
       .findOne({ _id: id, is_deleted: false })
   }

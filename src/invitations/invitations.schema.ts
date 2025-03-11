@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
-import { SYSTEM_USERS_COLLECTION } from 'src/system-users/system-users.constant';
 import { INVITATIONS_COLLECTION } from './invitations.constants';
 import { Role } from 'src/roles/roles.schema';
+import { USERS_COLLECTION } from 'src/users/users.constants';
 
 export enum InvitationStatus {
   P = 'Pending',
@@ -37,6 +37,7 @@ export const InvitationsSchema = new Schema<IInvitations>(
     role: {
       type: String,
       required: false,
+      enum: Role,
       default: null
 
     },
@@ -77,7 +78,7 @@ export const InvitationsSchema = new Schema<IInvitations>(
     created_by: {
       type: Schema.Types.ObjectId,
       required: false,
-      ref: SYSTEM_USERS_COLLECTION,
+      ref: USERS_COLLECTION,
     },
   },
   {
