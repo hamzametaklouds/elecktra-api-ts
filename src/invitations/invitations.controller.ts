@@ -29,7 +29,7 @@ export class InvitationsController {
    */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN)
   @Get()
   @ApiQuery({ type: QueryParamsDTO })
   async get(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
@@ -63,7 +63,7 @@ export class InvitationsController {
    */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN)
   @Post('sent-invitation')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: CreateInvitationDto })

@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, Inject, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId, Types } from 'mongoose';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import getMessages from 'src/app/api-messages';
@@ -8,6 +8,8 @@ import { CreateUserDto } from './dtos/create-users.dto';
 import { UpdateUserDto } from './dtos/update-users.dto';
 import { ConfigService } from '@nestjs/config';
 import { SignUpUserDto } from 'src/auth/dtos/sign-up.dto';
+import { InvitationsService } from 'src/invitations/invitations.service';
+import { Role } from 'src/roles/roles.schema';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -18,6 +20,8 @@ export class UsersService {
     @Inject(USERS_PROVIDER_TOKEN)
     private userModel: Model<IUsers>,
     private configService: ConfigService,
+    @Inject(forwardRef(() => InvitationsService))
+    private invitationService: InvitationsService,
   ) { }
 
   async getUserByEmail(email: string): Promise<IUsers> {
@@ -189,6 +193,7 @@ export class UsersService {
       last_name,
       email,
       business_name,
+      invitation_id,
       //dob,
       password,
       // country_code,
@@ -206,6 +211,15 @@ export class UsersService {
     //   }
     // }
 
+    let invitation;
+    if(invitation_id){
+       invitation = await this.invitationService.getinvitationById(invitation_id);
+      if(!invitation || invitation?.email !== email){
+        throw new BadRequestException('Invalid invitation id')
+      }
+      await this.invitationService.updateInvitationUser(invitation._id);
+    }
+
     const hashPassword = await bcrypt.hash(password, 10);
 
 
@@ -217,6 +231,8 @@ export class UsersService {
       first_name,
       last_name,
       email,
+      invitation_id:invitation?invitation?._id:null,
+      roles:invitation?.role?[invitation?.role]:[Role.BUSINESS_ADMIN],
      // dob,
       password:hashPassword,
       business_name:business_name?business_name:first_name,

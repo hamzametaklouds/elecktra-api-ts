@@ -71,6 +71,15 @@ export class CreateUserDto {
   @IsOptional()
   phone_no: string;
 
+  @ApiProperty({
+    description: 'invitation_id string e.g invitation_id= ',
+    required: true,
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  invitation_id: string;
+
 
 
 }

@@ -1,4 +1,4 @@
-import { Controller, Put, Body, ValidationPipe, UsePipes, UseFilters, UseGuards, Req, Get, Query } from '@nestjs/common';
+import { Controller, Put, Body, ValidationPipe, UsePipes, UseFilters, UseGuards, Req, Get, Query, BadRequestException } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -41,7 +41,7 @@ export class UsersController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.SUPPORT_ADMIN)
   @Get('list')
   @ApiQuery({ type: QueryParamsDTO })
   async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
@@ -75,7 +75,7 @@ export class UsersController {
   //   */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.SUPPORT_ADMIN)
   @Put()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: UpdateUserDto })
@@ -85,5 +85,4 @@ export class UsersController {
     return user;
   }
 
- 
 }

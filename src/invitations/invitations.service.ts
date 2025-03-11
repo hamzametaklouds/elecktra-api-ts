@@ -18,6 +18,7 @@ export class InvitationsService {
     @Inject(INVITATIONS_PROVIDER_TOKEN)
     private invitationModel: Model<IInvitations>,
     private configService: ConfigService,
+    @Inject(forwardRef(() => UsersService))
     private usersService: UsersService
   ) {
     SendGrid.setApiKey(this.configService.get('sendGridEmail.sendGridApiKey'));
@@ -275,7 +276,7 @@ export class InvitationsService {
     // Send the invitation email
     await this.sendEmail(email, emailSubject, emailMessage);
 
-    return invitation;
+    return {message: 'Invitation sent successfully'};
   }
 
   /**

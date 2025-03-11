@@ -6,7 +6,7 @@ import { InvitationsModel } from './invitations.model';
 import { InvitationsService } from './invitations.service';
 import { UsersModule } from 'src/users/users.module';
 @Module({
-  imports: [DatabaseModule, ConfigModule, UsersModule],
+  imports: [DatabaseModule, ConfigModule, forwardRef(() => UsersModule)],
   controllers: [InvitationsController],
   providers: [InvitationsService, ...InvitationsModel],
   exports: [InvitationsService]

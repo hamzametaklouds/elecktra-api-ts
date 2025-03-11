@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { USERS_COLLECTION } from './users.constants';
 import { Role } from 'src/roles/roles.schema';
+import { INVITATIONS_COLLECTION } from 'src/invitations/invitations.constants';
 
 
 export interface IUsers {
@@ -26,6 +27,7 @@ export interface IUsers {
   email_verified?: boolean;
   email_verified_at?: Date;
   uuid: string;
+  invitation_id?: Schema.Types.ObjectId;
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
@@ -144,6 +146,11 @@ export const UsersSchema = new Schema<IUsers>(
       type: Boolean,
       required: false,
       default: false,
+    },
+    invitation_id: {
+      type: Schema.Types.ObjectId,
+      required: false,
+      ref: INVITATIONS_COLLECTION,
     },
     created_by: {
       type: Schema.Types.ObjectId,
