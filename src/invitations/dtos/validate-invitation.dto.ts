@@ -11,11 +11,4 @@ export class ValidateInvitationDto {
   @IsString()
   link_id: string;
 
-  @ApiProperty({
-    description: 'company_id mongo id e.g company_id=624ea2841cd832e0db8466da',
-    required: false,
-    default: null,
-  })
-  @IsMongoId()
-  company_id?: ObjectId;
 }

@@ -241,15 +241,7 @@ export class InvitationsService {
     }
 
     // Delete any existing pending invitations for this email
-    await this.invitationModel.deleteMany({
-      email: email.toLowerCase(),
-      invitation_status: InvitationStatus.P,
-      $or: [
-       
-        { role: { $in: ['INTERNAL_ADMIN', 'SUPER_ADMIN'] } } // Internal or Super admin roles
-      ]
-    });
-
+  
     let companyExists;
 
     // Generate unique invitation link ID
@@ -258,7 +250,7 @@ export class InvitationsService {
     // Generate a JWT token with the `link_id`
     const token = jwt.sign({ link_id: generatedLinkId }, process.env.JWT_SECRET, { expiresIn: '3d' });
     // const invitationLink = `https://voyage-vite-admi-panel.vercel.app/signup/${token}`;
-    let invitationLink = process.env.DB_URL === 'mongodb+srv://raoarsalanlatif:dxSCi8DLrHsBUprf@cluster0.ohwlwoi.mongodb.net/test' ? `https://staging.electra.com//signup/${token}` : `https://portal.electra.com/signup/${token}`;
+    let invitationLink = `https://electra-seven-wine.vercel.app/signup/${token}`;
 
     // Save the invitation in the database
     const invitation = await new this.invitationModel({
@@ -271,14 +263,14 @@ export class InvitationsService {
     }).save();
 
     // Define a template for the invitation email
-    const emailSubject = "You're Invited to Join electra!";
+    const emailSubject = "You're Invited to Join Electra!";
     const emailMessage = `
       <html>
           <body>
-              <h1>Welcome to electra!</h1>
+              <h1>Welcome to Electra!</h1>
               <p>You have been invited to join our platform. Click the link below to accept your invitation:</p>
               <a href="${invitationLink}" style="color: blue; text-decoration: underline;">Accept Invitation</a>
-              <p>Thank you,<br>electra Team</p>
+              <p>Thank you,<br>Electra Team</p>
           </body>
       </html>
   `;
@@ -312,7 +304,7 @@ export class InvitationsService {
 
     // Generate the reset password link
 
-    const resetPasswordLink = `https://portal.electra.com/reset-password/${token}`;
+    const resetPasswordLink = `https://electra-seven-wine.vercel.app/reset-password/${token}`;
 
     const invitation = await new this.invitationModel({
       email,
@@ -380,7 +372,7 @@ export class InvitationsService {
 
     // Generate the verification link
     const verificationLink = 
-             `https://portal.electra.com/verify-email/${token}`;
+             `https://electra-seven-wine.vercel.app/verify-email/${token}`;
 
     // Create a new invitation record for verification
     const invitation = await new this.invitationModel({
