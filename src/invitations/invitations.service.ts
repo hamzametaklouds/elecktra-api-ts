@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 const postmark = require("postmark");
 import * as jwt from 'jsonwebtoken';
 import { UsersService } from 'src/users/users.service';
+import { Role } from 'src/roles/roles.schema';
 
 @Injectable()
 export class InvitationsService {
@@ -183,12 +184,7 @@ export class InvitationsService {
       .sort(orderBy)
       .skip(skip)
       .limit(rpp)
-      .populate('company_id')
-      .populate({
-        path: 'created_by',
-        select: '_id first_name last_name email phone_no',
-        match: { is_deleted: false },
-      });
+   
     return { pages: `Page ${page} of ${totalPages}`, total: totalDocuments, data: invitations };
   }
 
@@ -201,19 +197,11 @@ export class InvitationsService {
   async getFilteredInvitations($filter: Object, $orderBy, user) {
 
 
-    if (user?.company_id) {
-      $filter['company_id'] = user?.company_id
-    }
 
     return await this.invitationModel
       .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy)
-      .populate('company_id')
-      .populate({
-        path: 'created_by',
-        select: '_id first_name last_name email phone_no',
-        match: { is_deleted: false },
-      });
+     
   }
 
   /**
@@ -379,7 +367,9 @@ export class InvitationsService {
         link_id: verificationLinkId,
         token: token,
         invitation_status: InvitationStatus.P,
+        role: Role.EMAIL_VERIFICATION,
         is_used: false,
+        company_id: null,
         created_by: null,
     }).save();
 

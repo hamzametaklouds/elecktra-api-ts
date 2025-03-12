@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { HealthModule } from './health/health.module';
 import { sentry } from './config/env.config/sentry.config';
 import { InvitationsModule } from './invitations/invitations.module';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { InvitationsModule } from './invitations/invitations.module';
     AuthModule,
     UsersModule,
     InvitationsModule,
+    CompanyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

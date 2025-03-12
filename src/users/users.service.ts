@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { SignUpUserDto } from 'src/auth/dtos/sign-up.dto';
 import { InvitationsService } from 'src/invitations/invitations.service';
 import { Role } from 'src/roles/roles.schema';
+import { CompanyService } from 'src/company/company.service';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -22,6 +23,8 @@ export class UsersService {
     private configService: ConfigService,
     @Inject(forwardRef(() => InvitationsService))
     private invitationService: InvitationsService,
+    @Inject(forwardRef(() => CompanyService))
+    private companyService: CompanyService,
   ) { }
 
   async getUserByEmail(email: string): Promise<IUsers> {
@@ -190,22 +193,13 @@ export class UsersService {
       email,
       business_name,
       invitation_id,
-      //dob,
       password,
-      // country_code,
-      // phone_no,
     } = userObject;
 
     const ifEmailExists = await this.getUserByEmail(email);
     if (ifEmailExists) {
       throw new ConflictException('Email already exists')
     }
-    // if (phone_no) {
-    //   const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
-    //   if (ifPhoneExists) {
-    //     throw new ConflictException('Phone number already exists')
-    //   }
-    // }
 
     let invitation;
     if(invitation_id){
@@ -218,7 +212,14 @@ export class UsersService {
 
     const hashPassword = await bcrypt.hash(password, 10);
 
-
+    // Create company first
+    const companyName = business_name || first_name;
+    const company = await this.companyService.create({
+      name: companyName,
+      website: '',
+      bio: '',
+      image: '',
+    }, { userId: null }); // Pass null as userId since user isn't created yet
 
     let createdUser;
 
@@ -227,18 +228,19 @@ export class UsersService {
       first_name,
       last_name,
       email,
-      invitation_id:invitation?invitation?._id:null,
-      roles:invitation?.role?[invitation?.role]:[Role.BUSINESS_ADMIN],
-     // dob,
-      password:hashPassword,
-      business_name:business_name?business_name:first_name,
-      // country_code: country_code ? country_code : null,
-      // phone_no: phone_no ? phone_no : null,
+      invitation_id: invitation?invitation?._id:null,
+      roles: invitation?.role?[invitation?.role]:[Role.BUSINESS_ADMIN],
+      password: hashPassword,
+      business_name: business_name?business_name:first_name,
+      company_id: company._id, // Add the company ID to the user
     }).save();
 
+    // Update the company with the created user as created_by
+    await this.companyService.update(company._id.toString(), {
+      created_by: createdUser._id
+    });
 
-    return createdUser
-
+    return createdUser;
   }
 
 

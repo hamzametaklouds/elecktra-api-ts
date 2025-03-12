@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 import { USERS_COLLECTION } from './users.constants';
 import { Role } from 'src/roles/roles.schema';
 import { INVITATIONS_COLLECTION } from 'src/invitations/invitations.constants';
+import { COMPANY_COLLECTION } from 'src/company/company.constants';
 
 
 export interface IUsers {
@@ -33,6 +34,7 @@ export interface IUsers {
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
   is_deleted?: boolean;
+  company_id?: Schema.Types.ObjectId;
 }
 
 export const UsersSchema = new Schema<IUsers>(
@@ -167,6 +169,11 @@ export const UsersSchema = new Schema<IUsers>(
       type: Schema.Types.ObjectId,
       required: false,
       ref: USERS_COLLECTION,
+    },
+    company_id: {
+      type: Schema.Types.ObjectId,
+      required: false,
+      ref: COMPANY_COLLECTION,
     },
   },
   {
