@@ -196,6 +196,13 @@ export class InvitationsService {
    */
   async getFilteredInvitations($filter: Object, $orderBy, user) {
 
+    console.log('user-----', user)
+
+    if (user?.company_id) {
+      $filter['company_id'] = user?.company_id
+    }
+
+    console.log('filter-----', $filter)
 
 
     return await this.invitationModel
@@ -218,7 +225,7 @@ export class InvitationsService {
    * @returns Promise containing the created invitation
    * @throws BadRequestException if email exists or company is invalid
    */
-  async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId }) {
+  async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
     const { email, role } = invitationObject;
 
     const userWithEmail = await this.usersService.getUserByEmail(email.toLowerCase())
@@ -244,6 +251,7 @@ export class InvitationsService {
       email: email.toLowerCase(),
       link_id: generatedLinkId,
       token:token,
+      company_id: user?.company_id ?? null,
       role,
       invitation_status: InvitationStatus.P,
       created_by: user.userId ?? null,

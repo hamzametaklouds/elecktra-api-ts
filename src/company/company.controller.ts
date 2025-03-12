@@ -88,4 +88,17 @@ export class CompanyController {
       message: 'Company deleted successfully',
     };
   }
+
+  @Get('my-company')
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard)
+  async getMyCompany(@Req() req: Request) {
+    const company = await this.companyService.findByUserId(req.user);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Company retrieved successfully',
+      data: company,
+    };
+  }
 } 
