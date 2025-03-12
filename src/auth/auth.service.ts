@@ -2,7 +2,6 @@ import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpUserDto } from './dtos/sign-up.dto';
-import admin from "firebase-admin"
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
 import * as bcrypt from 'bcrypt'
 import * as appleSigninAuth from 'apple-signin-auth';
@@ -11,6 +10,10 @@ import { InvitationsService } from 'src/invitations/invitations.service';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ObjectId } from 'mongodb';
+import * as admin from 'firebase-admin';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client();
 
 
 @Injectable()
@@ -213,27 +216,49 @@ export class AuthService {
   // }
 
   async googleLoginUser(body: GoogleLoginDto): Promise<any> {
-
     try {
-
-      const decodedToken = await admin.auth().verifyIdToken(body.access_token)
-
-      const userRecordFirebase = await admin.auth().getUser(decodedToken.uid)
-
-      if (!userRecordFirebase) {
-        throw new BadRequestException('Invalid token')
+      if (!body.access_token) {
+        throw new BadRequestException('Access token is required');
       }
-
-      let userExists = await this.usersService.getUserByEmail(userRecordFirebase?.email)
-
+  
+      // **Step 1: Verify Google Access Token**
+      const ticket = await client.getTokenInfo(body.access_token); // Get Token Info
+      console.log(ticket)
+      const userInfo = await client.verifyIdToken({
+        idToken: body.access_token,
+        audience: "240945252561-t2o1rc2232a32pic1phr9vm3q7rcl9ff.apps.googleusercontent.com", // Your Google OAuth Client ID
+      });
+  
+      const payload = userInfo.getPayload();
+      if (!payload) {
+        throw new BadRequestException('Invalid Google token');
+      }
+  
+      const email = payload.email;
+      const name = payload.name || 'Anonymous User';
+  
+      // **Step 2: Check if the user exists in Firebase**
+      let userRecordFirebase;
+      try {
+        userRecordFirebase = await admin.auth().getUserByEmail(email);
+      } catch (error) {
+        // If user does not exist, create one in Firebase
+        userRecordFirebase = await admin.auth().createUser({
+          email,
+          displayName: name,
+          emailVerified: true,
+        });
+      }
+  
+      // **Step 3: Generate a Firebase Custom Token**
+      const firebaseToken = await admin.auth().createCustomToken(userRecordFirebase.uid);
+  
+      // **Step 4: Check if the user exists in the application database**
+      let userExists = await this.usersService.getUserByEmail(userRecordFirebase?.email);
+  
       if (!userExists) {
-
-        console.log('userRecordFirebase----', userRecordFirebase)
-
-        const fullName = userRecordFirebase?.displayName ? userRecordFirebase?.displayName : null
-        const firstName = userRecordFirebase?.displayName ? userRecordFirebase?.displayName?.split(' ')[0] : 'Anonymous'
-        const lastName = userRecordFirebase?.displayName ? userRecordFirebase?.displayName?.split(' ')[1] : 'User'
-
+        const [firstName, lastName] = name.split(' ') || ['Anonymous', 'User'];
+  
         userExists = await this.usersService.createGoogleUser({
           first_name: firstName || ' ',
           last_name: lastName || ' ',
@@ -241,25 +266,25 @@ export class AuthService {
           uuid: userRecordFirebase?.uid || ' ',
           country_code: null,
           phone_no: userRecordFirebase?.phoneNumber ? userRecordFirebase?.phoneNumber : null
-        })
-
+        });
       }
-
+  
+      // **Step 5: Check if the user is disabled**
       if (userExists.is_disabled) {
-        throw new ForbiddenException('We are sorry, but your account has been temporarily blocked. Please contact our customer support team for further assistance')
+        throw new ForbiddenException('Your account has been temporarily blocked. Please contact support.');
       }
-
+  
+      // **Step 6: Return JWT for authentication**
       return {
-        access_token: this.jwtService.sign({ userName: userExists.first_name, sub: userExists._id }), message: 'Login Successful', user: userExists
+        access_token: this.jwtService.sign({ userName: userExists.first_name, sub: userExists._id }),
+        firebase_token: firebaseToken, // Returning Firebase Token
+        message: 'Login Successful',
+        user: userExists
       };
-
+    } catch (err) {
+      console.error(err);
+      throw new BadRequestException('Something went wrong with sign-in');
     }
-    catch (err) {
-      console.error(err)
-
-      throw new BadRequestException('Something went wrong with sign in ')
-    }
-
   }
 
 
