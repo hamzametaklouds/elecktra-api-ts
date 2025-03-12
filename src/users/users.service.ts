@@ -134,18 +134,14 @@ export class UsersService {
     last_name?: string,
     email?: string,
     uuid?: string,
-    apple_id?: string,
-    country_code?: string,
-    phone_no?: string,
+   image?:string
   }) {
     const {
       first_name,
       last_name,
       email,
       uuid,
-      apple_id,
-      country_code,
-      phone_no,
+      image
     } = userObject;
 
     const ifEmailExists = await this.getUserByEmail(email);
@@ -169,9 +165,9 @@ export class UsersService {
       last_name,
       email,
       uuid,
-      apple_id,
-      country_code,
-      phone_no,
+     image:image?image:'',
+     email_verified:true,
+     email_verified_at:new Date()
     }).save();
 
 

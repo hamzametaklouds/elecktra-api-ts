@@ -1,16 +1,61 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, IsOptional, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-
 export class GoogleLoginDto {
-
     @ApiProperty({
-        description: 'access_token string e.g access_token=550e8400-e29b-41d4-a716-446655440000',
+        description: 'Google OAuth access token',
         required: true,
-        default: '',
     })
     @IsString()
     @IsNotEmpty()
     access_token: string;
+
+    @ApiProperty({
+        description: 'Google user ID (sub)',
+        required: true,
+    })
+    @IsString()
+    @IsNotEmpty()
+    sub: string;
+
+    @ApiProperty({
+        description: 'User email',
+        required: true,
+    })
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+
+    @ApiProperty({
+        description: 'User full name',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    name?: string;
+
+    @ApiProperty({
+        description: 'User family name',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    family_name?: string;
+
+    @ApiProperty({
+        description: 'User given name',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    given_name?: string;
+
+    @ApiProperty({
+        description: 'User profile picture URL',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    picture?: string;
 
 }

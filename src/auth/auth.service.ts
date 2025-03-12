@@ -57,86 +57,6 @@ export class AuthService {
     };
   }
 
-  async verifyAndAuthenticate(idToken: string) {
-    try {
-      // Step 1: Verify the Apple ID token
-      const applePayload = await appleSigninAuth.verifyIdToken(idToken, {
-        audience: 'com.apps.electraapp', // Replace with your Apple app's bundle ID
-      });
-
-      console.log(applePayload)
-
-      const { sub: appleUserId, email } = applePayload;
-
-      if (!appleUserId) {
-        throw new UnauthorizedException('Invalid Apple ID token');
-      }
-
-      // Step 2: Check if user exists in Firebase
-      let firebaseUser;
-      try {
-
-        const userExists = await this.usersService.getUserByEmail(email)
-
-        if (userExists) {
-          const user = await this.usersService.updateUserAppleId(userExists._id, appleUserId)
-
-          return {
-            access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), message: 'Login Successful', user: userExists
-          };
-
-        }
-
-        firebaseUser = await admin.auth().getUserByEmail(email);
-
-
-        const fullName = firebaseUser?.displayName.split(" ")
-        const firstName = fullName[0] || '-'
-        const lastName = fullName[1] || '-'
-        const em = firebaseUser?.email || '-'
-        const uid = firebaseUser?.uuid || '-'
-
-
-        const createdUser = await this.usersService.createGoogleUser({
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          uuid: uid,
-          apple_id: appleUserId,
-          country_code: '-',
-          phone_no: '-'
-        })
-
-        return {
-          access_token: this.jwtService.sign({ userName: createdUser.first_name, sub: createdUser._id }), message: 'Login Successful', user: userExists
-        };
-      } catch (error) {
-        if (error.code === 'auth/user-not-found') {
-          // Create a new Firebase user if not found
-          firebaseUser = await admin.auth().createUser({
-            uid: appleUserId,
-            email,
-            emailVerified: true,
-          });
-        } else {
-          throw error;
-        }
-      }
-
-      // Step 3: Generate a Firebase custom token for the user
-      const customToken = await admin.auth().createCustomToken(firebaseUser.uid);
-
-      return customToken;
-    } catch (error) {
-      console.error('Error in Apple login:', error);
-      throw new UnauthorizedException('Authentication failed');
-    }
-  }
-
-
- 
-
-
   // async validateSystemUser(email: string, pass: string): Promise<any> {
   //   const user = await this.usersService.getUserByEmail(email.toLocaleLowerCase());
 
@@ -217,73 +137,68 @@ export class AuthService {
 
   async googleLoginUser(body: GoogleLoginDto): Promise<any> {
     try {
-      if (!body.access_token) {
-        throw new BadRequestException('Access token is required');
-      }
-  
-      // **Step 1: Verify Google Access Token**
-      const ticket = await client.getTokenInfo(body.access_token); // Get Token Info
-      console.log(ticket)
-      const userInfo = await client.verifyIdToken({
-        idToken: body.access_token,
-        audience: "240945252561-t2o1rc2232a32pic1phr9vm3q7rcl9ff.apps.googleusercontent.com", // Your Google OAuth Client ID
-      });
-  
-      const payload = userInfo.getPayload();
-      if (!payload) {
-        throw new BadRequestException('Invalid Google token');
-      }
-  
-      const email = payload.email;
-      const name = payload.name || 'Anonymous User';
-  
-      // **Step 2: Check if the user exists in Firebase**
-      let userRecordFirebase;
-      try {
-        userRecordFirebase = await admin.auth().getUserByEmail(email);
-      } catch (error) {
-        // If user does not exist, create one in Firebase
-        userRecordFirebase = await admin.auth().createUser({
-          email,
-          displayName: name,
-          emailVerified: true,
-        });
-      }
-  
-      // **Step 3: Generate a Firebase Custom Token**
-      const firebaseToken = await admin.auth().createCustomToken(userRecordFirebase.uid);
-  
-      // **Step 4: Check if the user exists in the application database**
-      let userExists = await this.usersService.getUserByEmail(userRecordFirebase?.email);
-  
-      if (!userExists) {
-        const [firstName, lastName] = name.split(' ') || ['Anonymous', 'User'];
-  
-        userExists = await this.usersService.createGoogleUser({
-          first_name: firstName || ' ',
-          last_name: lastName || ' ',
-          email: userRecordFirebase?.email || ' ',
-          uuid: userRecordFirebase?.uid || ' ',
-          country_code: null,
-          phone_no: userRecordFirebase?.phoneNumber ? userRecordFirebase?.phoneNumber : null
-        });
-      }
-  
-      // **Step 5: Check if the user is disabled**
-      if (userExists.is_disabled) {
-        throw new ForbiddenException('Your account has been temporarily blocked. Please contact support.');
-      }
-  
-      // **Step 6: Return JWT for authentication**
-      return {
-        access_token: this.jwtService.sign({ userName: userExists.first_name, sub: userExists._id }),
-        firebase_token: firebaseToken, // Returning Firebase Token
-        message: 'Login Successful',
-        user: userExists
-      };
+        if (!body.access_token) {
+            throw new BadRequestException('Access token is required');
+        }
+
+        // Step 1: Verify Google Access Token
+        const ticket = await client.getTokenInfo(body.access_token);
+        
+        // Step 2: Verify that the essential token info matches
+        if (ticket.email !== body.email || ticket.sub !== body.sub) {
+            throw new BadRequestException('Invalid token data');
+        }
+
+        // Step 3: Check if user exists in the application database
+        let userExists = await this.usersService.getUserByEmail(body.email);
+
+        // Step 4: If user doesn't exist, create new user
+        if (!userExists) {
+            // Determine first and last name from available data
+            let firstName = '';
+            let lastName = '';
+
+            if (body.given_name) {
+                firstName = body.given_name;
+            } else if (body.name) {
+                firstName = body.name.split(' ')[0];
+            }
+
+            if (body.family_name) {
+                lastName = body.family_name;
+            } else if (body.name && body.name.includes(' ')) {
+                lastName = body.name.split(' ').slice(1).join(' ');
+            }
+
+            userExists = await this.usersService.createGoogleUser({
+                first_name: firstName,
+                last_name: lastName,
+                email: body.email,
+                uuid: body.sub,
+                image: body.picture || '',
+            });
+        }
+
+        // Step 5: Check if the user is disabled
+        if (userExists.is_disabled) {
+            throw new ForbiddenException('Your account has been temporarily blocked. Please contact support.');
+        }
+
+        // Step 6: Return JWT for authentication
+        return {
+            access_token: this.jwtService.sign({ 
+                userName: userExists.first_name, 
+                sub: userExists._id 
+            }),
+            message: 'Login Successful',
+            user: userExists
+        };
     } catch (err) {
-      console.error(err);
-      throw new BadRequestException('Something went wrong with sign-in');
+        console.error(err);
+        if (err instanceof BadRequestException || err instanceof ForbiddenException) {
+            throw err;
+        }
+        throw new BadRequestException('Something went wrong with sign-in');
     }
   }
 
