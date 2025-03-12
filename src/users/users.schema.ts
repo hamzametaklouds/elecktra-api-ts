@@ -19,6 +19,7 @@ export interface IUsers {
   address: string;
   emergency_contact?: string;
   country?: string
+  biography?: string
   street?: string
   apple_id: string;
   city?: string
@@ -57,6 +58,11 @@ export const UsersSchema = new Schema<IUsers>(
       default: null
     },
     first_name: {
+      type: String,
+      required: false,
+      default: ''
+    },
+    biography: {
       type: String,
       required: false,
       default: ''
