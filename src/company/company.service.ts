@@ -86,10 +86,9 @@ export class CompanyService {
     return company;
   }
 
-  async findByUserId(user): Promise<ICompany> {
-    console.log('user-----', user)
-    const company = await this.companyModel
-      .findOne({  is_deleted: false })
+  async findByUserId(user) {
+    console.log('fucking wrong-----', user)
+    const company = await this.companyModel.find()
     
     if (!company) {
       throw new NotFoundException('Company not found');
