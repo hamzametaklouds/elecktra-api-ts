@@ -309,7 +309,7 @@ export class InvitationsService {
       company_id: null,
       company_name: null,
       link_id: resetLinkId,
-      role: null,
+      role: user?.roles[0],
       invitation_status: InvitationStatus.P,
       is_forget_password: true,
       created_by: null,
