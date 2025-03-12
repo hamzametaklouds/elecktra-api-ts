@@ -68,6 +68,7 @@ export class InvitationsService {
       const invitation = await this.invitationModel.findOne({
         link_id: link_id,
         is_deleted: false,
+        is_disabled: false,
         is_used: false,
         invitation_status: { $ne: InvitationStatus.A }
       });
