@@ -114,7 +114,7 @@ export class AuthController {
     @Post('change-password')
     @ApiBearerAuth(AuthorizationHeader)
     @UseGuards(JWTAuthGuard, RolesGuard)
-    @Roles(Role.BUSINESS_ADMIN, Role.SUPPORT_ADMIN, Role.SUPER_ADMIN, Role.USER)
+    @Roles(Role.BUSINESS_OWNER,Role.BUSINESS_ADMIN, Role.SUPPORT_ADMIN, Role.SUPER_ADMIN, Role.USER)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     @ApiBody({ type: ChangePasswordDto })
     async changePassword(@Body() body: ChangePasswordDto, @Request() req) {
