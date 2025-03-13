@@ -228,6 +228,8 @@ export class UsersService {
         roles: invitation?.role?[invitation?.role]:[Role.BUSINESS_OWNER],
         password: hashPassword,
         business_name: null,
+        email_verified:true,
+        email_verified_at:new Date(),
         company_id:invitation?.company_id, // Add the company ID to the user
         created_by: invitation?.created_by?invitation?.created_by:null
       }).save();
