@@ -52,7 +52,7 @@ export const UsersSchema = new Schema<IUsers>(
     business_name: {
       type: String,
       required: false,
-      default: ''
+      default: null
     },
     last_name: {
       type: String,

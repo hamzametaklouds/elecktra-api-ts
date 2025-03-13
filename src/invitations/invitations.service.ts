@@ -217,7 +217,6 @@ export class InvitationsService {
       $in: [
         'SUPPORT_ADMIN',
         'BUSINESS_ADMIN',
-        'BUSINESS_OWNER',
         'USER'
       ]
     }
