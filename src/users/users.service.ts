@@ -229,7 +229,7 @@ export class UsersService {
       last_name,
       email,
       invitation_id: invitation?invitation?._id:null,
-      roles: invitation?.role?[invitation?.role]:[Role.BUSINESS_ADMIN],
+      roles: invitation?.role?[invitation?.role]:[Role.BUSINESS_OWNER],
       password: hashPassword,
       business_name: business_name?business_name:first_name,
       company_id: company._id, // Add the company ID to the user

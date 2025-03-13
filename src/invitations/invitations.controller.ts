@@ -13,6 +13,7 @@ import { Request } from 'express';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { RolesGuard } from 'src/app/guards/role-guard';
+import { UpdateInvitationDto } from './dtos/update-invitation.dto';
 
 UseFilters(HttpExceptionFilter);
 @Controller('invitations')
@@ -29,7 +30,7 @@ export class InvitationsController {
    */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
   @Get()
   @ApiQuery({ type: QueryParamsDTO })
   async get(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
@@ -63,7 +64,7 @@ export class InvitationsController {
    */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
   @Post('sent-invitation')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: CreateInvitationDto })
@@ -83,6 +84,26 @@ export class InvitationsController {
   async validate(@Query('invitation_token') link_id: string) {
     const validatedInvitation = await this.invitationService.validateInvitationLink(link_id);
     return validatedInvitation;
+  }
+
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
+  @Put()
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBody({ type: UpdateInvitationDto })
+  async updateInvitationStatus(
+    @Query('id') id: string,
+    @Body() body: UpdateInvitationDto, 
+    @Req() req: Request
+  ) {
+    const result = await this.invitationService.updateInvitationStatus(id, body, req.user);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Invitation status updated successfully',
+      data: result
+    };
   }
 
 }

@@ -11,6 +11,7 @@ const postmark = require("postmark");
 import * as jwt from 'jsonwebtoken';
 import { UsersService } from 'src/users/users.service';
 import { Role } from 'src/roles/roles.schema';
+import { UpdateInvitationDto } from './dtos/update-invitation.dto';
 
 @Injectable()
 export class InvitationsService {
@@ -251,7 +252,7 @@ export class InvitationsService {
       email: email.toLowerCase(),
       link_id: generatedLinkId,
       token:token,
-      company_id: user?.company_id ?? null,
+      company_id: user?.company_id,
       role,
       invitation_status: InvitationStatus.P,
       created_by: user.userId ?? null,
@@ -400,6 +401,46 @@ export class InvitationsService {
     await this.sendEmail(email, emailSubject, emailMessage);
 
     return { message: 'Verification email sent successfully' };
+  }
+
+  /**
+   * Updates the disabled and deleted status of an invitation
+   * @param id The invitation ID
+   * @param body The update invitation DTO containing is_disabled and is_deleted status
+   * @param user Current user making the request
+   * @returns Promise containing the updated invitation
+   */
+  async updateInvitationStatus(id: string, body: UpdateInvitationDto, user: any): Promise<IInvitations> {
+    const { is_disabled, is_deleted } = body;
+    
+    const updateData: any = {
+      updated_by: user.userId
+    };
+    
+    if (typeof is_disabled !== 'undefined') {
+      updateData.is_disabled = is_disabled;
+    }
+    
+    if (typeof is_deleted !== 'undefined') {
+      updateData.is_deleted = is_deleted;
+    }
+    
+    // If either flag is true, ensure is_deleted is true
+    if (is_disabled || is_deleted) {
+      updateData.is_deleted = true;
+    }
+    
+    const updatedInvitation = await this.invitationModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedInvitation) {
+      throw new BadRequestException('Invitation not found');
+    }
+
+    return updatedInvitation;
   }
 
 }

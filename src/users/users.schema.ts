@@ -73,7 +73,7 @@ export const UsersSchema = new Schema<IUsers>(
       type: [String],
       required: false,
       enum: Role,
-      default: [Role.BUSINESS_ADMIN]
+      default: [Role.BUSINESS_OWNER]
     },
     email: {
       type: String,
