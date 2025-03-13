@@ -75,7 +75,7 @@ export class UsersController {
   //   */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER,Role.USER)
   @Put()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: UpdateUserDto })
