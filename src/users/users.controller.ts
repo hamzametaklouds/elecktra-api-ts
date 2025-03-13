@@ -44,10 +44,10 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
   @Get('list')
   @ApiQuery({ type: QueryParamsDTO })
-  async getUserList(@ParamsHandler() pagination: IPaginationQuery) {
+  async getUserList(@ParamsHandler() pagination: IPaginationQuery,@Req() req: Request) {
     const { $rpp, $page, $filter, $orderBy } = pagination;
     if ($rpp && $page) {
-      const result = await this.userService.getPaginatedUsers($rpp, $page, $filter, $orderBy);
+      const result = await this.userService.getPaginatedUsers($rpp, $page, $filter, $orderBy,req.user);
       return {
         status: result ? true : false,
         statusCode: result ? 200 : 400,
@@ -55,7 +55,7 @@ export class UsersController {
         data: result ? result : null
       }
     }
-    const result = await this.userService.getFilteredUsers($filter, $orderBy);
+    const result = await this.userService.getFilteredUsers($filter, $orderBy,req.user);
     return {
       status: result ? true : false,
       statusCode: result ? 200 : 400,

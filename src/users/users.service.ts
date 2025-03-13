@@ -69,7 +69,12 @@ export class UsersService {
   }
 
 
-  async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy) {
+  async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy,user: { userId?: ObjectId, company_id?: ObjectId}) {
+    
+    if(user?.company_id){
+      filter['company_id'] = user?.company_id
+    }
+
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.userModel.countDocuments(filter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
@@ -123,7 +128,10 @@ export class UsersService {
    * @param $orderBy orderby as an argument
    * @returns bandCategory based on filter
    */
-  async getFilteredUsers($filter: Object, $orderBy) {
+  async getFilteredUsers($filter: Object, $orderBy,user: { userId?: ObjectId, company_id?: ObjectId}) {
+    if(user?.company_id){
+      $filter['company_id'] = user?.company_id
+    }
     return await this.userModel
       .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy)
@@ -201,6 +209,8 @@ export class UsersService {
       throw new ConflictException('Email already exists')
     }
 
+    const hashPassword = await bcrypt.hash(password, 10);
+
     let invitation;
     if(invitation_id){
        invitation = await this.invitationService.getinvitationById(invitation_id);
@@ -208,12 +218,26 @@ export class UsersService {
         throw new BadRequestException('Invalid invitation id')
       }
       await this.invitationService.updateInvitationUser(invitation._id);
-    }
 
-    const hashPassword = await bcrypt.hash(password, 10);
+     const createdUser = await new this.userModel({
+        image,
+        first_name,
+        last_name,
+        email,
+        invitation_id: invitation?invitation?._id:null,
+        roles: invitation?.role?[invitation?.role]:[Role.BUSINESS_OWNER],
+        password: hashPassword,
+        business_name: business_name?business_name:first_name,
+        company_id:invitation?.company_id, // Add the company ID to the user
+        created_by: invitation?.created_by?invitation?.created_by:null
+      }).save();
+
+      return createdUser;
+    }
 
     // Create company first
     const companyName = business_name || first_name;
+
     const company = await this.companyService.create({
       name: companyName,
       website: '',
@@ -233,6 +257,7 @@ export class UsersService {
       password: hashPassword,
       business_name: business_name?business_name:first_name,
       company_id: company._id, // Add the company ID to the user
+      created_by: invitation?.created_by?invitation?.created_by:null
     }).save();
 
     // Update the company with the created user as created_by
