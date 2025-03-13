@@ -29,7 +29,7 @@ export class UsersService {
 
   async getUserByEmail(email: string): Promise<IUsers> {
     return await this.userModel
-      .findOne({ email: email, is_deleted: false });
+      .findOne({ email: email, is_deleted: false }).populate('company_id');
   }
 
   async markEmailAsVerified(userId: ObjectId) {
