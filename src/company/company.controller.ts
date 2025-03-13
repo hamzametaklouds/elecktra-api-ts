@@ -34,7 +34,7 @@ export class CompanyController {
   @Get()
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN)
   async findAll(@ParamsHandler() pagination: IPaginationQuery) {
     const { $rpp, $page, $filter, $orderBy } = pagination;
     const result = await this.companyService.findAll($rpp || 10, $page || 1, $filter || {}, $orderBy || { created_at: -1 });
@@ -78,7 +78,7 @@ export class CompanyController {
   @Delete(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER)
   async remove(@Param('id') id: string) {
     await this.companyService.remove(id);
     return {
