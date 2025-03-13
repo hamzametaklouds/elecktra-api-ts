@@ -75,6 +75,10 @@ export class UsersService {
       filter['company_id'] = user?.company_id
     }
 
+    if(user?.userId) {
+      filter['_id'] = { $ne: user.userId }
+    }
+
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.userModel.countDocuments(filter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
@@ -132,6 +136,11 @@ export class UsersService {
     if(user?.company_id){
       $filter['company_id'] = user?.company_id
     }
+
+    if(user?.userId) {
+      $filter['_id'] = { $ne: user.userId }
+    }
+
     return await this.userModel
       .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy)
