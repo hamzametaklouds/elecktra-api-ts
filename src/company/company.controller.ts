@@ -63,7 +63,7 @@ export class CompanyController {
   @Put(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
     const company = await this.companyService.update(id, updateCompanyDto);
