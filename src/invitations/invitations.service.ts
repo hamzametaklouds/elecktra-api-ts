@@ -175,6 +175,16 @@ export class InvitationsService {
       filter['company_id'] = user?.company_id
     }
 
+    filter['role'] = {
+      $in: [
+        'SUPPORT_ADMIN',
+        'BUSINESS_ADMIN',
+        'BUSINESS_OWNER',
+        'USER'
+      ]
+    }
+
+
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.invitationModel.countDocuments(filter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
@@ -201,6 +211,15 @@ export class InvitationsService {
 
     if (user?.company_id) {
       $filter['company_id'] = user?.company_id
+    }
+
+    $filter['role'] = {
+      $in: [
+        'SUPPORT_ADMIN',
+        'BUSINESS_ADMIN',
+        'BUSINESS_OWNER',
+        'USER'
+      ]
     }
 
     console.log('filter-----', $filter)
