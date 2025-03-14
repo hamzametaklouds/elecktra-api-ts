@@ -254,8 +254,22 @@ export class InvitationsService {
    * @returns Promise containing the created invitation
    * @throws BadRequestException if email exists or company is invalid
    */
-  async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+  async sendInvitation(invitationObject: CreateInvitationDto, user: { userId?: ObjectId, company_id?: ObjectId, role?: string }) {
     const { email, role } = invitationObject;
+
+    // Add role-based invitation restrictions
+    const businessRoles = [Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER];
+    const adminRoles = [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN];
+
+    // Check if user is a business role trying to invite admin roles
+    if (businessRoles.includes(user.role as Role) && adminRoles.includes(role as Role)) {
+      throw new BadRequestException('You are not authorized to invite administrators');
+    }
+
+    // Check if user is super admin trying to invite business roles
+    if (user.role === Role.SUPER_ADMIN && businessRoles.includes(role as Role)) {
+      throw new BadRequestException('Super admin cannot invite business users');
+    }
 
     const userWithEmail = await this.usersService.getUserByEmail(email.toLowerCase())
 
