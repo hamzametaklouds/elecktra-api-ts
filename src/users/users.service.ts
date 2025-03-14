@@ -69,15 +69,19 @@ export class UsersService {
   }
 
 
-  async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy,user: { userId?: ObjectId, company_id?: ObjectId}) {
-    
-    if(user?.company_id){
-      filter['company_id'] = user?.company_id
+  async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    if (user?.company_id) {
+      filter['company_id'] = user?.company_id;
     }
 
-    if(user?.userId) {
-      filter['_id'] = { $ne: user.userId }
+    if (user?.userId) {
+      filter['_id'] = { $ne: user.userId };
     }
+
+    // Add condition to exclude super admin and support admin roles
+    filter['roles'] = { 
+      $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN] 
+    };
 
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.userModel.countDocuments(filter);
@@ -88,42 +92,11 @@ export class UsersService {
       .find(filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort(orderBy)
       .skip(skip)
-      .limit(rpp)
+      .limit(rpp);
 
     return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
-
   }
 
-  async getPaginatedHostUsers(rpp: number, page: number, filter: Object, orderBy) {
-
-    filter['is_host'] = true
-
-    const skip: number = (page - 1) * rpp;
-    const totalDocuments: number = await this.userModel.countDocuments(filter);
-    const totalPages: number = Math.ceil(totalDocuments / rpp);
-    page = page > totalPages ? totalPages : page;
-
-
-    const bandCategorySection = await this.userModel
-      .find(filter, { first_name: 1, last_name: 1, email: 1, country_code: 1, phone_no: 1, host_status: 1, address: 1, is_host: 1, for_car: 1, for_stay: 1 })
-      .sort(orderBy)
-      .skip(skip)
-      .limit(rpp)
-
-    return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
-
-  }
-
-
-  async getFilteredHostUsers($filter: Object, $orderBy) {
-
-    $filter['is_host'] = true
-
-    return await this.userModel
-      .find($filter, { first_name: 1, last_name: 1, email: 1, host_status: 1, country_code: 1, phone_no: 1, address: 1, is_host: 1, for_car: 1, for_stay: 1 })
-      .sort($orderBy)
-
-  }
 
 
   /**
@@ -132,19 +105,23 @@ export class UsersService {
    * @param $orderBy orderby as an argument
    * @returns bandCategory based on filter
    */
-  async getFilteredUsers($filter: Object, $orderBy,user: { userId?: ObjectId, company_id?: ObjectId}) {
-    if(user?.company_id){
-      $filter['company_id'] = user?.company_id
+  async getFilteredUsers($filter: Object, $orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    if (user?.company_id) {
+      $filter['company_id'] = user?.company_id;
     }
 
-    if(user?.userId) {
-      $filter['_id'] = { $ne: user.userId }
+    if (user?.userId) {
+      $filter['_id'] = { $ne: user.userId };
     }
+
+    // Add condition to exclude super admin and support admin roles
+    $filter['roles'] = { 
+      $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN] 
+    };
 
     return await this.userModel
       .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
-      .sort($orderBy)
-
+      .sort($orderBy);
   }
 
 
