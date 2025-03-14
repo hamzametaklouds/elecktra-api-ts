@@ -92,7 +92,7 @@ export class UsersService {
       .find(filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort(orderBy)
       .skip(skip)
-      .limit(rpp);
+      .limit(rpp).populate('company_id');
 
     return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
   }
@@ -119,9 +119,11 @@ export class UsersService {
       $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN] 
     };
 
+    console.log($filter)
+
     return await this.userModel
       .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
-      .sort($orderBy);
+      .sort($orderBy).populate('company_id');
   }
 
 
