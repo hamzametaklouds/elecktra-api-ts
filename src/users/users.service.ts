@@ -239,7 +239,7 @@ export class UsersService {
         business_name: null,
         email_verified:true,
         email_verified_at:new Date(),
-        company_id:invitation?.company_id, // Add the company ID to the user
+        company_id:invitation?.company_id?invitation?.company_id:null, // Add the company ID to the user
         created_by: invitation?.created_by?invitation?.created_by:null
       }).save();
 
