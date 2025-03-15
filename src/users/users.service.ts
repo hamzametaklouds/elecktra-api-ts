@@ -489,7 +489,7 @@ export class UsersService {
         city,
         post_code,
         dob,
-        roles: [role] // Add roles to update
+        roles: role?[role]:userExists.roles // Add roles to update
       },
       { new: true }
     );
