@@ -325,56 +325,76 @@ export class InvitationsService {
    * @returns Promise containing success message
    */
   async sendForgotPasswordEmail(email: string) {
-    // Check if the user exists
-    const user = await this.usersService.getUserByEmail(email);
-    console.log('user-----', user)
-    if (!user) {
-      return { message: 'Password reset email sent successfully' };
+    try {
+        // Check if the user exists
+        const user = await this.usersService.getUserByEmail(email);
+        
+        if (!user) {
+            // Still return success to prevent email enumeration
+            return { message: 'Password reset email sent successfully' };
+        }
+
+        // Generate unique reset link ID
+        const resetLinkId = uuidv4();
+
+        // Generate a JWT token with the `reset_link_id`
+        const token = jwt.sign({ link_id: resetLinkId }, process.env.JWT_SECRET, { expiresIn: '4d' });
+
+        // Generate the reset password link
+        const resetPasswordLink = `https://electra-seven-wine.vercel.app/reset-password/${token}`;
+
+        const invitation = await new this.invitationModel({
+            email,
+            company_id: null,
+            company_name: null,
+            link_id: resetLinkId,
+            role: user?.roles[0],
+            invitation_status: InvitationStatus.P,
+            is_forget_password: true,
+            created_by: null,
+        }).save();
+
+        // Define a template for the forgot password email
+        const emailSubject = 'Reset Your Password';
+        const emailMessage = `
+            <html>
+                <body>
+                    <h1>Password Reset Request</h1>
+                    <p>We received a request to reset your password. Click the link below to reset it:</p>
+                    <a href="${resetPasswordLink}" style="color: blue; text-decoration: underline;">Reset Password</a>
+                    <p>If you did not request this, please ignore this email.</p>
+                    <p>Thank you,<br>Electra Team</p>
+                </body>
+            </html>
+        `;
+
+        try {
+            // Send the email
+            await this.sendEmail(email, emailSubject, emailMessage);
+            return { message: 'Password reset email sent successfully' };
+        } catch (emailError) {
+            // Delete the invitation if email sending fails
+            await this.invitationModel.findByIdAndDelete(invitation._id);
+            
+            // Check specific Postmark error types
+            if (emailError.code === 406) {
+                throw new BadRequestException('Invalid email address');
+            } else if (emailError.code === 429) {
+                throw new BadRequestException('Too many requests. Please try again later');
+            } else {
+                // Log the error for debugging but don't expose details to user
+                console.error('Postmark error:', emailError);
+                throw new BadRequestException('Failed to send password reset email. Please try again later');
+            }
+        }
+    } catch (error) {
+        // Handle any other errors that might occur
+        if (error instanceof BadRequestException) {
+            throw error; // Re-throw BadRequestException
+        }
+        console.error('Password reset error:', error);
+        throw new BadRequestException('An error occurred while processing your request');
     }
-
-    // Generate unique reset link ID
-    const resetLinkId = uuidv4();
-
-    // Generate a JWT token with the `reset_link_id`
-    const token = jwt.sign({ link_id: resetLinkId }, process.env.JWT_SECRET, { expiresIn: '4d' });
-
-    console.log('token-----', token)
-
-    // Generate the reset password link
-
-    const resetPasswordLink = `https://electra-seven-wine.vercel.app/reset-password/${token}`;
-
-    const invitation = await new this.invitationModel({
-      email,
-      company_id: null,
-      company_name: null,
-      link_id: resetLinkId,
-      role: user?.roles[0],
-      invitation_status: InvitationStatus.P,
-      is_forget_password: true,
-      created_by: null,
-    }).save();
-
-    // Define a template for the forgot password email
-    const emailSubject = 'Reset Your Password';
-    const emailMessage = `
-      <html>
-          <body>
-              <h1>Password Reset Request</h1>
-              <p>We received a request to reset your password. Click the link below to reset it:</p>
-              <a href="${resetPasswordLink}" style="color: blue; text-decoration: underline;">Reset Password</a>
-              <p>If you did not request this, please ignore this email.</p>
-              <p>Thank you,<br>Electra Team</p>
-          </body>
-      </html>
-  `;
-
-    // Send the email
-    const x = await this.sendEmail(email, emailSubject, emailMessage);
-
-    console.log('x-----', x)
-
-    return { message: 'Password reset email sent successfully' };
   }
 
 
