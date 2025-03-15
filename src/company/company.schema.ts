@@ -9,6 +9,7 @@ export interface ICompany {
   bio?: string;
   image?: string;
   created_by?: Schema.Types.ObjectId;
+  is_disabled?: boolean;
   is_deleted?: boolean;
   created_at?: Date;
 }
@@ -31,6 +32,10 @@ export const CompanySchema = new Schema<ICompany>(
       type: String,
       required: false,
     },
+    is_disabled: {
+        type: Boolean,
+        default: false,
+      },
     is_deleted: {
       type: Boolean,
       default: false,
