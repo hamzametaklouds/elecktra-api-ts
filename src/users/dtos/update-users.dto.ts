@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongoose';
 import { IsMongoId, IsBoolean, IsOptional, IsString, IsEnum, IsArray, IsEmail, IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from 'src/roles/roles.schema';
 
 export class UpdateUserDto {
 
@@ -170,6 +171,14 @@ export class UpdateUserDto {
   @IsOptional()
   is_deleted?: boolean;
 
-
+  @ApiProperty({
+    description: 'User roles array',
+    required: false,
+    enum: Role,
+    isArray: true
+  })
+  @IsEnum(Role)
+  @IsOptional()
+  role?: string;
 
 }

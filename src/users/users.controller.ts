@@ -64,6 +64,31 @@ export class UsersController {
     }
   }
 
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Get('internal')
+  @ApiQuery({ type: QueryParamsDTO })
+  async getUserListInternal(@ParamsHandler() pagination: IPaginationQuery,@Req() req: Request) {
+    const { $rpp, $page, $filter, $orderBy } = pagination;
+    if ($rpp && $page) {
+      const result = await this.userService.getPaginatedInternal($rpp, $page, $filter, $orderBy,req.user);
+      return {
+        status: result ? true : false,
+        statusCode: result ? 200 : 400,
+        message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+        data: result ? result : null
+      }
+    }
+    const result = await this.userService.getFilteredInternal($filter, $orderBy,req.user);
+    return {
+      status: result ? true : false,
+      statusCode: result ? 200 : 400,
+      message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+      data: result ? result : null
+    }
+  }
+
 
 
 

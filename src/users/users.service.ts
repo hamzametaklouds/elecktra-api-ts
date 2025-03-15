@@ -127,6 +127,59 @@ export class UsersService {
   }
 
 
+  async getPaginatedInternal(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
+
+    if (user?.userId) {
+      filter['_id'] = { $ne: user.userId };
+    }
+
+    // Add condition to exclude super admin and support admin roles
+    filter['roles'] = { 
+      $nin: [Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN,Role.USER] 
+    };
+
+
+    const skip: number = (page - 1) * rpp;
+    const totalDocuments: number = await this.userModel.countDocuments(filter);
+    const totalPages: number = Math.ceil(totalDocuments / rpp);
+    page = page > totalPages ? totalPages : page;
+
+    const bandCategorySection = await this.userModel
+      .find(filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
+      .sort(orderBy)
+      .skip(skip)
+      .limit(rpp).populate('company_id');
+
+    return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
+  }
+
+
+
+  /**
+   *The purpose of this method is to return bandCategory based on filter
+   * @param $filter filter query as an argument
+   * @param $orderBy orderby as an argument
+   * @returns bandCategory based on filter
+   */
+  async getFilteredInternal($filter: Object, $orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
+
+    if (user?.userId) {
+      $filter['_id'] = { $ne: user.userId };
+    }
+
+    // Add condition to exclude super admin and support admin roles
+    $filter['roles'] = { 
+      $nin: [Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN,Role.USER] 
+    };
+
+    console.log($filter)
+
+    return await this.userModel
+      .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
+      .sort($orderBy).populate('company_id');
+  }
+
+
 
   async createGoogleUser(userObject: {
     first_name?: string,
@@ -376,12 +429,21 @@ export class UsersService {
    * @param userObject receives the user object that contains data that we want to update as an argument
    * @returns the updated user object
    */
-  async updateUser(id, userObject: UpdateUserDto, user: { userId?: ObjectId }) {
-
-    const userExists = await this.userModel.findOne({ _id: id })
+  async updateUser(id, userObject: UpdateUserDto, user: { userId?: ObjectId, roles?: string[] }) {
+    const userExists = await this.userModel.findOne({ _id: id });
 
     if (!userExists) {
-      throw new BadRequestException('Invalid token')
+      throw new BadRequestException('Invalid token');
+    }
+
+    // Check if trying to update a super admin or support admin
+    if (
+(      userExists.roles.includes(Role.SUPER_ADMIN) || 
+      userExists.roles.includes(Role.SUPPORT_ADMIN)) && 
+      (user.roles[0] == Role.BUSINESS_OWNER || user.roles[0] == Role.BUSINESS_ADMIN || user.roles[0] == Role.USER)
+    ) {
+     
+        throw new BadRequestException('You do not have permission to modify admin users'); 
     }
 
     const {
@@ -402,10 +464,9 @@ export class UsersService {
       suite,
       city,
       post_code,
-      dob
-
+      dob,
+      role // Add roles to destructuring
     } = userObject;
-
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
       { _id: userExists._id },
@@ -427,12 +488,18 @@ export class UsersService {
         suite,
         city,
         post_code,
-        dob
+        dob,
+        roles: [role] // Add roles to update
       },
       { new: true }
     );
 
-    return { status: true, statusCode: 204, message: `User ${is_deleted ? 'deleted' : is_deleted ? 'deleted' : 'updated'} successfully`, data: updatedUser };
+    return { 
+      status: true, 
+      statusCode: 204, 
+      message: `User ${is_deleted ? 'deleted' : 'updated'} successfully`, 
+      data: updatedUser 
+    };
   }
 
   async updatePassword(email: string, newPassword: string) {

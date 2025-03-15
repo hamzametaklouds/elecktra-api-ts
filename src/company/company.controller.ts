@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Req, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dtos/create-company.dto';
 import { UpdateCompanyDto } from './dtos/update-company.dto';
@@ -11,25 +11,38 @@ import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorato
 import { IPaginationQuery } from 'src/app/interfaces';
 import { Request } from 'express';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
+import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
 
 @ApiTags('company')
 @Controller('company')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
-//   @Post()
-//   @ApiBearerAuth('access-token')
-//   @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN)
-//   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-//   async create(@Body() createCompanyDto: CreateCompanyDto, @Req() req: Request) {
-//     const company = await this.companyService.create(createCompanyDto, req.user);
-//     return {
-//       status: true,
-//       statusCode: 201,
-//       message: 'Company created successfully',
-//       data: company,
-//     };
-//   }
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
+  @Get('list')
+  @ApiQuery({ type: QueryParamsDTO })
+  async getUserList(@ParamsHandler() pagination: IPaginationQuery,@Req() req: Request) {
+    const { $rpp, $page, $filter, $orderBy } = pagination;
+    if ($rpp && $page) {
+      const result = await this.companyService.getPaginatedCompanies($rpp, $page, $filter, $orderBy,req.user);
+      return {
+        status: result ? true : false,
+        statusCode: result ? 200 : 400,
+        message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+        data: result ? result : null
+      }
+    }
+    const result = await this.companyService.getFilteredCompanies($filter, $orderBy,req.user);
+    return {
+      status: result ? true : false,
+      statusCode: result ? 200 : 400,
+      message: result ? 'Result of query fetched successfully' : 'Something went wrong with parameters, Kindly have a look and try again',
+      data: result ? result : null
+    }
+  }
+
 
   @Get()
   @ApiBearerAuth(AuthorizationHeader)
@@ -63,7 +76,7 @@ export class CompanyController {
   @Put(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER,Role.BUSINESS_ADMIN)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
     const company = await this.companyService.update(id, updateCompanyDto);
@@ -78,7 +91,7 @@ export class CompanyController {
   @Delete(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER,Role.BUSINESS_ADMIN)
   async remove(@Param('id') id: string) {
     await this.companyService.remove(id);
     return {
