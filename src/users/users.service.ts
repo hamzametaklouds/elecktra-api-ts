@@ -442,9 +442,10 @@ export class UsersService {
       userExists.roles.includes(Role.SUPPORT_ADMIN)) && 
       (user.roles[0] == Role.BUSINESS_OWNER || user.roles[0] == Role.BUSINESS_ADMIN || user.roles[0] == Role.USER)
     ) {
-     
         throw new BadRequestException('You do not have permission to modify admin users'); 
     }
+
+ 
 
     const {
       image,
@@ -467,6 +468,15 @@ export class UsersService {
       dob,
       role // Add roles to destructuring
     } = userObject;
+
+
+    if (role &&
+      (    userExists.roles.includes(Role.BUSINESS_OWNER) || 
+            userExists.roles.includes(Role.BUSINESS_ADMIN) || userExists.roles.includes(Role.BUSINESS_ADMIN)) && 
+            (role === Role.SUPER_ADMIN || role === Role.SUPPORT_ADMIN )
+          ) {
+              throw new BadRequestException('Client cannot be modified to admin'); 
+          }
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
       { _id: userExists._id },
