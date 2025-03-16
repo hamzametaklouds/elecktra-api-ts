@@ -277,10 +277,19 @@ export class InvitationsService {
       throw new BadRequestException('User with this email already exists')
     }
 
-    // Delete any existing pending invitations for this email
+    // Mark all previous pending invitations for this email as discarded
+    await this.invitationModel.updateMany(
+      { 
+        email: email.toLowerCase(),
+        invitation_status: InvitationStatus.P,
+        is_deleted: false
+      },
+      { 
+        invitation_status: InvitationStatus.D,
+        is_deleted: true
+      }
+    );
   
-    let companyExists;
-
     // Generate unique invitation link ID
     const generatedLinkId = uuidv4();
 

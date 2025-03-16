@@ -291,7 +291,20 @@ export class AuthService {
       // Mark the invitation as used
       await this.invitationsService.updateInvitationUser(invitation._id);
 
-      return { success: true };
+      // Generate access token
+      const access_token = this.jwtService.sign({ 
+        userName: user.first_name, 
+        sub: user._id 
+      });
+
+      // Remove password from user data
+      const { password: _, ...userWithoutPassword } = user;
+
+      return {
+        access_token,
+        user: userWithoutPassword,
+        success: true
+      };
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;

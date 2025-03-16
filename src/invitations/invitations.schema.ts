@@ -8,6 +8,7 @@ export enum InvitationStatus {
   P = 'Pending',
   O = 'Opened',
   A = 'Accepted',
+  D = 'Discarded',
 }
 
 export interface IInvitations {
