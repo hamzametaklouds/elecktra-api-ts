@@ -182,11 +182,11 @@ export class UsersService {
 
 
   async createGoogleUser(userObject: {
-    first_name?: string,
-    last_name?: string,
-    email?: string,
-    uuid?: string,
-   image?:string
+    first_name: string;
+    last_name: string;
+    email: string;
+    uuid: string;
+    image: string;
   }) {
     const {
       first_name,
@@ -200,31 +200,41 @@ export class UsersService {
     if (ifEmailExists) {
       throw new ConflictException('Email already exists')
     }
-    // const ifPhoneExists = await this.getUserByPhoneNumber(phone_no);
-    // if (ifPhoneExists) {
-    //   throw new ConflictException('Phone number already exists')
-    // }
-
+    
     const ifUuidExists = await this.userModel.findOne({ uuid: uuid });
     if (ifUuidExists) {
       throw new ConflictException('UUID already exists')
     }
 
-    let createdUser;
-
-    createdUser = await new this.userModel({
-      first_name,
-      last_name,
-      email,
-      uuid,
-     image:image?image:'',
-     email_verified:true,
-     email_verified_at:new Date()
+    // Create company first
+    const companyName = first_name;
+    
+    const company = await this.companyService.create({
+        name: companyName,
+        website: '',
+        bio: '',
+        image: '',
+    }, { userId: null }); // Pass null as userId since user isn't created yet
+    
+    const createdUser = await new this.userModel({
+        first_name,
+        last_name,
+        email,
+        uuid,
+        image,
+        roles: [Role.BUSINESS_OWNER],
+        business_name: first_name,
+        company_id: company._id,
+        email_verified: true,
+        email_verified_at: new Date()
     }).save();
 
+    // Update the company with the created user as created_by
+    await this.companyService.update(company._id.toString(), {
+        created_by: createdUser._id
+    });
 
-    return createdUser
-
+    return createdUser;
   }
 
 

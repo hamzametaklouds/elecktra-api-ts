@@ -204,10 +204,21 @@ export class AuthService {
 
 
   async signUpUser(body: SignUpUserDto) {
+    const user = await this.usersService.insertUser(body);
+    
+    let access_token = null;
+    if (body.invitation_id) {
+        // If there's a valid invitation_id, generate access token
+        access_token = this.jwtService.sign({ 
+            userName: user.first_name, 
+            sub: user._id 
+        });
+    }
 
-    const user = await this.usersService.insertUser(body)
-    return {user: user}
-
+    return {
+        user,
+        access_token
+    };
   }
 
   async forgetPassword(body: ForgotPasswordDto) {

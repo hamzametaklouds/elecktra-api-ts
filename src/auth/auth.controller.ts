@@ -76,8 +76,11 @@ export class AuthController {
     @ApiBody({ type: SignUpUserDto })
     @Post('sign-up')
     async signup(@Body() body: SignUpUserDto) {
-        const createAuth = await this.authService.signUpUser(body);
-        return { message: 'User signed up successfully', data: createAuth };
+        const { user, access_token } = await this.authService.signUpUser(body);
+        return { 
+            message: 'User signed up successfully', 
+            data: { user, access_token } 
+        };
     }
 
     
