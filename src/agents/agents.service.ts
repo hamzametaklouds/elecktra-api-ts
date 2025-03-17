@@ -34,9 +34,19 @@ export class AgentsService {
 
     const agents = await this.agentModel
       .find(filter)
-      .populate('work_flows.integrations')
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name')
+      .populate({
+        path: 'work_flows.integrations',
+        select: 'title description image',
+        match: { is_deleted: false }
+      })
+      .populate({
+        path: 'created_by',
+        select: 'first_name last_name'
+      })
+      .populate({
+        path: 'updated_by',
+        select: 'first_name last_name'
+      })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
@@ -58,9 +68,19 @@ export class AgentsService {
 
     return await this.agentModel
       .find(filter)
-      .populate('work_flows.integrations')
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name')
+      .populate({
+        path: 'work_flows.integrations',
+        select: 'title description image',
+        match: { is_deleted: false }
+      })
+      .populate({
+        path: 'created_by',
+        select: 'first_name last_name'
+      })
+      .populate({
+        path: 'updated_by',
+        select: 'first_name last_name'
+      })
       .sort(orderBy);
   }
 
@@ -71,9 +91,19 @@ export class AgentsService {
         is_deleted: false,
         status: { $ne: AgentStatus.TERMINATED } 
       })
-      .populate('work_flows.integrations')
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name');
+      .populate({
+        path: 'work_flows.integrations',
+        select: 'title description image',
+        match: { is_deleted: false }
+      })
+      .populate({
+        path: 'created_by',
+        select: 'first_name last_name'
+      })
+      .populate({
+        path: 'updated_by',
+        select: 'first_name last_name'
+      });
 
     if (!agent) {
       throw new NotFoundException('Agent not found');
@@ -98,7 +128,20 @@ export class AgentsService {
         updated_by: user.userId,
       },
       { new: true }
-    ).populate('work_flows.integrations');
+    )
+    .populate({
+      path: 'work_flows.integrations',
+      select: 'title description image',
+      match: { is_deleted: false }
+    })
+    .populate({
+      path: 'created_by',
+      select: 'first_name last_name'
+    })
+    .populate({
+      path: 'updated_by',
+      select: 'first_name last_name'
+    });
   }
 
   async remove(id: string, user: { userId?: ObjectId }) {
@@ -115,6 +158,19 @@ export class AgentsService {
         updated_by: user.userId,
       },
       { new: true }
-    );
+    )
+    .populate({
+      path: 'work_flows.integrations',
+      select: 'title description image',
+      match: { is_deleted: false }
+    })
+    .populate({
+      path: 'created_by',
+      select: 'first_name last_name'
+    })
+    .populate({
+      path: 'updated_by',
+      select: 'first_name last_name'
+    });
   }
 } 

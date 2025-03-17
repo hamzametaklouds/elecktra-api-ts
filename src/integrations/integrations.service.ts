@@ -30,8 +30,14 @@ export class IntegrationsService {
 
     const integrations = await this.integrationModel
       .find(filter)
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name')
+      .populate({
+        path: 'created_by',
+        select: 'first_name last_name'
+      })
+      .populate({
+        path: 'updated_by',
+        select: 'first_name last_name'
+      })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
@@ -50,16 +56,28 @@ export class IntegrationsService {
 
     return await this.integrationModel
       .find(filter)
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name')
+      .populate({
+        path: 'created_by',
+        select: 'first_name last_name'
+      })
+      .populate({
+        path: 'updated_by',
+        select: 'first_name last_name'
+      })
       .sort(orderBy);
   }
 
   async findOne(id: string) {
     const integration = await this.integrationModel
       .findOne({ _id: id, is_deleted: false })
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name');
+      .populate({
+        path: 'created_by',
+        select: 'first_name last_name'
+      })
+      .populate({
+        path: 'updated_by',
+        select: 'first_name last_name'
+      });
 
     if (!integration) {
       throw new NotFoundException('Integration not found');
@@ -80,7 +98,14 @@ export class IntegrationsService {
         updated_by: user.userId,
       },
       { new: true }
-    );
+    ).populate({
+      path: 'created_by',
+      select: 'first_name last_name'
+    })
+    .populate({
+      path: 'updated_by',
+      select: 'first_name last_name'
+    });
   }
 
   async remove(id: string, user: { userId?: ObjectId }) {
@@ -96,6 +121,13 @@ export class IntegrationsService {
         updated_by: user.userId,
       },
       { new: true }
-    );
+    ).populate({
+      path: 'created_by',
+      select: 'first_name last_name'
+    })
+    .populate({
+      path: 'updated_by',
+      select: 'first_name last_name'
+    });
   }
 } 
