@@ -1,5 +1,6 @@
 import { Schema } from 'mongoose';
 import { AGENTS_COLLECTION } from './agents.constants';
+import { INTEGRATIONS_COLLECTION } from 'src/integrations/integrations.constants';
 
 export enum AgentStatus {
   ACTIVE = 'Active',
@@ -57,7 +58,7 @@ const WorkflowSchema = new Schema<IWorkflow>({
   },
   integrations: [{
     type: Schema.Types.ObjectId,
-    ref: 'integrations' // Reference to your integrations collection
+    ref: INTEGRATIONS_COLLECTION // Reference to your integrations collection
   }]
 });
 

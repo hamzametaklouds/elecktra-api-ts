@@ -41,7 +41,7 @@ export class UsersController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
+  @Roles(Role.SUPER_ADMIN,Role.SUPPORT_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
   @Get('list')
   @ApiQuery({ type: QueryParamsDTO })
   async getUserList(@ParamsHandler() pagination: IPaginationQuery,@Req() req: Request) {
@@ -66,7 +66,7 @@ export class UsersController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN,Role.SUPPORT_ADMIN)
   @Get('internal')
   @ApiQuery({ type: QueryParamsDTO })
   async getUserListInternal(@ParamsHandler() pagination: IPaginationQuery,@Req() req: Request) {
@@ -100,7 +100,7 @@ export class UsersController {
   //   */
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER,Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER,Role.USER,Role.SUPPORT_ADMIN)
   @Put()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBody({ type: UpdateUserDto })

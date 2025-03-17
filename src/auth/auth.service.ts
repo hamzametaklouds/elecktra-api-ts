@@ -12,6 +12,7 @@ import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ObjectId } from 'mongodb';
 import * as admin from 'firebase-admin';
 import { OAuth2Client } from 'google-auth-library';
+import { CompanyService } from 'src/company/company.service';
 
 const client = new OAuth2Client();
 
@@ -21,7 +22,8 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private invitationsService: InvitationsService
+    private invitationsService: InvitationsService,
+    private companyService: CompanyService
   ) {   // Initialize Firebase Admin SDK
   }
 
@@ -285,6 +287,14 @@ export class AuthService {
         throw new BadRequestException('User not found');
       }
 
+      let company = null;
+      if(user?.company_id){  
+       company = await this.companyService.getCompanyById(user.company_id);
+       if(!company){
+        throw new BadRequestException('Company not found');
+       }
+      }
+      
       // Mark the user's email as verified
       await this.usersService.markEmailAsVerified(user._id);
 
@@ -299,6 +309,8 @@ export class AuthService {
 
       // Remove password from user data
       const { password: _, ...userWithoutPassword } = user;
+
+      userWithoutPassword['business_name'] = company?.name?company.name:null;
 
       return {
         access_token,

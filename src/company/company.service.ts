@@ -22,6 +22,12 @@ export class CompanyService {
     return await company.save();
   }
 
+  async getCompanyById(id) {
+    return await this.companyModel
+      .findOne({ _id: id, is_disabled: false,is_deleted: false });
+  }
+
+
   async findAll(rpp: number, page: number, filter: object, orderBy): Promise<IPageinatedDataTable> {
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.companyModel.countDocuments({ ...filter, is_deleted: false });
