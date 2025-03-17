@@ -12,6 +12,7 @@ import { InvitationsModule } from './invitations/invitations.module';
 import { CompanyModule } from './company/company.module';
 import { AgentsModule } from './agents/agents.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { AgentRequestsModule } from './agent-requests/agent-requests.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
     CompanyModule,
     AgentsModule,
     IntegrationsModule,
+    AgentRequestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

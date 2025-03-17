@@ -86,24 +86,14 @@ export class AgentsService {
 
   async findOne(id: string) {
     const agent = await this.agentModel
-      .findOne({ 
-        _id: id, 
-        is_deleted: false,
-        status: { $ne: AgentStatus.TERMINATED } 
-      })
+      .findOne({ _id: id, is_deleted: false })
       .populate({
         path: 'work_flows.integrations',
-        select: 'title description image',
-        match: { is_deleted: false }
+        match: { is_deleted: false },
+        select: 'title description image'
       })
-      .populate({
-        path: 'created_by',
-        select: 'first_name last_name'
-      })
-      .populate({
-        path: 'updated_by',
-        select: 'first_name last_name'
-      });
+      .populate('created_by', 'first_name last_name')
+      .populate('updated_by', 'first_name last_name');
 
     if (!agent) {
       throw new NotFoundException('Agent not found');

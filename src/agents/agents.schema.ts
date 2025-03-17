@@ -8,6 +8,7 @@ export enum AgentStatus {
 }
 
 interface IWorkflow {
+ _id?: Schema.Types.ObjectId;
   title: string;
   description: string;
   price: number;
