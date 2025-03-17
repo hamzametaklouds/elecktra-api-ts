@@ -90,8 +90,12 @@ export class InvitationsService {
 
       // }
 
-      const updatedInvitation = await this.invitationModel.findByIdAndUpdate({ _id: invitation._id }, { invitation_status: InvitationStatus.O }, { new: true })
-
+      const updatedInvitation = await this.invitationModel.findByIdAndUpdate(
+        invitation?._id, // ✅ Pass the ID directly
+        { invitation_status: InvitationStatus.O },
+        { new: true }
+      ).populate('company_id');
+      
       return updatedInvitation;
     } catch (error) {
       throw new BadRequestException('Invalid or expired invitation link');
