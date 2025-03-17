@@ -10,6 +10,8 @@ import { HealthModule } from './health/health.module';
 import { sentry } from './config/env.config/sentry.config';
 import { InvitationsModule } from './invitations/invitations.module';
 import { CompanyModule } from './company/company.module';
+import { AgentsModule } from './agents/agents.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { CompanyModule } from './company/company.module';
     UsersModule,
     InvitationsModule,
     CompanyModule,
+    AgentsModule,
+    IntegrationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
