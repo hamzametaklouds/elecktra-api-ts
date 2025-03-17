@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
-import { IAgent } from './agents.schema';
+import { IAgent, AgentStatus } from './agents.schema';
 import { AGENTS_PROVIDER_TOKEN } from './agents.constants';
 import { CreateAgentDto } from './dtos/create-agent.dto';
 import { UpdateAgentDto } from './dtos/update-agent.dto';
@@ -15,6 +15,7 @@ export class AgentsService {
   async create(createAgentDto: CreateAgentDto, user: { userId?: ObjectId }) {
     const agent = new this.agentModel({
       ...createAgentDto,
+      status: AgentStatus.ACTIVE,
       created_by: user.userId,
     });
     return await agent.save();
@@ -22,6 +23,9 @@ export class AgentsService {
 
   async getPaginatedAgents(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId }) {
     filter['is_deleted'] = false;
+    if (!filter['status']) {
+      filter['status'] = { $ne: AgentStatus.TERMINATED };
+    }
 
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.agentModel.countDocuments(filter);
@@ -48,6 +52,9 @@ export class AgentsService {
 
   async getFilteredAgents(filter: Object, orderBy, user: { userId?: ObjectId }) {
     filter['is_deleted'] = false;
+    if (!filter['status']) {
+      filter['status'] = { $ne: AgentStatus.TERMINATED };
+    }
 
     return await this.agentModel
       .find(filter)
@@ -59,7 +66,11 @@ export class AgentsService {
 
   async findOne(id: string) {
     const agent = await this.agentModel
-      .findOne({ _id: id, is_deleted: false })
+      .findOne({ 
+        _id: id, 
+        is_deleted: false,
+        status: { $ne: AgentStatus.TERMINATED } 
+      })
       .populate('work_flows.integrations')
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name');
@@ -71,7 +82,11 @@ export class AgentsService {
   }
 
   async update(id: string, updateAgentDto: UpdateAgentDto, user: { userId?: ObjectId }) {
-    const agent = await this.agentModel.findOne({ _id: id, is_deleted: false });
+    const agent = await this.agentModel.findOne({ 
+      _id: id, 
+      is_deleted: false 
+    });
+    
     if (!agent) {
       throw new NotFoundException('Agent not found');
     }
@@ -83,7 +98,7 @@ export class AgentsService {
         updated_by: user.userId,
       },
       { new: true }
-    );
+    ).populate('work_flows.integrations');
   }
 
   async remove(id: string, user: { userId?: ObjectId }) {
@@ -96,6 +111,7 @@ export class AgentsService {
       id,
       {
         is_deleted: true,
+        status: AgentStatus.TERMINATED,
         updated_by: user.userId,
       },
       { new: true }

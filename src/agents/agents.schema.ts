@@ -1,6 +1,12 @@
 import { Schema } from 'mongoose';
 import { AGENTS_COLLECTION } from './agents.constants';
 
+export enum AgentStatus {
+  ACTIVE = 'Active',
+  MAINTENANCE = 'Maintenance',
+  TERMINATED = 'Terminated'
+}
+
 interface IWorkflow {
   title: string;
   description: string;
@@ -22,6 +28,7 @@ export interface IAgent {
   display_description: string;
   request_time_frame: string;
   image: string;
+  status: AgentStatus;
   pricing: IPricing;
   work_flows: IWorkflow[];
   created_by?: Schema.Types.ObjectId;
@@ -79,6 +86,12 @@ export const AgentSchema = new Schema<IAgent>(
       type: String,
       required: false,
       default: ''
+    },
+    status: {
+      type: String,
+      enum: AgentStatus,
+      default: AgentStatus.ACTIVE,
+      required: true
     },
     pricing: {
       installation_price: {
