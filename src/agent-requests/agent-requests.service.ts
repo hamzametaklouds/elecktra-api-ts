@@ -23,49 +23,24 @@ export class AgentRequestsService {
       throw new BadRequestException('Agent not found');
     }
 
-    const company = await this.companyService.findOne(user.companyId.toString());
-    if (!company) {
-      throw new BadRequestException('Company not found');
+    let company = null;
+
+    if(user?.companyId){  
+      company = await this.companyService.findOne(user?.companyId);
+      if (!company) {
+        throw new BadRequestException('Company not found');
+      }
     }
 
-    // Validate and get selected workflows with their integrations
+    // Validate and get selected workflows with all their integrations
     const selectedWorkflows = agent.work_flows.filter(agentWorkflow => 
-      createAgentRequestDto.work_flows.some(requestWorkflow => 
-        requestWorkflow.workflow_id.toString() === agentWorkflow._id.toString()
+      createAgentRequestDto.workflow_ids.some(workflowId => 
+        workflowId.toString() === agentWorkflow._id.toString()
       )
-    ).map(workflow => {
-      console.log('workflow----',workflow);
-      // Find the corresponding request workflow to get selected integrations
-      const requestWorkflow = createAgentRequestDto.work_flows.find(
-        rw => rw.workflow_id.toString() === workflow._id.toString()
-      );
-
-      console.log('requestWorkflow----',requestWorkflow);
-      console.log('workflow----',workflow);
-      // Filter and validate selected integrations for this workflow
-      const selectedIntegrations = workflow.integrations.filter(integration =>
-        requestWorkflow.integration_ids.some(id => 
-          id.toString() == integration.toString()
-        )
-      );
-
-      console.log('selectedIntegrations----',selectedIntegrations);
-      // Validate if all requested integration IDs exist in the workflow
-    //   if (selectedIntegrations.length !== requestWorkflow.integration_ids.length) {
-    //     throw new BadRequestException(
-    //       `Invalid integration IDs provided for workflow: ${workflow.title}`
-    //     );
-    //   }
-
-      // Return workflow with only selected integrations
-      return {
-        ...workflow,
-        integrations: selectedIntegrations
-      };
-    });
+    );
 
     // Validate if all requested workflow IDs exist
-    if (selectedWorkflows.length !== createAgentRequestDto.work_flows.length) {
+    if (selectedWorkflows.length !== createAgentRequestDto.workflow_ids.length) {
       throw new BadRequestException('Invalid workflow IDs provided');
     }
 
@@ -82,8 +57,8 @@ export class AgentRequestsService {
       display_description: agent.display_description,
       request_time_frame: agent.request_time_frame,
       image: agent.image,
-      company_id: company._id,
-      company_owner_id: company.created_by,
+      company_id: company?._id || null,
+      company_owner_id: company?.created_by || null,
       status: AgentRequestStatus.PENDING_CREDENTIALS,
       pricing: agent.pricing,
       work_flows: selectedWorkflows,

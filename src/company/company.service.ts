@@ -47,7 +47,7 @@ export class CompanyService {
     return { pages: `Page ${page} of ${totalPages}`, total: totalDocuments, data: companies };
   }
 
-  async findOne(id: string): Promise<ICompany> {
+  async findOne(id): Promise<ICompany> {
     const company = await this.companyModel
       .findOne({ _id: id, is_deleted: false })
       .populate({
