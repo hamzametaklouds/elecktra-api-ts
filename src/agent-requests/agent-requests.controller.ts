@@ -23,7 +23,7 @@ export class AgentRequestsController {
   @Post()
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles( Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
+  @Roles(  Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({ summary: 'Create a new agent request' })
   @ApiResponse({ status: 201, description: 'Agent request successfully created' })

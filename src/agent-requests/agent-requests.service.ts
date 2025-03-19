@@ -16,7 +16,7 @@ export class AgentRequestsService {
     private companyService: CompanyService,
   ) {}
 
-  async create(createAgentRequestDto: CreateAgentRequestDto, user: { userId?: ObjectId, companyId?: ObjectId }) {
+  async create(createAgentRequestDto: CreateAgentRequestDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
     // Get agent details
     const agent = await this.agentsService.findOne(createAgentRequestDto.agent_id.toString());
     if (!agent) {
@@ -25,8 +25,8 @@ export class AgentRequestsService {
 
     let company = null;
 
-    if(user?.companyId){  
-      company = await this.companyService.findOne(user?.companyId);
+    if(user?.company_id){  
+      company = await this.companyService.findOne(user?.company_id);
       if (!company) {
         throw new BadRequestException('Company not found');
       }
