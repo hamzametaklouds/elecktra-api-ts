@@ -37,6 +37,7 @@ export interface IAgentRequest {
   description: string;
   display_description: string;
   request_time_frame: string;
+  delivery_date?: Date;
   image: string;
   company_id: Schema.Types.ObjectId;
   company_owner_id: Schema.Types.ObjectId;
@@ -143,6 +144,10 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
     request_time_frame: {
       type: String,
       required: true
+    },
+    delivery_date: {
+      type: Date,
+      required: false
     },
     image: {
       type: String,
