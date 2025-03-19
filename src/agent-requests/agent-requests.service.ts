@@ -85,8 +85,8 @@ export class AgentRequestsService {
     const requests = await this.agentRequestModel
       .find(filter)
       .populate('agent_id')
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name')
+      .populate('created_by', 'first_name last_name image roles')
+      .populate('updated_by', 'first_name last_name image roles')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);

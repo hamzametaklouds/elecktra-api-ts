@@ -41,11 +41,11 @@ export class AgentsService {
       })
       .populate({
         path: 'created_by',
-        select: 'first_name last_name'
+        select: 'first_name last_name image roles'
       })
       .populate({
         path: 'updated_by',
-        select: 'first_name last_name'
+        select: 'first_name last_name image roles'
       })
       .sort(orderBy)
       .skip(skip)
