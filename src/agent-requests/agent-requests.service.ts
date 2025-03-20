@@ -87,6 +87,7 @@ export class AgentRequestsService {
       .populate('agent_id')
       .populate('created_by', 'first_name last_name image roles')
       .populate('updated_by', 'first_name last_name image roles')
+      .populate('company_owner_id', 'first_name last_name image roles')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
@@ -108,6 +109,8 @@ export class AgentRequestsService {
       .populate('agent_id')
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
+      .populate('company_owner_id', 'first_name last_name image roles')
+
       .sort(orderBy);
   }
 
