@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from 'src/database/database.module';
 import { AgentRequestsModel } from './agent-requests.model';
@@ -11,7 +11,7 @@ import { CompanyModule } from 'src/company/company.module';
     DatabaseModule,
     ConfigModule,
     AgentsModule, // Import AgentsModule to use its service
-    CompanyModule,
+    forwardRef(() => CompanyModule),
   ],
   controllers: [AgentRequestsController],
   providers: [AgentRequestsService, ...AgentRequestsModel],

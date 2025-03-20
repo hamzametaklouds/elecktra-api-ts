@@ -11,6 +11,7 @@ import { SignUpUserDto } from 'src/auth/dtos/sign-up.dto';
 import { InvitationsService } from 'src/invitations/invitations.service';
 import { Role } from 'src/roles/roles.schema';
 import { CompanyService } from 'src/company/company.service';
+import { ChatService } from 'src/chat/chat.service';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -25,6 +26,8 @@ export class UsersService {
     private invitationService: InvitationsService,
     @Inject(forwardRef(() => CompanyService))
     private companyService: CompanyService,
+    @Inject(forwardRef(() => ChatService))
+    private chatService: ChatService,
   ) { }
 
   async getUserByEmail(email: string): Promise<IUsers> {
@@ -285,6 +288,7 @@ export class UsersService {
         created_by: invitation?.created_by?invitation?.created_by:null
       }).save();
 
+
       return createdUser;
     }
 
@@ -317,6 +321,8 @@ export class UsersService {
     await this.companyService.update(company._id.toString(), {
       created_by: createdUser._id
     });
+
+
 
     return createdUser;
   }
@@ -429,6 +435,7 @@ export class UsersService {
       { new: true }
     );
 
+   
     return { status: true, statusCode: 204, message: `User ${is_deleted ? 'deleted' : is_deleted ? 'deleted' : 'updated'} successfully`, data: updatedUser };
   }
 
@@ -514,6 +521,7 @@ export class UsersService {
       { new: true }
     );
 
+ 
     return { 
       status: true, 
       statusCode: 204, 

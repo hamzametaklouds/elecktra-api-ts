@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { ICompany } from './company.schema';
 import { COMPANY_PROVIDER_TOKEN } from './company.constants';
@@ -6,20 +6,28 @@ import { CreateCompanyDto } from './dtos/create-company.dto';
 import { UpdateCompanyDto } from './dtos/update-company.dto';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import { Role } from 'src/roles/roles.schema';
+import { ChatService } from 'src/chat/chat.service';
 
 @Injectable()
 export class CompanyService {
   constructor(
     @Inject(COMPANY_PROVIDER_TOKEN)
     private companyModel: Model<ICompany>,
+    @Inject(forwardRef(() => ChatService))
+    private chatService: ChatService,
   ) {}
 
-  async create(createCompanyDto: CreateCompanyDto, user:{userId?: ObjectId}): Promise<ICompany> {
+  async create(createCompanyDto: CreateCompanyDto, user: { userId?: ObjectId }): Promise<ICompany> {
     const company = new this.companyModel({
       ...createCompanyDto,
       created_by: user?.userId,
     });
-    return await company.save();
+    
+    const savedCompany = await company.save();
+
+  
+
+    return savedCompany;
   }
 
   async getCompanyById(id) {

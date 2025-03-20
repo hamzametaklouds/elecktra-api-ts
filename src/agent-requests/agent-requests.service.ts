@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { IAgentRequest } from './agent-requests.schema';
 import { AGENT_REQUESTS_PROVIDER_TOKEN } from './agent-requests.constants';
@@ -13,6 +13,7 @@ export class AgentRequestsService {
     @Inject(AGENT_REQUESTS_PROVIDER_TOKEN)
     private agentRequestModel: Model<IAgentRequest>,
     private agentsService: AgentsService,
+    @Inject(forwardRef(() => CompanyService))
     private companyService: CompanyService,
   ) {}
 

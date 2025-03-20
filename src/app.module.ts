@@ -13,6 +13,7 @@ import { CompanyModule } from './company/company.module';
 import { AgentsModule } from './agents/agents.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { AgentRequestsModule } from './agent-requests/agent-requests.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -35,6 +36,8 @@ import { AgentRequestsModule } from './agent-requests/agent-requests.module';
     AgentsModule,
     IntegrationsModule,
     AgentRequestsModule,
+    AuthModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
