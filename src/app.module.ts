@@ -14,6 +14,7 @@ import { AgentsModule } from './agents/agents.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { AgentRequestsModule } from './agent-requests/agent-requests.module';
 import { ChatModule } from './chat/chat.module';
+import { DeliveredAgentsModule } from './delivered-agents/delivered-agents.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ChatModule } from './chat/chat.module';
     AgentRequestsModule,
     AuthModule,
     ChatModule,
+    DeliveredAgentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

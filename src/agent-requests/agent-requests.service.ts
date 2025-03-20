@@ -7,6 +7,8 @@ import { UpdateAgentRequestDto } from './dtos/update-agent-request.dto';
 import { AgentsService } from 'src/agents/agents.service';
 import { AgentRequestStatus } from './agent-requests.constants';
 import { CompanyService } from 'src/company/company.service';
+import { DeliveredAgentsService } from 'src/delivered-agents/delivered-agents.service';
+
 @Injectable()
 export class AgentRequestsService {
   constructor(
@@ -15,6 +17,8 @@ export class AgentRequestsService {
     private agentsService: AgentsService,
     @Inject(forwardRef(() => CompanyService))
     private companyService: CompanyService,
+    @Inject(forwardRef(() => DeliveredAgentsService))
+    private deliveredAgentsService: DeliveredAgentsService,
   ) {}
 
   async create(createAgentRequestDto: CreateAgentRequestDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
@@ -75,8 +79,12 @@ export class AgentRequestsService {
     return await agentRequest.save();
   }
 
-  async getPaginatedRequests(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId }) {
+  async getPaginatedRequests(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
     filter['is_deleted'] = false;
+
+    if(user.company_id) {
+      filter['company_id'] = user.company_id;
+    }
 
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.agentRequestModel.countDocuments(filter);
@@ -102,8 +110,12 @@ export class AgentRequestsService {
     };
   }
 
-  async getFilteredRequests(filter: Object, orderBy, user: { userId?: ObjectId }) {
+  async getFilteredRequests(filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
     filter['is_deleted'] = false;
+
+    if(user.company_id) {
+      filter['company_id'] = user.company_id;
+    }
 
     return await this.agentRequestModel
       .find(filter)
@@ -119,8 +131,10 @@ export class AgentRequestsService {
     const request = await this.agentRequestModel
       .findOne({ _id: id, is_deleted: false })
       .populate('agent_id')
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name');
+      .populate('created_by', 'first_name last_name email image roles')
+      .populate('updated_by', 'first_name last_name email image roles')
+      .populate('company_owner_id', 'first_name last_name email image roles')
+      .populate('company_id');
 
     if (!request) {
       throw new NotFoundException('Agent request not found');
@@ -134,7 +148,11 @@ export class AgentRequestsService {
       throw new NotFoundException('Agent request not found');
     }
 
-    return await this.agentRequestModel.findByIdAndUpdate(
+    if (updateAgentRequestDto.status === AgentRequestStatus.DELIVERED && (!updateAgentRequestDto.delivery_date || !updateAgentRequestDto.assistant_id)) {
+      throw new BadRequestException('Delivery date and assistant ID are required');
+    }
+
+    let updatedRequest = await this.agentRequestModel.findByIdAndUpdate(
       id,
       {
         ...updateAgentRequestDto,
@@ -145,6 +163,14 @@ export class AgentRequestsService {
     .populate('agent_id')
     .populate('created_by', 'first_name last_name')
     .populate('updated_by', 'first_name last_name');
+
+    // If status is changed to DELIVERED, create delivered agent
+    if (updateAgentRequestDto.status === AgentRequestStatus.DELIVERED) {
+     
+      await this.deliveredAgentsService.handleAgentDelivery(updatedRequest, user, updateAgentRequestDto.assistant_id);
+    }
+
+    return updatedRequest;
   }
 
   async remove(id: string, user: { userId?: ObjectId }) {

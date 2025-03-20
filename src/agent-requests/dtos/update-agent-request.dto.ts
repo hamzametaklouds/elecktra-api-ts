@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
 import { CreateAgentRequestDto } from './create-agent-request.dto';
-import { IsEnum, IsBoolean, IsOptional, IsDate } from 'class-validator';
+import { IsEnum, IsBoolean, IsOptional, IsDate, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AgentRequestStatus } from '../agent-requests.constants';
 import { Type } from 'class-transformer';
@@ -20,6 +20,11 @@ export class UpdateAgentRequestDto extends PartialType(CreateAgentRequestDto) {
   @IsDate()
   @Type(() => Date)
   delivery_date?: Date;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  assistant_id?: string;
 
   @ApiProperty()
   @IsBoolean()

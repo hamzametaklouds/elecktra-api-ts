@@ -6,12 +6,15 @@ import { AgentsModule } from 'src/agents/agents.module';
 import { AgentRequestsController } from './agent-requests.controller';
 import { AgentRequestsService } from './agent-requests.service';
 import { CompanyModule } from 'src/company/company.module';
+import { DeliveredAgentsModule } from 'src/delivered-agents/delivered-agents.module';
+
 @Module({
   imports: [
     DatabaseModule,
     ConfigModule,
     AgentsModule, // Import AgentsModule to use its service
     forwardRef(() => CompanyModule),
+    forwardRef(() => DeliveredAgentsModule),
   ],
   controllers: [AgentRequestsController],
   providers: [AgentRequestsService, ...AgentRequestsModel],
