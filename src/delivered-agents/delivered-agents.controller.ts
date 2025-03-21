@@ -10,6 +10,7 @@ import { MaintenanceStatus } from './delivered-agents.schema';
 import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorator';
 import { IPaginationQuery } from 'src/app/interfaces';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
+import { AuthorizationHeader } from 'src/app/swagger.constant';
 
 @ApiTags('delivered-agents')
 @Controller('delivered-agents')
@@ -18,7 +19,8 @@ export class DeliveredAgentsController {
   constructor(private readonly deliveredAgentsService: DeliveredAgentsService) {}
 
   @Get('list')
-  @ApiBearerAuth()
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
   @ApiQuery({ type: QueryParamsDTO })
   async getDeliveredAgentsList(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
@@ -42,7 +44,8 @@ export class DeliveredAgentsController {
   }
 
   @Get(':id')
-  @ApiBearerAuth()
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
   async getDeliveredAgent(@Param('id') id: string, @Req() req: Request) {
     const deliveredAgent = await this.deliveredAgentsService.findOne(id, req.user);
@@ -55,8 +58,9 @@ export class DeliveredAgentsController {
   }
 
   @Put(':id/maintenance-status')
-  @ApiBearerAuth()
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN)
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
   async updateMaintenanceStatus(
     @Param('id') id: string,
     @Body('status') status: MaintenanceStatus,

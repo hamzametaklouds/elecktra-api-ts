@@ -57,7 +57,6 @@ export class DeliveredAgentsService {
     if (user?.company_id) {
       filter['company_id'] = user.company_id;
     }
-    filter['is_deleted'] = false;
 
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.deliveredAgentModel.countDocuments(filter);
@@ -89,10 +88,11 @@ export class DeliveredAgentsService {
     orderBy,
     user: { userId?: ObjectId, company_id?: ObjectId }
   ) {
+    console.log(user);
     if (user?.company_id) {
       filter['company_id'] = user.company_id;
     }
-    filter['is_deleted'] = false;
+
 
     return await this.deliveredAgentModel
       .find(filter)
