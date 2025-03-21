@@ -116,6 +116,7 @@ export class DeliveredAgentsService {
       .findOne(filter)
       .populate('agent_id')
       .populate('agent_request_id')
+      .populate('company_id')
       .populate('created_by', 'first_name last_name image roles')
       .populate('updated_by', 'first_name last_name image roles')
       .populate('company_owner_id', 'first_name last_name image roles');
@@ -152,6 +153,7 @@ export class DeliveredAgentsService {
     )
     .populate('agent_id')
     .populate('agent_request_id')
+    .populate('company_id')
     .populate('created_by', 'first_name last_name image roles')
     .populate('updated_by', 'first_name last_name image roles')
     .populate('company_owner_id', 'first_name last_name image roles');
