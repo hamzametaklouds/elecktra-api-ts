@@ -1,9 +1,20 @@
 import { PartialType } from '@nestjs/swagger';
 import { CreateIntegrationDto } from './create-integration.dto';
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsBoolean, IsOptional, IsArray, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateIntegrationDto extends PartialType(CreateIntegrationDto) {
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  api_key_required?: boolean;
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  api_keys?: string[];
+
   @ApiProperty()
   @IsBoolean()
   @IsOptional()

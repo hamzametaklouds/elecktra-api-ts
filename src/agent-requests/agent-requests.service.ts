@@ -148,10 +148,7 @@ export class AgentRequestsService {
       throw new NotFoundException('Agent request not found');
     }
 
-    if (updateAgentRequestDto.status === AgentRequestStatus.DELIVERED && (!updateAgentRequestDto.delivery_date || !updateAgentRequestDto.assistant_id)) {
-      throw new BadRequestException('Delivery date and assistant ID are required');
-    }
-
+   
     let updatedRequest = await this.agentRequestModel.findByIdAndUpdate(
       id,
       {
@@ -167,7 +164,7 @@ export class AgentRequestsService {
     // If status is changed to DELIVERED, create delivered agent
     if (updateAgentRequestDto.status === AgentRequestStatus.DELIVERED) {
      
-      await this.deliveredAgentsService.handleAgentDelivery(updatedRequest, user, updateAgentRequestDto.assistant_id);
+      await this.deliveredAgentsService.handleAgentDelivery(updatedRequest, user);
     }
 
     return updatedRequest;

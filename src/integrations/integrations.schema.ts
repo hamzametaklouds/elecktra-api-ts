@@ -6,6 +6,8 @@ export interface IIntegration {
   title: string;
   description: string;
   image: string;
+  api_key_required?: boolean;
+  api_keys?: string[];
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
@@ -27,6 +29,15 @@ export const IntegrationSchema = new Schema<IIntegration>(
       required: false,
       default: ''
     },
+    api_key_required: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    api_keys: [{
+      type: String,
+      required: false
+    }],
     created_by: {
       type: Schema.Types.ObjectId,
       ref: 'users',

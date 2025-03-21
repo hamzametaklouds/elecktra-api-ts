@@ -21,10 +21,7 @@ export class UpdateAgentRequestDto extends PartialType(CreateAgentRequestDto) {
   @Type(() => Date)
   delivery_date?: Date;
 
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  assistant_id?: string;
+
 
   @ApiProperty()
   @IsBoolean()

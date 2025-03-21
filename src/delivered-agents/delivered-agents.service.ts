@@ -15,7 +15,7 @@ export class DeliveredAgentsService {
     private agentRequestsService: AgentRequestsService,
   ) {}
 
-  async handleAgentDelivery(agentRequest: IAgentRequest, user: { userId?: ObjectId }, assistant_id: string) {
+  async handleAgentDelivery(agentRequest: IAgentRequest, user: { userId?: ObjectId }) {
     // Check if already delivered
     const existingDelivered = await this.deliveredAgentModel.findOne({
       agent_request_id: agentRequest._id
@@ -31,7 +31,6 @@ export class DeliveredAgentsService {
       title: agentRequest.title,
       sub_title: agentRequest.sub_title,
       description: agentRequest.description,
-      assistant_id: assistant_id,
       display_description: agentRequest.display_description,
       request_time_frame: agentRequest.request_time_frame,
       image: agentRequest.image,
