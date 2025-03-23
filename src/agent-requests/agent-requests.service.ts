@@ -94,9 +94,9 @@ export class AgentRequestsService {
     const requests = await this.agentRequestModel
       .find(filter)
       .populate('agent_id')
-      .populate('created_by', 'first_name last_name image roles')
-      .populate('updated_by', 'first_name last_name image roles')
-      .populate('company_owner_id', 'first_name last_name image roles')
+      .populate('created_by', 'first_name last_name email image roles')
+      .populate('updated_by', 'first_name last_name email image roles')
+      .populate('company_owner_id', 'first_name last_name email image roles')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
@@ -120,10 +120,9 @@ export class AgentRequestsService {
     return await this.agentRequestModel
       .find(filter)
       .populate('agent_id')
-      .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name')
-      .populate('company_owner_id', 'first_name last_name image roles')
-
+      .populate('created_by', 'first_name last_name email image roles')
+      .populate('updated_by', 'first_name last_name email image roles')
+      .populate('company_owner_id', 'first_name last_name email image roles')
       .sort(orderBy);
   }
 

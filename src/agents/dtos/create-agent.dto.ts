@@ -49,11 +49,20 @@ export class CreateAgentDto {
 
   @ApiProperty()
   @IsString()
+  service_type: string;
+
+  @ApiProperty()
+  @IsString()
   description: string;
 
   @ApiProperty()
   @IsString()
   display_description: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  assistant_id: string;
 
   @ApiProperty()
   @IsString()

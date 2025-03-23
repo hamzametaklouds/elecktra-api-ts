@@ -1,29 +1,45 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import admin from 'firebase-admin';
 import { AppModule } from './app.module';
 import { AuthorizationHeader, AuthorizationHeaderSchema } from './app/swagger.constant';
 import { FirebaseServiceAccount } from './app/fire-base';
+import { WebSocketAdapter } from './chat/websocket.adapter';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  logger.log('Starting application bootstrap...');
+
   const app = await NestFactory.create(AppModule);
+  
   const configService = app.get(ConfigService);
   const env = configService.get('root.env');
-  // const allowedClients = configService.get('server.allowedClients');
   const port = configService.get('server.port');
 
+  logger.log(`Application environment: ${env}`);
+  logger.log(`Server port: ${port}`);
 
-  app.enableCors();
+  // Enable CORS
+  logger.log('Configuring CORS...');
+  app.enableCors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: true
+  });
+
   app.useGlobalPipes(new ValidationPipe());
+
+  // Initialize WebSocket adapter
+  logger.log('Initializing WebSocket adapter...');
+  const wsAdapter = new WebSocketAdapter(app);
+  app.useWebSocketAdapter(wsAdapter);
+  logger.log('WebSocket adapter initialized');
 
   admin.initializeApp({
     credential: admin.credential.cert(FirebaseServiceAccount),
-  })
-
-
-
+  });
 
   const config = new DocumentBuilder()
     .setTitle('electra-consumer-service API platform')
@@ -32,12 +48,16 @@ async function bootstrap() {
     .addTag('electra-consumer-service')
     .addBearerAuth(
       AuthorizationHeaderSchema,
-      AuthorizationHeader // This name here is for matching up with @ApiBearerAuth() in controllers
+      AuthorizationHeader
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  logger.log('Starting server...');
   await app.listen(port);
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`WebSocket server is running on: ws://localhost:${port}/chat`);
+  logger.log('Application bootstrap completed');
 }
 bootstrap();

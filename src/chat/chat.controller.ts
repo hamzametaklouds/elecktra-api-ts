@@ -9,8 +9,8 @@ import { Role } from 'src/roles/roles.schema';
 import { Request } from 'express';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
 
-@ApiTags('chat')
-@Controller('chat')
+@ApiTags('chats')
+@Controller('chats')
 @UseGuards(JWTAuthGuard, RolesGuard)
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}

@@ -29,6 +29,8 @@ export interface IAgent {
   description: string;
   display_description: string;
   request_time_frame: string;
+  service_type: string;
+  assistant_id: string;
   image: string;
   status: AgentStatus;
   pricing: IPricing;
@@ -76,6 +78,10 @@ export const AgentSchema = new Schema<IAgent>(
       type: String,
       required: true
     },
+    assistant_id: {
+      type: String,
+      required: false
+    },
     display_description: {
       type: String,
       required: true
@@ -93,6 +99,10 @@ export const AgentSchema = new Schema<IAgent>(
       type: String,
       enum: AgentStatus,
       default: AgentStatus.ACTIVE,
+      required: true
+    },
+    service_type: {
+      type: String,
       required: true
     },
     pricing: {

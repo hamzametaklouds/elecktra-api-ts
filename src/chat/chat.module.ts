@@ -8,6 +8,7 @@ import { CompanyModule } from 'src/company/company.module';
 import { AgentRequestsModule } from 'src/agent-requests/agent-requests.module';
 import { ChatModel } from './chat.model';
 import { MessagesModel } from './messages.model';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MessagesModel } from './messages.model';
   controllers: [ChatController],
   providers: [
     ChatService,
+    ChatGateway,
     ...ChatModel,
     ...MessagesModel
   ],

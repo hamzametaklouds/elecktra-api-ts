@@ -1,14 +1,10 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
-import { IChatChannel } from './chat-channel.schema';
-import { CHAT_CHANNELS_PROVIDER_TOKEN, MESSAGES_PROVIDER_TOKEN } from './chat.constants';
-import { CreateChannelDto } from './dtos/create-channel.dto';
+import {  MESSAGES_PROVIDER_TOKEN } from './chat.constants';
 import { CreateMessageDto } from './dtos/create-message.dto';
 import { CompanyService } from 'src/company/company.service';
 import { UsersService } from 'src/users/users.service';
 import { IMessage } from './messages.schema';
-import { USERS_COLLECTION } from 'src/users/users.constants';
-import { AGENT_REQUESTS_COLLECTION } from 'src/agent-requests/agent-requests.constants';
 
 @Injectable()
 export class ChatService {

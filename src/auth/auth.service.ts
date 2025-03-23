@@ -9,10 +9,10 @@ import { ResetPasswordDto } from './dtos/reset-password';
 import { InvitationsService } from 'src/invitations/invitations.service';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ObjectId } from 'mongodb';
 import * as admin from 'firebase-admin';
 import { OAuth2Client } from 'google-auth-library';
 import { CompanyService } from 'src/company/company.service';
+import { ObjectId } from 'mongoose';
 
 const client = new OAuth2Client();
 

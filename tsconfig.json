@@ -5,6 +5,9 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "paths": {
+      "rxjs": ["node_modules/rxjs"]
+    },
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,
