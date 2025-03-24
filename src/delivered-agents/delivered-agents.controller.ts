@@ -21,7 +21,7 @@ export class DeliveredAgentsController {
   @Get('list')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   @ApiQuery({ type: QueryParamsDTO })
   async getDeliveredAgentsList(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
     const { $rpp, $page, $filter, $orderBy } = pagination;
@@ -46,7 +46,7 @@ export class DeliveredAgentsController {
   @Get(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   async getDeliveredAgent(@Param('id') id: string, @Req() req: Request) {
     const deliveredAgent = await this.deliveredAgentsService.findOne(id, req.user);
     return {
@@ -60,7 +60,7 @@ export class DeliveredAgentsController {
   @Put(':id/maintenance-status')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   async updateMaintenanceStatus(
     @Param('id') id: string,
     @Body('status') status: MaintenanceStatus,

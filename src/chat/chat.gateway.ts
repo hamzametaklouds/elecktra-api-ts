@@ -16,9 +16,15 @@ import { CreateMessageDto } from './dtos/create-message.dto';
 @WebSocketGateway({
   cors: {
     origin: '*',
-    credentials: true
+    credentials: true,
   },
-  namespace: '/chat'
+  transports: ['websocket', 'polling'],
+  namespace: '/chat',
+  path: '/socket.io',
+  pingInterval: 10000,
+  pingTimeout: 15000,
+  connectTimeout: 45000,
+  allowUpgrades: true
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() 

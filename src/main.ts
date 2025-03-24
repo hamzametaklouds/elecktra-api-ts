@@ -16,7 +16,10 @@ async function bootstrap() {
   
   const configService = app.get(ConfigService);
   const env = configService.get('root.env');
-  const port = configService.get('server.port');
+  const port = configService.get('server.port') || 5200;
+  const wsPort = port + 1;
+  
+  console.log('\n\n\n\nport', port);
 
   logger.log(`Application environment: ${env}`);
   logger.log(`Server port: ${port}`);
@@ -25,8 +28,8 @@ async function bootstrap() {
   logger.log('Configuring CORS...');
   app.enableCors({
     origin: '*',
-    methods: ['GET', 'POST','PUT','DELETE'],
-    credentials: true
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
   });
 
   app.useGlobalPipes(new ValidationPipe());
@@ -35,6 +38,7 @@ async function bootstrap() {
   logger.log('Initializing WebSocket adapter...');
   const wsAdapter = new WebSocketAdapter(app);
   app.useWebSocketAdapter(wsAdapter);
+
   logger.log('WebSocket adapter initialized');
 
   admin.initializeApp({
@@ -54,10 +58,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  logger.log('Starting server...');
+  // Starting HTTP server
+  logger.log('Starting HTTP server...');
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`);
-  logger.log(`WebSocket server is running on: ws://localhost:${port}/chat`);
+  logger.log(`WebSocket server is running on: ws://localhost:${wsPort}/chat`);
   logger.log('Application bootstrap completed');
 }
 bootstrap();
