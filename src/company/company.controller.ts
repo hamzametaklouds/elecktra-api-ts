@@ -20,7 +20,7 @@ export class CompanyController {
 
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   @Get('list')
   @ApiQuery({ type: QueryParamsDTO })
   async getUserList(@ParamsHandler() pagination: IPaginationQuery,@Req() req: Request) {
@@ -47,7 +47,7 @@ export class CompanyController {
   @Get()
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   async findAll(@ParamsHandler() pagination: IPaginationQuery) {
     const { $rpp, $page, $filter, $orderBy } = pagination;
     const result = await this.companyService.findAll($rpp || 10, $page || 1, $filter || {}, $orderBy || { created_at: -1 });
@@ -62,7 +62,7 @@ export class CompanyController {
   @Get(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   async findOne(@Param('id') id: string) {
     const company = await this.companyService.findOne(id);
     return {
@@ -76,7 +76,7 @@ export class CompanyController {
   @Put(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER,Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
     const company = await this.companyService.update(id, updateCompanyDto);
@@ -91,7 +91,7 @@ export class CompanyController {
   @Delete(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_OWNER,Role.BUSINESS_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
   async remove(@Param('id') id: string) {
     await this.companyService.remove(id);
     return {
