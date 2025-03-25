@@ -75,6 +75,9 @@ export class UsersService {
   async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
     if (user?.company_id) {
       filter['company_id'] = user?.company_id;
+      filter['roles'] = { 
+        $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN,Role.BUSINESS_OWNER] 
+      };
     }
 
     if (user?.userId) {
@@ -82,10 +85,7 @@ export class UsersService {
     }
 
     // Add condition to exclude super admin and support admin roles
-    filter['roles'] = { 
-      $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN] 
-    };
-
+  
     const skip: number = (page - 1) * rpp;
     const totalDocuments: number = await this.userModel.countDocuments(filter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
@@ -111,6 +111,9 @@ export class UsersService {
   async getFilteredUsers($filter: Object, $orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
     if (user?.company_id) {
       $filter['company_id'] = user?.company_id;
+      $filter['roles'] = { 
+        $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN,Role.BUSINESS_OWNER] 
+      };
     }
 
     if (user?.userId) {
