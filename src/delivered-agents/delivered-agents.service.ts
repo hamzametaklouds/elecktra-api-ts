@@ -143,7 +143,7 @@ export class DeliveredAgentsService {
     }
 
     return await this.deliveredAgentModel.findByIdAndUpdate(
-      id,
+      {_id: id},
       {
         maintenance_status: status,
         updated_by: user.userId

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Req, UsePipes, ValidationPipe, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { DeliveredAgentsService } from './delivered-agents.service';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { RolesGuard } from 'src/app/guards/role-guard';
@@ -11,6 +11,7 @@ import { ParamsHandler } from 'src/app/custom-decorators/params-handler.decorato
 import { IPaginationQuery } from 'src/app/interfaces';
 import { QueryParamsDTO } from 'src/app/dtos/query-params.dto';
 import { AuthorizationHeader } from 'src/app/swagger.constant';
+import { UpdateClientAgentDto } from './dtos/update-status.dto';
 
 @ApiTags('delivered-agents')
 @Controller('delivered-agents')
@@ -61,14 +62,16 @@ export class DeliveredAgentsController {
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBody({ type: UpdateClientAgentDto })
   async updateMaintenanceStatus(
     @Param('id') id: string,
-    @Body('status') status: MaintenanceStatus,
+    @Body('status') body:UpdateClientAgentDto,
     @Req() req: Request
   ) {
     const deliveredAgent = await this.deliveredAgentsService.updateMaintenanceStatus(
       id,
-      status,
+      body.status as MaintenanceStatus,
       req.user
     );
     return {
