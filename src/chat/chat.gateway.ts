@@ -49,6 +49,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() companyId: string) {
     try {
+      console.log('joinRoom',companyId);
       client.join(`company-${companyId}`);
       this.logger.log(`Client ${client.id} joined room: company-${companyId}`);
       return { success: true, message: 'Joined room successfully' };

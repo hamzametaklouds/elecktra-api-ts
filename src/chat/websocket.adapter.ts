@@ -18,7 +18,7 @@ export class WebSocketAdapter extends IoAdapter {
   }
 
   createIOServer(port: number, options?: ServerOptions) {
-    const wsPort = (this.configService.get('server.port') || 5200) + 1;
+    const wsPort = (this.configService.get('server.port') || 5200);
     
     const optionsWithCORS: ServerOptions = {
       ...options,

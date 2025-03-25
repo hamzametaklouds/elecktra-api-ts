@@ -17,7 +17,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const env = configService.get('root.env');
   const port = configService.get('server.port') || 5200;
-  const wsPort = port + 1;
+  const wsPort = port;
   
   console.log('\n\n\n\nport', port);
 
@@ -36,8 +36,8 @@ async function bootstrap() {
 
   // Initialize WebSocket adapter
   logger.log('Initializing WebSocket adapter...');
-  const wsAdapter = new WebSocketAdapter(app);
-  app.useWebSocketAdapter(wsAdapter);
+  // const wsAdapter = new WebSocketAdapter(app);
+  // app.useWebSocketAdapter(wsAdapter);
 
   logger.log('WebSocket adapter initialized');
 
