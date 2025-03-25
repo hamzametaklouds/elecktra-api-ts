@@ -47,9 +47,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('joinRoom')
-  async handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() companyId: string) {
+  async handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() company) {
     try {
-      console.log('joinRoom',companyId);
+      // If company is a string, parse it, otherwise use it as is
+      const parsedData = typeof company === 'string' ? JSON.parse(company) : company;
+      console.log('joinRoom', parsedData);
+      
+      // Access the company ID from the parsed data
+      const companyId = parsedData.data;
+      
       client.join(`company-${companyId}`);
       this.logger.log(`Client ${client.id} joined room: company-${companyId}`);
       return { success: true, message: 'Joined room successfully' };
@@ -62,16 +68,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @ConnectedSocket() client: Socket, 
-    @MessageBody() data: CreateMessageDto & { 
-      user: any,
-      company_id: string,
-      user_id: string 
-    }
+    @MessageBody() data
   ) {
     try {
       console.log('handleMessage', data);
       // Parse the data if it's a string
       const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+
+      console.log('parsedData', parsedData);
       
       const messageDto = {
         content: parsedData.content,
@@ -83,7 +87,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       console.log('messageDto', messageDto);
       const message = await this.chatService.createMessageSocket(messageDto);
-      this.server.to(`company-${parsedData.company_id}`).emit('newMessage', message);
+      
+      // Get room name
+      const roomName = `company-${parsedData.company_id}`;
+      
+      // Log room details
+      console.log('Emitting to room:', roomName);
+      console.log('Client rooms:', client.rooms);
+      
+      // Emit to room including sender
+      await this.server.to(roomName).emit('newMessage', message);
+      
       return { success: true, data: message };
     } catch (error) {
       this.logger.error(`Error sending message: ${error.message}`);
