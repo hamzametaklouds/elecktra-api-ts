@@ -63,7 +63,7 @@ export class UsersService {
 
   async getUserById(id): Promise<IUsers> {
     return await this.userModel
-      .findOne({ _id: id, is_deleted: false })
+      .findOne({ _id: id, is_deleted: false }).populate('company_id');
   }
 
   async getUserData(user: { userId?: ObjectId }): Promise<IUsers> {
@@ -288,8 +288,9 @@ export class UsersService {
         created_by: invitation?.created_by?invitation?.created_by:null
       }).save();
 
+      const user = await this.getUserById(createdUser._id);
 
-      return createdUser;
+      return user;
     }
 
     // Create company first
