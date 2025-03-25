@@ -60,10 +60,30 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('sendMessage')
-  async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: CreateMessageDto & { user: any }) {
+  async handleMessage(
+    @ConnectedSocket() client: Socket, 
+    @MessageBody() data: CreateMessageDto & { 
+      user: any,
+      company_id: string,
+      user_id: string 
+    }
+  ) {
     try {
-      const message = await this.chatService.createMessage(data, data.user);
-      this.server.to(`company-${data.user.company_id}`).emit('newMessage', message);
+      console.log('handleMessage', data);
+      // Parse the data if it's a string
+      const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+      
+      const messageDto = {
+        content: parsedData.content,
+        user_mentions: parsedData.user_mentions,
+        agent_mentions: parsedData.agent_mentions,
+        company_id: parsedData.company_id,
+        userId: parsedData.user_id
+      };
+
+      console.log('messageDto', messageDto);
+      const message = await this.chatService.createMessageSocket(messageDto);
+      this.server.to(`company-${parsedData.company_id}`).emit('newMessage', message);
       return { success: true, data: message };
     } catch (error) {
       this.logger.error(`Error sending message: ${error.message}`);

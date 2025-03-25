@@ -37,14 +37,42 @@ export class ChatService {
     return messages.reverse(); // Return in chronological order
   }
 
-  async createMessage(createMessageDto: CreateMessageDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
-    if (!user.company_id) {
+  async createMessage(createMessageDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    console.log('createMessage DTO:', createMessageDto);
+    console.log('createMessage user:', user);
+    
+    if (!createMessageDto.company_id) {
       throw new BadRequestException('User is not associated with any company');
     }
 
     const message = new this.messageModel({
       company_id: user.company_id,
       sender_id: user.userId,
+      created_by: user.userId,
+      content: createMessageDto.content,
+      user_mentions: createMessageDto.user_mentions || [],
+      agent_mentions: createMessageDto.agent_mentions || [],
+    });
+
+    const savedMessage = await message.save();
+    
+    return await this.messageModel.findById(savedMessage._id)
+      .populate('sender_id', 'first_name last_name image')
+      .populate('user_mentions', 'first_name last_name image')
+      .populate('agent_mentions', 'title sub_title image');
+  }
+
+  async createMessageSocket(createMessageDto) {
+    console.log('createMessage DTO:', createMessageDto);
+    
+    if (!createMessageDto.company_id) {
+      throw new BadRequestException('User is not associated with any company');
+    }
+
+    const message = new this.messageModel({
+      company_id: createMessageDto.company_id,
+      sender_id: createMessageDto.userId,
+      created_by: createMessageDto.userId,
       content: createMessageDto.content,
       user_mentions: createMessageDto.user_mentions || [],
       agent_mentions: createMessageDto.agent_mentions || [],
