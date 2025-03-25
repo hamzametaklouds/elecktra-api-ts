@@ -62,6 +62,7 @@ export class AgentRequestsService {
       display_description: agent.display_description,
       request_time_frame: agent.request_time_frame,
       image: agent.image,
+      agent_assigned_id: agent.assistant_id,
       company_id: company?._id || null,
       company_owner_id: company?.created_by || null,
       status: AgentRequestStatus.PENDING_CREDENTIALS,

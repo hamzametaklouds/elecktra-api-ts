@@ -3,6 +3,7 @@ import { USERS_COLLECTION } from 'src/users/users.constants';
 import { AGENT_REQUESTS_COLLECTION } from 'src/agent-requests/agent-requests.constants';
 import { MESSAGES_COLLECTION } from './chat.constants';
 import { COMPANY_COLLECTION } from 'src/company/company.constants';
+import { DELIVERED_AGENTS_COLLECTION } from 'src/delivered-agents/delivered-agents.constants';
 
 export interface IMessage {
   _id?: Schema.Types.ObjectId;
@@ -40,7 +41,7 @@ export const MessageSchema = new Schema<IMessage>({
   }],
   agent_mentions: [{
     type: Schema.Types.ObjectId,
-    ref: AGENT_REQUESTS_COLLECTION,
+    ref: DELIVERED_AGENTS_COLLECTION,
     required: false
   }],
   created_at: {

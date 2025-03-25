@@ -39,6 +39,7 @@ export interface IAgentRequest {
   request_time_frame: string;
   delivery_date?: Date;
   image: string;
+  agent_assigned_id: string;
   company_id: Schema.Types.ObjectId;
   company_owner_id: Schema.Types.ObjectId;
   status: AgentRequestStatus;
@@ -64,6 +65,7 @@ const WorkflowRequestSchema = new Schema<IWorkflowRequest>({
     type: String,
     required: true
   },
+
   price: {
     type: Number,
     required: true
@@ -126,6 +128,10 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
     description: {
       type: String,
       required: true
+    },
+    agent_assigned_id: {
+      type: String,
+      required: false
     },
     company_id: {
         type: Schema.Types.ObjectId,

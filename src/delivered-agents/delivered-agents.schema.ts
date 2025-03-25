@@ -46,6 +46,7 @@ export interface IDeliveredAgent {
   request_time_frame: string;
   delivery_date: Date;
   image: string;
+  agent_assigned_id: string;
   company_id: Schema.Types.ObjectId;
   company_owner_id: Schema.Types.ObjectId;
   maintenance_status: MaintenanceStatus;
@@ -96,6 +97,10 @@ export const DeliveredAgentSchema = new Schema<IDeliveredAgent>({
   sub_title: {
     type: String,
     required: true
+  },
+  agent_assigned_id: {
+    type: String,
+    required: false
   },
   description: {
     type: String,
