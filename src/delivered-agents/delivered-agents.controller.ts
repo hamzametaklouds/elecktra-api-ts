@@ -66,12 +66,12 @@ export class DeliveredAgentsController {
   @ApiBody({ type: UpdateClientAgentDto })
   async updateMaintenanceStatus(
     @Param('id') id: string,
-    @Body('status') body:UpdateClientAgentDto,
+    @Body() body:UpdateClientAgentDto,
     @Req() req: Request
   ) {
     const deliveredAgent = await this.deliveredAgentsService.updateMaintenanceStatus(
       id,
-      body.status as MaintenanceStatus,
+      body.status,
       req.user
     );
     return {

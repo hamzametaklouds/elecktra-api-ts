@@ -142,6 +142,8 @@ export class DeliveredAgentsService {
       throw new NotFoundException('Delivered agent not found');
     }
 
+    console.log('status-------',status);  
+
     return await this.deliveredAgentModel.findByIdAndUpdate(
       {_id: id},
       {
