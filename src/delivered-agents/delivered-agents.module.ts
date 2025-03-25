@@ -11,6 +11,7 @@ import { AgentRequestsModule } from 'src/agent-requests/agent-requests.module';
     DatabaseModule,
     ConfigModule,
     forwardRef(() => AgentRequestsModule),
+ 
   ],
   controllers: [DeliveredAgentsController],
   providers: [DeliveredAgentsService, ...DeliveredAgentsModel],

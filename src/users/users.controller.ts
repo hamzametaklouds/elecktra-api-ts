@@ -12,6 +12,8 @@ import { IPaginationQuery } from 'src/app/interfaces';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
 import { RolesGuard } from 'src/app/guards/role-guard';
+import { DeliveredAgentsService } from 'src/delivered-agents/delivered-agents.service';
+import { forwardRef, Inject } from '@nestjs/common';
 
 
 UseFilters(HttpExceptionFilter);
@@ -22,6 +24,8 @@ UseFilters(HttpExceptionFilter);
 export class UsersController {
   constructor(
     private userService: UsersService,
+    @Inject(forwardRef(() => DeliveredAgentsService))
+    private deliveredAgentsService: DeliveredAgentsService,
   ) { }
 
   //   /**
@@ -108,6 +112,36 @@ export class UsersController {
 
     const user = await this.userService.updateUser(id, body, req.user);
     return user;
+  }
+
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER, Role.SUPPORT_ADMIN)
+  @Get('company-data')
+  async getCompanyData(@Req() req: Request) {
+ 
+
+    const users = await this.userService.getCompanyUsersAndAgents(req.user);
+    const deliveredAgents = await this.deliveredAgentsService.getTaggedDeliveredAgents(
+     req.user
+    );
+
+    // Filter delivered agents to only include required fields
+    const filteredDeliveredAgents = deliveredAgents.map(agent => ({
+      title: agent.title,
+      image: agent.image,
+      _id: agent._id
+    }));
+
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Company data fetched successfully',
+      data: {
+        users,
+        deliveredAgents: filteredDeliveredAgents
+      }
+    };
   }
 
 }

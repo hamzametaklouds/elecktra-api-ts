@@ -83,12 +83,26 @@ export class DeliveredAgentsService {
     };
   }
 
+  async getTaggedDeliveredAgents(
+    user: { userId?: ObjectId, company_id?: ObjectId }
+  ) {
+    const filter: any = { is_deleted: false };
+    if (user?.company_id) {
+      filter['company_id'] = user.company_id;
+    }
+
+
+    return await this.deliveredAgentModel
+      .find(filter)
+    
+   
+  }
+
   async getFilteredDeliveredAgents(
     filter: Object,
     orderBy,
     user: { userId?: ObjectId, company_id?: ObjectId }
   ) {
-    console.log(user);
     if (user?.company_id) {
       filter['company_id'] = user.company_id;
     }

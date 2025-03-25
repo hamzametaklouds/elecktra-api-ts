@@ -549,4 +549,14 @@ export class UsersService {
     return user;
   }
 
+  async getCompanyUsersAndAgents(user: { userId?: ObjectId, company_id?: ObjectId }) {
+    const users = await this.userModel
+      .find(
+        { company_id: user.company_id, is_deleted: false },
+        { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1, _id: 1 }
+      );
+
+    return users;
+  }
+
 }

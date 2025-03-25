@@ -7,6 +7,7 @@ import { UsersService } from './users.service';
 import { InvitationsModule } from 'src/invitations/invitations.module';
 import { CompanyModule } from 'src/company/company.module';
 import { ChatModule } from 'src/chat/chat.module';
+import { DeliveredAgentsModule } from 'src/delivered-agents/delivered-agents.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ChatModule } from 'src/chat/chat.module';
     forwardRef(() => InvitationsModule),
     forwardRef(() => CompanyModule),
     forwardRef(() => ChatModule),
+    forwardRef(() => DeliveredAgentsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService, ...UsersModel],
