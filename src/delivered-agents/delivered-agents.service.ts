@@ -109,7 +109,7 @@ export class DeliveredAgentsService {
 
 
     return await this.deliveredAgentModel
-      .find(filter)
+      .find({...filter,maintenance_status:MaintenanceStatus.ACTIVE})
       .populate('agent_id')
       .populate('agent_request_id')
       .populate('company_id')
