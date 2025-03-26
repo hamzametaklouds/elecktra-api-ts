@@ -49,6 +49,29 @@ export class AuthService {
       throw new BadRequestException('Please verify your email before logging in');
     }
 
+    // Check company status if user has a company
+    if (user.company_id) {
+      const company = await this.companyService.getCompanyById(user.company_id);
+      
+      if (!company) {
+        throw new BadRequestException('Your associated company no longer exists. Please contact support for assistance.');
+      }
+
+      if (company.is_disabled) {
+        throw new ForbiddenException('Your company account has been temporarily suspended. Please contact our support team to resolve this issue.');
+      }
+
+      if (company.is_deleted) {
+        throw new BadRequestException('Your company account has been deactivated. Please contact our support team for more information.');
+      }
+
+      // Add company information to the response
+      user['company'] = {
+        id: company._id,
+        name: company.name
+      };
+    }
+
     // Remove sensitive data before sending response
     const { password: _, ...userWithoutPassword } = user;
 
