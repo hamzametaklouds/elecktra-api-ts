@@ -45,12 +45,12 @@ export class AuthService {
     }
 
     // Check if email is verified
-    if (!user.email_verified) {
+    if (!user?.email_verified) {
       throw new BadRequestException('Please verify your email before logging in');
     }
 
     // Check company status if user has a company
-    if (user.company_id) {
+    if (user?.company_id) {
       const company = await this.companyService.getCompanyByIdForLogin(user.company_id);
       
       if (!company) {
@@ -178,7 +178,7 @@ export class AuthService {
         let userExists = await this.usersService.getUserByEmail(body.email);
 
          // Check company status if user has a company
-    if (userExists.company_id) {
+    if (userExists?.company_id) {
       const company = await this.companyService.getCompanyByIdForLogin(userExists.company_id);
       
       if (!company) {
