@@ -177,6 +177,23 @@ export class AuthService {
         // Step 3: Check if user exists in the application database
         let userExists = await this.usersService.getUserByEmail(body.email);
 
+         // Check company status if user has a company
+    if (userExists.company_id) {
+      const company = await this.companyService.getCompanyByIdForLogin(userExists.company_id);
+      
+      if (!company) {
+        throw new BadRequestException('Your associated company no longer exists. Please contact support for assistance.');
+      }
+
+      if (company.is_disabled) {
+        throw new ForbiddenException('Your company account has been temporarily suspended. Please contact our support team to resolve this issue.');
+      }
+
+      if (company.is_deleted) {
+        throw new BadRequestException('Your company account has been deactivated. Please contact our support team for more information.');
+      }
+    }
+
         // Step 4: If user doesn't exist, create new user
         if (!userExists) {
             // Determine first and last name from available data
