@@ -35,6 +35,11 @@ export class CompanyService {
       .findOne({ _id: id, is_disabled: false,is_deleted: false });
   }
 
+  async getCompanyByIdForLogin(id) {
+    return await this.companyModel
+      .findOne({ _id: id});
+  }
+
 
   async findAll(rpp: number, page: number, filter: object, orderBy): Promise<IPageinatedDataTable> {
     const skip: number = (page - 1) * rpp;

@@ -51,7 +51,7 @@ export class AuthService {
 
     // Check company status if user has a company
     if (user.company_id) {
-      const company = await this.companyService.getCompanyById(user.company_id);
+      const company = await this.companyService.getCompanyByIdForLogin(user.company_id);
       
       if (!company) {
         throw new BadRequestException('Your associated company no longer exists. Please contact support for assistance.');
