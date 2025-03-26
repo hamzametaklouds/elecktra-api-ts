@@ -56,19 +56,34 @@ export class ChatService {
       throw new BadRequestException('User is not associated with any company');
     }
 
+    const totalDocuments = await this.messageModel.countDocuments({ 
+      company_id: user.company_id,
+      is_deleted: false 
+    });
+    
+    const totalPages = Math.ceil(totalDocuments / limit);
+    const skip = (page - 1) * limit;
+
     const messages = await this.messageModel
       .find({ 
         company_id: user.company_id,
         is_deleted: false 
       })
       .sort({ created_at: -1 })
-      .skip((page - 1) * limit)
+      .skip(skip)
       .limit(limit)
       .populate('sender_id', 'first_name last_name image')
+      .populate('agent_id', 'title sub_title image')
       .populate('user_mentions', 'first_name last_name image')
       .populate('agent_mentions', 'title sub_title image');
 
-    return messages.reverse(); // Return in chronological order
+    return {
+      pages: `Page ${page} of ${totalPages}`,
+      current_page: page,
+      total_pages: totalPages,
+      total_records: totalDocuments,
+      data: messages.reverse() // Return in chronological order
+    };
   }
 
   async createMessage(createMessageDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
