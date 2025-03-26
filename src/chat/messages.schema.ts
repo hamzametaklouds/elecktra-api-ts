@@ -9,6 +9,7 @@ export interface IMessage {
   _id?: Schema.Types.ObjectId;
   company_id: Schema.Types.ObjectId;
   sender_id: Schema.Types.ObjectId;
+  agent_id: Schema.Types.ObjectId;
   content: string;
   user_mentions: Schema.Types.ObjectId[];
   agent_mentions: Schema.Types.ObjectId[];
@@ -28,7 +29,12 @@ export const MessageSchema = new Schema<IMessage>({
   sender_id: {
     type: Schema.Types.ObjectId,
     ref: USERS_COLLECTION,
-    required: true
+    required: false
+  },
+  agent_id: {
+    type: Schema.Types.ObjectId,
+    ref: DELIVERED_AGENTS_COLLECTION,
+    required: false
   },
   content: {
     type: String,

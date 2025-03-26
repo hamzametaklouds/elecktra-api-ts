@@ -9,6 +9,7 @@ import { AgentRequestsModule } from 'src/agent-requests/agent-requests.module';
 import { ChatModel } from './chat.model';
 import { MessagesModel } from './messages.model';
 import { ChatGateway } from './chat.gateway';
+import { DeliveredAgentsModule } from 'src/delivered-agents/delivered-agents.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ChatGateway } from './chat.gateway';
     forwardRef(() => UsersModule),
     forwardRef(() => CompanyModule),
     forwardRef(() => AgentRequestsModule),
+    forwardRef(() => DeliveredAgentsModule),
   ],
   controllers: [ChatController],
   providers: [

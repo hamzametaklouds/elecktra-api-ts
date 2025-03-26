@@ -71,11 +71,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @MessageBody() data
   ) {
     try {
-      console.log('handleMessage', data);
-      // Parse the data if it's a string
       const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-
-      console.log('parsedData', parsedData);
       
       const messageDto = {
         content: parsedData.content,
@@ -85,20 +81,21 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         userId: parsedData.user_id
       };
 
-      console.log('messageDto', messageDto);
-      const message = await this.chatService.createMessageSocket(messageDto);
-      
-      // Get room name
+      const result = await this.chatService.createMessageSocket(messageDto);
+      console.log('\n\n\n\nresult-----', result);
       const roomName = `company-${parsedData.company_id}`;
+
+      console.log('\n\n\n\nroomName-----', roomName);
       
-      // Log room details
-      console.log('Emitting to room:', roomName);
-      console.log('Client rooms:', client.rooms);
+      // Emit user message
+      await this.server.to(roomName).emit('newMessage', result.userMessage);
       
-      // Emit to room including sender
-      await this.server.to(roomName).emit('newMessage', message);
+      // Emit agent responses if any
+      for (const agentResponse of result.agentResponses) {
+        await this.server.to(roomName).emit('newMessage', agentResponse);
+      }
       
-      return { success: true, data: message };
+      return { success: true, data: result };
     } catch (error) {
       this.logger.error(`Error sending message: ${error.message}`);
       return { success: false, message: 'Failed to send message' };
