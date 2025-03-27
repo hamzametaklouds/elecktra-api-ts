@@ -13,6 +13,7 @@ interface IPopulatedAgent {
   _id: ObjectId;
   agent_assistant_id: string;
   title: string;
+  agent_request_id: ObjectId;
 }
 
 interface IAgentResponse {
@@ -20,6 +21,18 @@ interface IAgentResponse {
     agent_id: string;
     message: string;
   }
+}
+
+interface IPopulatedUser {
+  _id: ObjectId;
+  first_name: string;
+  last_name: string;
+}
+
+interface IPopulatedMessage {
+  _id: ObjectId;
+  user_mentions: IPopulatedUser[];
+  agent_mentions: IPopulatedAgent[];
 }
 
 @Injectable()
@@ -131,22 +144,45 @@ export class ChatService {
 
     // Handle agent mentions if any
     if (createMessageDto.agent_mentions?.length > 0) {
-      const populatedAgents = await this.messageModel
+      // Populate both user and agent mentions
+      const populatedMessage = await this.messageModel
         .findById(savedUserMessage._id)
-        .populate('agent_mentions') as any;
+        .populate('user_mentions', 'first_name last_name')
+        .populate('agent_mentions', 'title agent_assistant_id')
+        .lean() as IPopulatedMessage;
 
-        console.log('populatedAgents', populatedAgents);
+        console.log('populatedMessage', populatedMessage);
+
+      // Replace user mentions in content
+      let processedContent = createMessageDto.content;
+      if (populatedMessage.user_mentions?.length > 0) {
+        for (const user of populatedMessage.user_mentions) {
+          const fullName = `${user.first_name} ${user.last_name}`;
+          processedContent = processedContent.replace(user._id.toString(), fullName);
+        }
+      }
+      console.log('processedContent', processedContent);
+
+      // Replace agent mentions in content
+      if (populatedMessage.agent_mentions?.length > 0) {
+        for (const agent of populatedMessage.agent_mentions) {
+          processedContent = processedContent.replace(agent._id.toString(), agent.title);
+        }
+      }
+
+      console.log('processedContent', processedContent);
 
       const agentResponses: IMessage[] = [];
-      for (const agent of populatedAgents.agent_mentions) {
+      for (const agent of populatedMessage.agent_mentions) {
         console.log('agent', agent);
         const agentDoc = agent as IPopulatedAgent;
+
         if (!agentDoc.agent_assistant_id) continue;
 
         const webhookPayload: IAgentWebhookPayload = {
           agentId: agentDoc.agent_assistant_id,
           businessId: createMessageDto.company_id.toString(),
-          message: createMessageDto.content,
+          message: processedContent,
           executionMode: 'production'
         };
 
@@ -160,6 +196,7 @@ export class ChatService {
         const agentMessage = new this.messageModel({
           company_id: createMessageDto.company_id,
           agent_id: agentDoc._id,
+          query: processedContent,
           assistant_id: agentResponse?.output?.agent_id?agentResponse?.output?.agent_id:agentResponse['agent_id']?agentResponse['agent_id']:null,
           content: agentResponse?.output?.message?agentResponse?.output?.message:agentResponse['message']?agentResponse['message']:null,
           user_mentions: [],

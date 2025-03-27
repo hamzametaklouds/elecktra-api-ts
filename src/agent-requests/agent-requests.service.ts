@@ -164,6 +164,8 @@ export class AgentRequestsService {
     // If status is changed to DELIVERED, create delivered agent
     if (updateAgentRequestDto.status === AgentRequestStatus.DELIVERED) {
       updateAgentRequestDto['agent_assistant_id'] = request?.agent_assistant_id;
+
+      console.log('updatedRequest', updatedRequest);
      
       await this.deliveredAgentsService.handleAgentDelivery(updatedRequest, user);
     }

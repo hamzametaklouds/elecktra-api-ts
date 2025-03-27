@@ -23,9 +23,10 @@ export class DeliveredAgentsService {
 
     if (existingDelivered) {
       throw new BadRequestException('Agent request already delivered');
+      
     }
 
-    const request=await this.agentRequestsService.findOne(agentRequest._id)
+    console.log('agentRequest', agentRequest);
 
     const deliveredAgent = new this.deliveredAgentModel({
       agent_request_id: agentRequest._id,
@@ -37,7 +38,7 @@ export class DeliveredAgentsService {
       image: agentRequest.image,
       company_id: agentRequest.company_id,
       company_owner_id: agentRequest.company_owner_id,
-      agent_assigned_id: request?.agent_assistant_id,
+      agent_assistant_id: agentRequest['agent_id']['assistant_id'],
       maintenance_status: MaintenanceStatus.ACTIVE,
       pricing: agentRequest.pricing,
       work_flows: agentRequest.work_flows,

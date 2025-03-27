@@ -14,6 +14,7 @@ export interface IMessage {
   user_mentions: Schema.Types.ObjectId[];
   agent_mentions: Schema.Types.ObjectId[];
   created_at: Date;
+  query: string;
   updated_at?: Date;
   is_edited: boolean;
   is_deleted: boolean;
@@ -39,6 +40,10 @@ export const MessageSchema = new Schema<IMessage>({
   content: {
     type: String,
     required: true
+  },
+  query: {
+    type: String,
+    required: false
   },
   user_mentions: [{
     type: Schema.Types.ObjectId,
