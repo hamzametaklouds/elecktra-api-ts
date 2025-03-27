@@ -79,7 +79,7 @@ export class AgentRequestsController {
   @Put(':id')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN,Role.SUPPORT_ADMIN, Role.BUSINESS_OWNER, Role.USER)
+  @Roles(Role.SUPER_ADMIN,Role.SUPPORT_ADMIN)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiOperation({ summary: 'Update an agent request' })
   @ApiResponse({ status: 200, description: 'Agent request successfully updated' })
