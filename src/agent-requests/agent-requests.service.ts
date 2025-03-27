@@ -57,7 +57,6 @@ export class AgentRequestsService {
     const agentRequest = new this.agentRequestModel({
       agent_id: agent._id,
       title: agent.title,
-      sub_title: agent.sub_title,
       description: agent.description,
       display_description: agent.display_description,
       request_time_frame: agent.request_time_frame,
@@ -71,7 +70,7 @@ export class AgentRequestsService {
       invoice: {
         workflows_total: workflowsTotal,
         installation_price: agent.pricing.installation_price,
-        subscription_price: agent.pricing.subscription_price,
+        subscription_price: workflowsTotal,
         grand_total: grandTotal
       },
       created_by: user.userId,

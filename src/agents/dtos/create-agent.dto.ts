@@ -43,9 +43,6 @@ export class CreateAgentDto {
   @IsString()
   title: string;
 
-  @ApiProperty()
-  @IsString()
-  sub_title: string;
 
   @ApiProperty()
   @IsString()

@@ -25,7 +25,7 @@ interface IPricing {
 export interface IAgent {
   _id?: Schema.Types.ObjectId;
   title: string;
-  sub_title: string;
+
   description: string;
   display_description: string;
   request_time_frame: string;
@@ -67,10 +67,6 @@ const WorkflowSchema = new Schema<IWorkflow>({
 export const AgentSchema = new Schema<IAgent>(
   {
     title: {
-      type: String,
-      required: true
-    },
-    sub_title: {
       type: String,
       required: true
     },

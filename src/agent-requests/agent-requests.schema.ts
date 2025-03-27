@@ -19,7 +19,7 @@ interface IWorkflowRequest {
 
 interface IPricing {
   installation_price: number;
-  subscription_price: number;
+
 }
 
 interface IInvoice {
@@ -33,7 +33,7 @@ export interface IAgentRequest {
   _id?: Schema.Types.ObjectId;
   agent_id: Schema.Types.ObjectId;
   title: string;
-  sub_title: string;
+
   description: string;
   display_description: string;
   request_time_frame: string;
@@ -121,10 +121,7 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
       type: String,
       required: true
     },
-    sub_title: {
-      type: String,
-      required: true
-    },
+  
     description: {
       type: String,
       required: true

@@ -73,9 +73,9 @@ export class ChatService {
       .skip(skip)
       .limit(limit)
       .populate('sender_id', 'first_name last_name image')
-      .populate('agent_id', 'title sub_title image')
+      .populate('agent_id', 'title image')
       .populate('user_mentions', 'first_name last_name image')
-      .populate('agent_mentions', 'title sub_title image');
+      .populate('agent_mentions', 'title image');
 
     return {
       pages: `Page ${page} of ${totalPages}`,
@@ -108,7 +108,7 @@ export class ChatService {
     return await this.messageModel.findById(savedMessage._id)
       .populate('sender_id', 'first_name last_name image')
       .populate('user_mentions', 'first_name last_name image')
-      .populate('agent_mentions', 'title sub_title image');
+      .populate('agent_mentions', 'title image');
   }
   async createMessageSocket(createMessageDto: CreateMessageDto & { company_id: ObjectId; userId: ObjectId }) {
     if (!createMessageDto.company_id) {
@@ -177,11 +177,11 @@ export class ChatService {
         userMessage: await this.messageModel.findById(savedUserMessage._id)
           .populate('sender_id', 'first_name last_name image')
           .populate('user_mentions', 'first_name last_name image')
-          .populate('agent_mentions', 'title sub_title image'),
+          .populate('agent_mentions', 'title image'),
         agentResponses: await Promise.all(
           agentResponses.map(msg => 
             this.messageModel.findById(msg._id)
-              .populate('agent_id', 'title sub_title image')
+              .populate('agent_id', 'title image')
           )
         )
       };
@@ -192,7 +192,7 @@ export class ChatService {
       userMessage: await this.messageModel.findById(savedUserMessage._id)
         .populate('sender_id', 'first_name last_name image')
         .populate('user_mentions', 'first_name last_name image')
-        .populate('agent_mentions', 'title sub_title image'),
+        .populate('agent_mentions', 'title image'),
       agentResponses: []
     };
   }
@@ -216,7 +216,7 @@ export class ChatService {
     )
     .populate('sender_id', 'first_name last_name image')
     .populate('user_mentions', 'first_name last_name image')
-    .populate('agent_mentions', 'title sub_title image');
+    .populate('agent_mentions', 'title image');
   }
 
   async editMessage(messageId: string, content: string, user: { userId?: ObjectId, company_id?: ObjectId }) {
@@ -242,6 +242,6 @@ export class ChatService {
     )
     .populate('sender_id', 'first_name last_name image')
     .populate('user_mentions', 'first_name last_name image')
-    .populate('agent_mentions', 'title sub_title image');
+    .populate('agent_mentions', 'title image');
   }
 } 

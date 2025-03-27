@@ -29,7 +29,6 @@ export class DeliveredAgentsService {
       agent_request_id: agentRequest._id,
       agent_id: agentRequest.agent_id,
       title: agentRequest.title,
-      sub_title: agentRequest.sub_title,
       description: agentRequest.description,
       display_description: agentRequest.display_description,
       request_time_frame: agentRequest.request_time_frame,

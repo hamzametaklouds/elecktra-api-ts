@@ -40,7 +40,6 @@ export interface IDeliveredAgent {
   agent_request_id: Schema.Types.ObjectId;
   agent_id: Schema.Types.ObjectId;
   title: string;
-  sub_title: string;
   description: string;
   display_description: string;
   request_time_frame: string;
@@ -94,10 +93,7 @@ export const DeliveredAgentSchema = new Schema<IDeliveredAgent>({
     type: String,
     required: true
   },
-  sub_title: {
-    type: String,
-    required: true
-  },
+
   agent_assistant_id: {
     type: String,
     required: false
