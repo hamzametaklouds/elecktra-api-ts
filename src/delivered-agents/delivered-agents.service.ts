@@ -36,7 +36,7 @@ export class DeliveredAgentsService {
       image: agentRequest.image,
       company_id: agentRequest.company_id,
       company_owner_id: agentRequest.company_owner_id,
-      agent_assigned_id: agentRequest.agent_assigned_id,
+      agent_assigned_id: agentRequest?.agent_assigned_id,
       maintenance_status: MaintenanceStatus.ACTIVE,
       pricing: agentRequest.pricing,
       work_flows: agentRequest.work_flows,
