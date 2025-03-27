@@ -9,11 +9,7 @@ export class UpdateIntegrationDto extends PartialType(CreateIntegrationDto) {
   @IsOptional()
   api_key_required?: boolean;
 
-  @ApiProperty({ required: false, type: [String] })
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  api_keys?: string[];
+
 
   @ApiProperty()
   @IsBoolean()
