@@ -33,13 +33,13 @@ export interface IAgentRequest {
   _id?: Schema.Types.ObjectId;
   agent_id: Schema.Types.ObjectId;
   title: string;
-
   description: string;
   display_description: string;
   request_time_frame: string;
+  service_type?: string;
   delivery_date?: Date;
   image: string;
-  agent_assigned_id: string;
+  agent_assistant_id?: string;
   company_id: Schema.Types.ObjectId;
   company_owner_id: Schema.Types.ObjectId;
   status: AgentRequestStatus;
@@ -122,11 +122,16 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
       required: true
     },
   
+    service_type: {
+      type: String,
+      required: false
+    },
+  
     description: {
       type: String,
       required: true
     },
-    agent_assigned_id: {
+    agent_assistant_id: {
       type: String,
       required: false
     },

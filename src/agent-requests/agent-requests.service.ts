@@ -61,7 +61,8 @@ export class AgentRequestsService {
       display_description: agent.display_description,
       request_time_frame: agent.request_time_frame,
       image: agent.image,
-      agent_assigned_id: agent.assistant_id,
+      service_type:agent?.service_type,
+      agent_assistant_id: agent.assistant_id,
       company_id: company?._id || null,
       company_owner_id: company?.created_by || null,
       status: AgentRequestStatus.SUBMITTED,
@@ -126,7 +127,7 @@ export class AgentRequestsService {
       .sort(orderBy);
   }
 
-  async findOne(id: string) {
+  async findOne(id) {
     const request = await this.agentRequestModel
       .findOne({ _id: id, is_deleted: false })
       .populate('agent_id')
@@ -162,7 +163,7 @@ export class AgentRequestsService {
 
     // If status is changed to DELIVERED, create delivered agent
     if (updateAgentRequestDto.status === AgentRequestStatus.DELIVERED) {
-      updateAgentRequestDto['agent_assigned_id'] = request?.agent_assigned_id;
+      updateAgentRequestDto['agent_assistant_id'] = request?.agent_assistant_id;
      
       await this.deliveredAgentsService.handleAgentDelivery(updatedRequest, user);
     }
