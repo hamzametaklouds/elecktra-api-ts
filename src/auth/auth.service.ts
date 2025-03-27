@@ -306,7 +306,8 @@ export class AuthService {
     try {
       console.log(token)
       // Verify the token
-      const decoded = await this.jwtService.verify(token);
+      // In NestJS, assuming jwtService is injected into the constructor
+const decoded = await this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
 
       console.log(decoded)
       

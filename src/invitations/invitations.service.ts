@@ -447,6 +447,8 @@ export class InvitationsService {
     // Generate a JWT token with the link_id
     const token = jwt.sign({ link_id: verificationLinkId }, process.env.JWT_SECRET, { expiresIn: '3d' });
 
+    console.log(token)
+
     // Generate the verification link
     const verificationLink = 
              `https://electra-seven-wine.vercel.app/verify-email/${token}`;
