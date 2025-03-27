@@ -160,8 +160,8 @@ export class ChatService {
         const agentMessage = new this.messageModel({
           company_id: createMessageDto.company_id,
           agent_id: agentDoc._id,
-          assistant_id: agentResponse.output.agent_id,
-          content: agentResponse.output.message,
+          assistant_id: agentResponse?.output?.agent_id?agentResponse?.output?.agent_id:agentResponse['agent_id']?agentResponse['agent_id']:null,
+          content: agentResponse?.output?.message?agentResponse?.output?.message:agentResponse['message']?agentResponse['message']:null,
           user_mentions: [],
           agent_mentions: [],
         });
