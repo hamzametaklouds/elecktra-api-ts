@@ -65,7 +65,7 @@ export class AgentRequestsService {
       agent_assigned_id: agent.assistant_id,
       company_id: company?._id || null,
       company_owner_id: company?.created_by || null,
-      status: AgentRequestStatus.PENDING_CREDENTIALS,
+      status: AgentRequestStatus.SUBMITTED,
       pricing: agent.pricing,
       work_flows: selectedWorkflows,
       invoice: {

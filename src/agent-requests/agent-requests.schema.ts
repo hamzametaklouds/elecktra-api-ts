@@ -163,7 +163,7 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
     status: {
       type: String,
       enum: AgentRequestStatus,
-      default: AgentRequestStatus.PENDING_CREDENTIALS,
+      default: AgentRequestStatus.SUBMITTED,
       required: true
     },
     pricing: {
