@@ -14,7 +14,6 @@ export class CreateCompanyDto {
     description: 'Company website URL',
     required: false,
   })
-  @IsUrl()
   @IsOptional()
   website?: string;
 

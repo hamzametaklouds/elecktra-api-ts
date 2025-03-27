@@ -304,6 +304,7 @@ export class AuthService {
 
   async verifyEmail(token: string) {
     try {
+      console.log(token)
       // Verify the token
       const decoded = await this.jwtService.verify(token);
 
