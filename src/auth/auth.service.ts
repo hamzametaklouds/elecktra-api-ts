@@ -305,14 +305,14 @@ export class AuthService {
   async verifyEmail(token: string) {
     try {
       console.log(token)
-      // Verify the token
-      // In NestJS, assuming jwtService is injected into the constructor
-const decoded = await this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
+//       // Verify the token
+//       // In NestJS, assuming jwtService is injected into the constructor
+// const decoded = await this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
 
-      console.log(decoded)
+      //console.log(decoded)
       
       // Get the invitation using the link_id from token
-      const invitation = await this.invitationsService.getinvitationByLinkId(decoded.link_id);
+      const invitation = await this.invitationsService.getinvitationByLinkId(token);
       
       if (!invitation) {
         throw new BadRequestException('Invalid or expired verification link');

@@ -445,19 +445,19 @@ export class InvitationsService {
     const verificationLinkId = uuidv4();
 
     // Generate a JWT token with the link_id
-    const token = jwt.sign({ link_id: verificationLinkId }, process.env.JWT_SECRET, { expiresIn: '3d' });
+    // const token = jwt.sign({ link_id: verificationLinkId }, process.env.JWT_SECRET, { expiresIn: '3d' });
 
-    console.log(token)
+    // console.log(token)
 
     // Generate the verification link
     const verificationLink = 
-             `https://electra-seven-wine.vercel.app/verify-email/${token}`;
+             `https://electra-seven-wine.vercel.app/verify-email/${verificationLinkId}`;
 
     // Create a new invitation record for verification
     const invitation = await new this.invitationModel({
         email: email.toLowerCase(),
         link_id: verificationLinkId,
-        token: token,
+        token: verificationLinkId,
         invitation_status: InvitationStatus.P,
         role: Role.EMAIL_VERIFICATION,
         is_used: false,
