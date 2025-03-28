@@ -36,7 +36,7 @@ export class AgentsService {
       .find(filter)
       .populate({
         path: 'work_flows.integrations',
-        select: 'title description image',
+        select: '_id title api_key_required',
         match: { is_deleted: false }
       })
       .populate({
@@ -70,7 +70,7 @@ export class AgentsService {
       .find(filter)
       .populate({
         path: 'work_flows.integrations',
-        select: 'title description image',
+        select: '_id title api_key_required',
         match: { is_deleted: false }
       })
       .populate({
@@ -90,7 +90,7 @@ export class AgentsService {
       .populate({
         path: 'work_flows.integrations',
         match: { is_deleted: false },
-        select: 'title description image'
+        select: '_id title api_key_required'
       })
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name');
@@ -121,7 +121,7 @@ export class AgentsService {
     )
     .populate({
       path: 'work_flows.integrations',
-      select: 'title description image',
+      select: '_id title api_key_required',
       match: { is_deleted: false }
     })
     .populate({
@@ -151,7 +151,7 @@ export class AgentsService {
     )
     .populate({
       path: 'work_flows.integrations',
-      select: 'title description image',
+      select: '_id title api_key_required',
       match: { is_deleted: false }
     })
     .populate({

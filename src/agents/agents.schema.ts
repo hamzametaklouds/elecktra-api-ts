@@ -25,7 +25,6 @@ interface IPricing {
 export interface IAgent {
   _id?: Schema.Types.ObjectId;
   title: string;
-
   description: string;
   display_description: string;
   request_time_frame: string;
