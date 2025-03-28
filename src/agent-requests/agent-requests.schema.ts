@@ -12,8 +12,6 @@ interface IWorkflowRequest {
   integrations: {
     _id: Schema.Types.ObjectId;
     title: string;
-    description: string;
-    image: string;
   }[];
 }
 
@@ -79,14 +77,6 @@ const WorkflowRequestSchema = new Schema<IWorkflowRequest>({
     title: {
       type: String,
       required: true
-    },
-    description: {
-      type: String,
-      required: true
-    },
-    image: {
-      type: String,
-      required: false
     }
   }]
 });

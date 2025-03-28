@@ -10,17 +10,17 @@ export class FileUploadService {
 
     constructor(private configService:ConfigService) {
         AWS.config.update({
-            accessKeyId:  process.env.S3_ACCESS_KEY_ID,
-            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-            region: process.env.S3_REGION
+            accessKeyId: this.configService.get('s3AccessKeyId.s3AccessKeyId'),
+            secretAccessKey: this.configService.get('s3SecretAccessKey.s3SecretAccessKey'),
+            region: this.configService.get('s3Region.s3Region')
+            //keys
           });
         this.s3 = new AWS.S3();
     }
 
 
-
     async uploadFile(file: any, fileName: string) {
-        const bucketName = process.env.S3_BUCKET_NAME;
+        const bucketName = this.configService.get('s3BucketName.s3BucketName');
         const uniqueFileName=`${uuidv4()}.${fileName.split('.').pop()}`;
         const params = {
           Bucket: bucketName,
