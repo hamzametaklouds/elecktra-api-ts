@@ -240,7 +240,12 @@ export class UsersService {
         created_by: createdUser._id
     });
 
-    return createdUser;
+    // Get the user with populated company_id
+    const populatedUser = await this.userModel
+        .findById(createdUser._id)
+        .populate('company_id');
+
+    return populatedUser;
   }
 
 
