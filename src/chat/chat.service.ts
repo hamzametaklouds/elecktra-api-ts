@@ -166,7 +166,7 @@ export class ChatService {
       // Replace agent mentions in content
       if (populatedMessage.agent_mentions?.length > 0) {
         for (const agent of populatedMessage.agent_mentions) {
-          processedContent = processedContent.replace(agent._id.toString(), agent.title);
+          processedContent = processedContent.replace(agent._id.toString(), agent.agent_assistant_id);
         }
       }
 
