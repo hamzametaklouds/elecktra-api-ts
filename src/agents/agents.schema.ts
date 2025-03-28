@@ -9,17 +9,19 @@ export enum AgentStatus {
 }
 
 interface IWorkflow {
- _id?: Schema.Types.ObjectId;
+  _id?: Schema.Types.ObjectId;
   title: string;
   description: string;
   price: number;
+  weeks: number;
+  installation_price: number;
   is_disabled: boolean;
   integrations: Schema.Types.ObjectId[];
 }
 
 interface IPricing {
-  installation_price: number;
-  subscription_price: number;
+  installation_price?: number;
+  subscription_price?: number;
 }
 
 export interface IAgent {
@@ -53,13 +55,21 @@ const WorkflowSchema = new Schema<IWorkflow>({
     type: Number,
     required: true
   },
+  weeks: {
+    type: Number,
+    required: true
+  },
+  installation_price: {
+    type: Number,
+    required: true
+  },
   is_disabled: {
     type: Boolean,
     default: false
   },
   integrations: [{
     type: Schema.Types.ObjectId,
-    ref: INTEGRATIONS_COLLECTION // Reference to your integrations collection
+    ref: INTEGRATIONS_COLLECTION
   }]
 });
 
@@ -103,11 +113,11 @@ export const AgentSchema = new Schema<IAgent>(
     pricing: {
       installation_price: {
         type: Number,
-        required: true
+        required: false
       },
       subscription_price: {
         type: Number,
-        required: true
+        required: false
       }
     },
     work_flows: [WorkflowSchema],

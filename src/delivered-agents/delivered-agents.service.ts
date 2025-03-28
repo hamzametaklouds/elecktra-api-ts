@@ -23,10 +23,14 @@ export class DeliveredAgentsService {
 
     if (existingDelivered) {
       throw new BadRequestException('Agent request already delivered');
-      
     }
 
-    console.log('agentRequest', agentRequest);
+    // Calculate workflow totals
+    const workflowsTotal = agentRequest.work_flows.reduce((sum, workflow) => sum + workflow.price, 0);
+    const workflowsInstallationTotal = agentRequest.work_flows.reduce(
+      (sum, workflow) => sum + workflow.installation_price, 
+      0
+    );
 
     const deliveredAgent = new this.deliveredAgentModel({
       agent_request_id: agentRequest._id,
@@ -40,9 +44,22 @@ export class DeliveredAgentsService {
       company_owner_id: agentRequest.company_owner_id,
       agent_assistant_id: agentRequest['agent_id']['assistant_id'],
       maintenance_status: MaintenanceStatus.ACTIVE,
-      pricing: agentRequest.pricing,
-      work_flows: agentRequest.work_flows,
-      invoice: agentRequest.invoice,
+      pricing: {
+        installation_price: agentRequest.pricing.installation_price,
+        subscription_price: agentRequest.pricing.subscription_price
+      },
+      work_flows: agentRequest.work_flows.map(workflow => ({
+        ...workflow,
+        weeks: workflow.weeks,
+        installation_price: workflow.installation_price
+      })),
+      invoice: {
+        workflows_total: workflowsTotal,
+        workflows_installation_total: workflowsInstallationTotal,
+        installation_price: agentRequest.invoice.installation_price,
+        subscription_price: agentRequest.invoice.subscription_price,
+        grand_total: agentRequest.invoice.grand_total
+      },
       created_by: user.userId
     });
 

@@ -26,15 +26,25 @@ class WorkflowDto {
   @IsMongoId({ each: true })
   @IsOptional()
   integrations?: ObjectId[];
+
+  @ApiProperty()
+  @IsNumber()
+  weeks: number;
+
+  @ApiProperty()
+  @IsNumber()
+  installation_price: number;
 }
 
 class PricingDto {
   @ApiProperty()
   @IsNumber()
-  installation_price: number;
+  @IsOptional()
+  installation_price?: number;
 
   @ApiProperty()
   @IsNumber()
+  @IsOptional()
   subscription_price: number;
 }
 
@@ -73,6 +83,7 @@ export class CreateAgentDto {
   @ApiProperty()
   @ValidateNested()
   @Type(() => PricingDto)
+  @IsOptional()
   pricing: PricingDto;
 
   @ApiProperty({ type: [WorkflowDto] })

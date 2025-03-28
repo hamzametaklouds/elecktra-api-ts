@@ -29,8 +29,7 @@ export class AgentRequestsService {
     }
 
     let company = null;
-
-    if(user?.company_id){  
+    if(user?.company_id) {  
       company = await this.companyService.findOne(user?.company_id);
       if (!company) {
         throw new BadRequestException('Company not found');
@@ -51,7 +50,11 @@ export class AgentRequestsService {
 
     // Calculate totals
     const workflowsTotal = selectedWorkflows.reduce((sum, workflow) => sum + workflow.price, 0);
-    const grandTotal = workflowsTotal + agent.pricing.installation_price + agent.pricing.subscription_price;
+    const workflowsInstallationTotal = selectedWorkflows.reduce((sum, workflow) => sum + workflow.installation_price, 0);
+    const baseInstallationPrice = agent.pricing.installation_price || 0;
+    const totalInstallationPrice = baseInstallationPrice + workflowsInstallationTotal;
+    const subscriptionPrice = agent.pricing.subscription_price || 0;
+    const grandTotal = workflowsTotal + totalInstallationPrice + subscriptionPrice;
 
     // Create agent request with cloned data
     const agentRequest = new this.agentRequestModel({
@@ -61,17 +64,21 @@ export class AgentRequestsService {
       display_description: agent.display_description,
       request_time_frame: agent.request_time_frame,
       image: agent.image,
-      service_type:agent?.service_type,
+      service_type: agent?.service_type,
       agent_assistant_id: agent.assistant_id,
       company_id: company?._id || null,
       company_owner_id: company?.created_by || null,
       status: AgentRequestStatus.SUBMITTED,
-      pricing: agent.pricing,
+      pricing: {
+        installation_price: totalInstallationPrice,
+        subscription_price: subscriptionPrice
+      },
       work_flows: selectedWorkflows,
       invoice: {
         workflows_total: workflowsTotal,
-        installation_price: agent.pricing.installation_price,
-        subscription_price: workflowsTotal,
+        workflows_installation_total: workflowsInstallationTotal,
+        installation_price: totalInstallationPrice,
+        subscription_price: subscriptionPrice,
         grand_total: grandTotal
       },
       created_by: user.userId,

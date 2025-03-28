@@ -9,6 +9,8 @@ interface IWorkflowRequest {
   title: string;
   description: string;
   price: number;
+  weeks: number;
+  installation_price: number;
   integrations: {
     _id: Schema.Types.ObjectId;
     title: string;
@@ -16,12 +18,13 @@ interface IWorkflowRequest {
 }
 
 interface IPricing {
-  installation_price: number;
-
+  installation_price?: number;
+  subscription_price?: number;
 }
 
 interface IInvoice {
   workflows_total: number;
+  workflows_installation_total: number;
   installation_price: number;
   subscription_price: number;
   grand_total: number;
@@ -63,12 +66,18 @@ const WorkflowRequestSchema = new Schema<IWorkflowRequest>({
     type: String,
     required: true
   },
-
   price: {
     type: Number,
     required: true
   },
-
+  weeks: {
+    type: Number,
+    required: true
+  },
+  installation_price: {
+    type: Number,
+    required: true
+  },
   integrations: [{
     _id: {
       type: Schema.Types.ObjectId,
@@ -83,6 +92,10 @@ const WorkflowRequestSchema = new Schema<IWorkflowRequest>({
 
 const InvoiceSchema = new Schema<IInvoice>({
   workflows_total: {
+    type: Number,
+    required: true
+  },
+  workflows_installation_total: {
     type: Number,
     required: true
   },
@@ -161,11 +174,11 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
     pricing: {
       installation_price: {
         type: Number,
-        required: true
+        required: false
       },
       subscription_price: {
         type: Number,
-        required: true
+        required: false
       }
     },
     work_flows: [WorkflowRequestSchema],
