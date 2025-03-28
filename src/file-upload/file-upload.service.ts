@@ -13,7 +13,7 @@ export class FileUploadService {
             accessKeyId: this.configService.get('s3AccessKeyId.s3AccessKeyId'),
             secretAccessKey: this.configService.get('s3SecretAccessKey.s3SecretAccessKey'),
             region: this.configService.get('s3Region.s3Region')
-            //keys
+    
           });
         this.s3 = new AWS.S3();
     }
