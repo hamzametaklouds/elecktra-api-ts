@@ -21,10 +21,14 @@ export class AgentsService {
     return await agent.save();
   }
 
-  async getPaginatedAgents(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId }) {
+  async getPaginatedAgents(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
     filter['is_deleted'] = false;
     if (!filter['status']) {
       filter['status'] = { $ne: AgentStatus.TERMINATED };
+    }
+
+    if(user?.company_id){
+      filter['is_disabled'] = false;
     }
 
     const skip: number = (page - 1) * rpp;
@@ -60,11 +64,17 @@ export class AgentsService {
     };
   }
 
-  async getFilteredAgents(filter: Object, orderBy, user: { userId?: ObjectId }) {
+  async getFilteredAgents(filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
     filter['is_deleted'] = false;
     if (!filter['status']) {
       filter['status'] = { $ne: AgentStatus.TERMINATED };
     }
+
+
+    if(user?.company_id){
+      filter['is_disabled'] = false;
+    }
+
 
     return await this.agentModel
       .find(filter)
