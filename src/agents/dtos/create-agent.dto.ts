@@ -71,9 +71,6 @@ export class CreateAgentDto {
   @IsOptional()
   assistant_id: string;
 
-  @ApiProperty()
-  @IsString()
-  request_time_frame: string;
 
   @ApiProperty()
   @IsString()

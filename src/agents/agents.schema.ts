@@ -29,7 +29,6 @@ export interface IAgent {
   title: string;
   description: string;
   display_description: string;
-  request_time_frame: string;
   service_type: string;
   assistant_id: string;
   image: string;
@@ -91,10 +90,7 @@ export const AgentSchema = new Schema<IAgent>(
       type: String,
       required: true
     },
-    request_time_frame: {
-      type: String,
-      required: true
-    },
+   
     image: {
       type: String,
       required: false,

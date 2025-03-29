@@ -62,7 +62,6 @@ export class AgentRequestsService {
       title: agent.title,
       description: agent.description,
       display_description: agent.display_description,
-      request_time_frame: agent.request_time_frame,
       image: agent.image,
       service_type: agent?.service_type,
       agent_assistant_id: agent.assistant_id,

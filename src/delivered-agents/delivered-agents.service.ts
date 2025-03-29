@@ -38,7 +38,6 @@ export class DeliveredAgentsService {
       title: agentRequest.title,
       description: agentRequest.description,
       display_description: agentRequest.display_description,
-      request_time_frame: agentRequest.request_time_frame,
       image: agentRequest.image,
       company_id: agentRequest.company_id,
       company_owner_id: agentRequest.company_owner_id,

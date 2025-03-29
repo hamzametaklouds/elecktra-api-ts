@@ -36,7 +36,6 @@ export interface IAgentRequest {
   title: string;
   description: string;
   display_description: string;
-  request_time_frame: string;
   service_type?: string;
   delivery_date?: Date;
   image: string;
@@ -152,10 +151,7 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
       type: String,
       required: true
     },
-    request_time_frame: {
-      type: String,
-      required: true
-    },
+
     delivery_date: {
       type: Date,
       required: false
