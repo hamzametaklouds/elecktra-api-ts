@@ -7,7 +7,8 @@ import { DELIVERED_AGENTS_COLLECTION } from './delivered-agents.constants';
 export enum MaintenanceStatus {
   ACTIVE = 'Active',
   MAINTENANCE = 'Under Maintenance',
-  TERMINATED = 'Terminated'
+  TERMINATED = 'Terminated',
+  SUBSCRIPTION_CANCELLED = 'Subscription Cancelled'
 }
 
 interface IWorkflow {

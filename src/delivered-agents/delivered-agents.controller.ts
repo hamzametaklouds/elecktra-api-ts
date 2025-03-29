@@ -81,4 +81,25 @@ export class DeliveredAgentsController {
       data: deliveredAgent
     };
   }
+
+  @Put(':id/cancel-subscription')
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER, Role.SUPPORT_ADMIN)
+  async cancelSubscription(
+    @Param('id') id: string,
+    @Req() req: Request
+  ) {
+    const deliveredAgent = await this.deliveredAgentsService.updateMaintenanceStatus(
+      id,
+      MaintenanceStatus.SUBSCRIPTION_CANCELLED,
+      req.user
+    );
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Subscription cancelled successfully',
+      data: deliveredAgent
+    };
+  }
 } 
