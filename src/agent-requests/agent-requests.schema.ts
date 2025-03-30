@@ -28,6 +28,7 @@ interface IInvoice {
   installation_price: number;
   subscription_price: number;
   grand_total: number;
+  request_time_frame: number;
 }
 
 export interface IAgentRequest {
@@ -50,6 +51,7 @@ export interface IAgentRequest {
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
   is_deleted?: boolean;
+  request_time_frame: number;
 }
 
 const WorkflowRequestSchema = new Schema<IWorkflowRequest>({
@@ -107,6 +109,10 @@ const InvoiceSchema = new Schema<IInvoice>({
     required: true
   },
   grand_total: {
+    type: Number,
+    required: true
+  },
+  request_time_frame: {
     type: Number,
     required: true
   }
@@ -198,6 +204,11 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
       type: Boolean,
       required: false,
       default: false
+    },
+    request_time_frame: {
+      type: Number,
+      required: true,
+      default: 0
     }
   },
   {

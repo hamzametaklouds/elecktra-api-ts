@@ -55,6 +55,9 @@ export class AgentRequestsService {
     const totalInstallationPrice = baseInstallationPrice + workflowsInstallationTotal;
     const subscriptionPrice = agent.pricing.subscription_price || 0;
     const grandTotal = workflowsTotal + totalInstallationPrice + subscriptionPrice;
+    
+    // Calculate request time frame
+    const requestTimeFrame = selectedWorkflows.reduce((sum, workflow) => sum + workflow.weeks, 0);
 
     // Create agent request with cloned data
     const agentRequest = new this.agentRequestModel({
@@ -68,6 +71,7 @@ export class AgentRequestsService {
       company_id: company?._id || null,
       company_owner_id: company?.created_by || null,
       status: AgentRequestStatus.SUBMITTED,
+      request_time_frame: requestTimeFrame,
       pricing: {
         installation_price: totalInstallationPrice,
         subscription_price: subscriptionPrice
@@ -78,7 +82,8 @@ export class AgentRequestsService {
         workflows_installation_total: workflowsInstallationTotal,
         installation_price: totalInstallationPrice,
         subscription_price: subscriptionPrice,
-        grand_total: grandTotal
+        grand_total: grandTotal,
+        request_time_frame: requestTimeFrame
       },
       created_by: user.userId,
     });

@@ -37,6 +37,7 @@ interface IInvoice {
   installation_price: number;
   subscription_price: number;
   grand_total: number;
+  request_time_frame: number;
 }
 
 export interface IDeliveredAgent {
@@ -55,6 +56,7 @@ export interface IDeliveredAgent {
   pricing: IPricing;
   work_flows: IWorkflow[];
   invoice: IInvoice;
+  request_time_frame: number;
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
@@ -81,7 +83,8 @@ const InvoiceSchema = new Schema({
   workflows_installation_total: Number,
   installation_price: Number,
   subscription_price: Number,
-  grand_total: Number
+  grand_total: Number,
+  request_time_frame: Number
 });
 
 export const DeliveredAgentSchema = new Schema<IDeliveredAgent>({
@@ -150,6 +153,11 @@ export const DeliveredAgentSchema = new Schema<IDeliveredAgent>({
   },
   work_flows: [WorkflowSchema],
   invoice: InvoiceSchema,
+  request_time_frame: {
+    type: Number,
+    required: true,
+    default: 0
+  },
   created_by: {
     type: Schema.Types.ObjectId,
     ref: USERS_COLLECTION,

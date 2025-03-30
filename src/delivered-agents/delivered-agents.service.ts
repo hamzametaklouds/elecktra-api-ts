@@ -32,6 +32,9 @@ export class DeliveredAgentsService {
       0
     );
 
+    // Calculate request time frame
+    const requestTimeFrame = agentRequest.work_flows.reduce((sum, workflow) => sum + workflow.weeks, 0);
+
     const deliveredAgent = new this.deliveredAgentModel({
       agent_request_id: agentRequest._id,
       agent_id: agentRequest.agent_id,
@@ -52,12 +55,14 @@ export class DeliveredAgentsService {
         weeks: workflow.weeks,
         installation_price: workflow.installation_price
       })),
+      request_time_frame: requestTimeFrame,
       invoice: {
         workflows_total: workflowsTotal,
         workflows_installation_total: workflowsInstallationTotal,
         installation_price: agentRequest.invoice.installation_price,
         subscription_price: agentRequest.invoice.subscription_price,
-        grand_total: agentRequest.invoice.grand_total
+        grand_total: agentRequest.invoice.grand_total,
+        request_time_frame: requestTimeFrame
       },
       created_by: user.userId
     });
@@ -112,7 +117,7 @@ export class DeliveredAgentsService {
 
 
     return await this.deliveredAgentModel
-      .find(filter)
+      .find({...filter,maintenance_status:MaintenanceStatus.ACTIVE})
     
    
   }
