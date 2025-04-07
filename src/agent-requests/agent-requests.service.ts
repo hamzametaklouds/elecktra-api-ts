@@ -8,6 +8,7 @@ import { AgentsService } from 'src/agents/agents.service';
 import { AgentRequestStatus } from './agent-requests.constants';
 import { CompanyService } from 'src/company/company.service';
 import { DeliveredAgentsService } from 'src/delivered-agents/delivered-agents.service';
+import { isValidObjectId } from 'src/app/mongo.utils';
 
 @Injectable()
 export class AgentRequestsService {
@@ -103,16 +104,107 @@ export class AgentRequestsService {
     const totalPages: number = Math.ceil(totalDocuments / rpp);
     page = page > totalPages ? totalPages : page;
 
-    const requests = await this.agentRequestModel
-      .find(filter)
-      .populate('agent_id')
-      .populate('created_by', 'first_name last_name email image roles')
-      .populate('updated_by', 'first_name last_name email image roles')
-      .populate('company_id')
-      .populate('company_owner_id', 'first_name last_name email image roles')
-      .sort(orderBy)
-      .skip(skip)
-      .limit(rpp);
+    const requests = await this.agentRequestModel.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'agents',
+          localField: 'agent_id',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'integrations',
+                localField: 'work_flows.integrations',
+                foreignField: '_id',
+                as: 'allIntegrations'
+              }
+            },
+            {
+              $addFields: {
+                work_flows: {
+                  $map: {
+                    input: '$work_flows',
+                    as: 'workflow',
+                    in: {
+                      $mergeObjects: [
+                        '$$workflow',
+                        {
+                          integrations: {
+                            $filter: {
+                              input: '$allIntegrations',
+                              as: 'integration',
+                              cond: {
+                                $in: ['$$integration._id', '$$workflow.integrations']
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              $project: {
+                allIntegrations: 0
+              }
+            }
+          ],
+          as: 'agent_id'
+        }
+      },
+      { $unwind: { path: '$agent_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'created_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'created_by'
+        }
+      },
+      { $unwind: { path: '$created_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'updated_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'updated_by'
+        }
+      },
+      { $unwind: { path: '$updated_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company_id'
+        }
+      },
+      { $unwind: { path: '$company_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'company_owner_id',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'company_owner_id'
+        }
+      },
+      { $unwind: { path: '$company_owner_id', preserveNullAndEmptyArrays: true } },
+      { $sort: orderBy },
+      { $skip: skip },
+      { $limit: rpp }
+    ]);
 
     return { 
       pages: `Page ${page} of ${totalPages}`, 
@@ -130,28 +222,221 @@ export class AgentRequestsService {
       filter['company_id'] = user.company_id;
     }
 
-    return await this.agentRequestModel
-      .find(filter)
-      .populate('agent_id')
-      .populate('created_by', 'first_name last_name email image roles')
-      .populate('updated_by', 'first_name last_name email image roles')
-      .populate('company_id')
-      .populate('company_owner_id', 'first_name last_name email image roles')
-      .sort(orderBy);
+    return await this.agentRequestModel.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'agents',
+          localField: 'agent_id',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'integrations',
+                localField: 'work_flows.integrations',
+                foreignField: '_id',
+                as: 'allIntegrations'
+              }
+            },
+            {
+              $addFields: {
+                work_flows: {
+                  $map: {
+                    input: '$work_flows',
+                    as: 'workflow',
+                    in: {
+                      $mergeObjects: [
+                        '$$workflow',
+                        {
+                          integrations: {
+                            $filter: {
+                              input: '$allIntegrations',
+                              as: 'integration',
+                              cond: {
+                                $in: ['$$integration._id', '$$workflow.integrations']
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              $project: {
+                allIntegrations: 0
+              }
+            }
+          ],
+          as: 'agent_id'
+        }
+      },
+      { $unwind: { path: '$agent_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'created_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'created_by'
+        }
+      },
+      { $unwind: { path: '$created_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'updated_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'updated_by'
+        }
+      },
+      { $unwind: { path: '$updated_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company_id'
+        }
+      },
+      { $unwind: { path: '$company_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'company_owner_id',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'company_owner_id'
+        }
+      },
+      { $unwind: { path: '$company_owner_id', preserveNullAndEmptyArrays: true } },
+      { $sort: orderBy }
+    ]);
   }
 
   async findOne(id) {
-    const request = await this.agentRequestModel
-      .findOne({ _id: id, is_deleted: false })
-      .populate('agent_id')
-      .populate('created_by', 'first_name last_name email image roles')
-      .populate('updated_by', 'first_name last_name email image roles')
-      .populate('company_owner_id', 'first_name last_name email image roles')
-      .populate('company_id');
+
+    const requestId = await this.agentRequestModel.findOne({_id:id,is_deleted:false});
+    if(!requestId){
+      throw new NotFoundException('Agent request not found');
+    }
+    const [request] = await this.agentRequestModel.aggregate([
+      { 
+        $match: { 
+          _id: requestId._id, 
+          is_deleted: false 
+        } 
+      },
+      {
+        $lookup: {
+          from: 'agents',
+          localField: 'agent_id',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'integrations',
+                localField: 'work_flows.integrations',
+                foreignField: '_id',
+                as: 'allIntegrations'
+              }
+            },
+            {
+              $addFields: {
+                work_flows: {
+                  $map: {
+                    input: '$work_flows',
+                    as: 'workflow',
+                    in: {
+                      $mergeObjects: [
+                        '$$workflow',
+                        {
+                          integrations: {
+                            $filter: {
+                              input: '$allIntegrations',
+                              as: 'integration',
+                              cond: {
+                                $in: ['$$integration._id', '$$workflow.integrations']
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              $project: {
+                allIntegrations: 0
+              }
+            }
+          ],
+          as: 'agent_id'
+        }
+      },
+      { $unwind: { path: '$agent_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'created_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'created_by'
+        }
+      },
+      { $unwind: { path: '$created_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'updated_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'updated_by'
+        }
+      },
+      { $unwind: { path: '$updated_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'company_owner_id',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'company_owner_id'
+        }
+      },
+      { $unwind: { path: '$company_owner_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company_id'
+        }
+      },
+      { $unwind: { path: '$company_id', preserveNullAndEmptyArrays: true } }
+    ]);
 
     if (!request) {
       throw new NotFoundException('Agent request not found');
     }
+
     return request;
   }
 

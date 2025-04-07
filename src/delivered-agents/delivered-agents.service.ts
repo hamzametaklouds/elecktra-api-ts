@@ -5,6 +5,7 @@ import { DELIVERED_AGENTS_PROVIDER_TOKEN } from './delivered-agents.constants';
 import { AgentRequestsService } from 'src/agent-requests/agent-requests.service';
 import { AgentRequestStatus } from 'src/agent-requests/agent-requests.constants';
 import { IAgentRequest } from 'src/agent-requests/agent-requests.schema';
+import { matchFilters } from 'src/app/mongo.utils';
 
 @Injectable()
 export class DeliveredAgentsService {
@@ -77,26 +78,129 @@ export class DeliveredAgentsService {
     orderBy,
     user: { userId?: ObjectId, company_id?: ObjectId }
   ) {
+
+    const newFilter = matchFilters(filter);
     if (user?.company_id) {
-      filter['company_id'] = user.company_id;
+      newFilter['company_id'] = user.company_id;
     }
 
     const skip: number = (page - 1) * rpp;
-    const totalDocuments: number = await this.deliveredAgentModel.countDocuments(filter);
+    const totalDocuments: number = await this.deliveredAgentModel.countDocuments(newFilter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
     page = page > totalPages ? totalPages : page;
 
-    const deliveredAgents = await this.deliveredAgentModel
-      .find(filter)
-      .populate('agent_id')
-      .populate('company_id')
-      .populate('agent_request_id')
-      .populate('created_by', 'first_name last_name image roles')
-      .populate('updated_by', 'first_name last_name image roles')
-      .populate('company_owner_id', 'first_name last_name image roles')
-      .sort(orderBy)
-      .skip(skip)
-      .limit(rpp);
+    const deliveredAgents = await this.deliveredAgentModel.aggregate([
+      { $match: newFilter },
+      {
+        $lookup: {
+          from: 'agents',
+          localField: 'agent_id',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'integrations',
+                localField: 'work_flows.integrations',
+                foreignField: '_id',
+                as: 'allIntegrations'
+              }
+            },
+            {
+              $addFields: {
+                work_flows: {
+                  $map: {
+                    input: '$work_flows',
+                    as: 'workflow',
+                    in: {
+                      $mergeObjects: [
+                        '$$workflow',
+                        {
+                          integrations: {
+                            $filter: {
+                              input: '$allIntegrations',
+                              as: 'integration',
+                              cond: {
+                                $in: ['$$integration._id', '$$workflow.integrations']
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              $project: {
+                allIntegrations: 0
+              }
+            }
+          ],
+          as: 'agent_id'
+        }
+      },
+      { $unwind: { path: '$agent_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'created_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'created_by'
+        }
+      },
+      { $unwind: { path: '$created_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'updated_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'updated_by'
+        }
+      },
+      { $unwind: { path: '$updated_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company_id'
+        }
+      },
+      { $unwind: { path: '$company_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'company_owner_id',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'company_owner_id'
+        }
+      },
+      { $unwind: { path: '$company_owner_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'agent_requests',
+          localField: 'agent_request_id',
+          foreignField: '_id',
+          as: 'agent_request_id'
+        }
+      },
+      { $unwind: { path: '$agent_request_id', preserveNullAndEmptyArrays: true } },
+      { $sort: orderBy },
+      { $skip: skip },
+      { $limit: rpp }
+    ]);
+
+
 
     return {
       pages: `Page ${page} of ${totalPages}`,
@@ -127,42 +231,250 @@ export class DeliveredAgentsService {
     orderBy,
     user: { userId?: ObjectId, company_id?: ObjectId }
   ) {
+
+    const newFilter = matchFilters(filter);
     if (user?.company_id) {
-      filter['company_id'] = user.company_id;
+      newFilter['company_id'] = user.company_id;
     }
 
 
-    return await this.deliveredAgentModel
-      .find({...filter,maintenance_status:MaintenanceStatus.ACTIVE})
-      .populate('agent_id')
-      .populate('agent_request_id')
-      .populate('company_id')
-      .populate('created_by', 'first_name last_name image roles')
-      .populate('updated_by', 'first_name last_name image roles')
-      .populate('company_owner_id', 'first_name last_name image roles')
-      .sort(orderBy);
+    const deliveredAgents = await this.deliveredAgentModel.aggregate([
+      { $match: newFilter },
+      {
+        $lookup: {
+          from: 'agents',
+          localField: 'agent_id',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'integrations',
+                localField: 'work_flows.integrations',
+                foreignField: '_id',
+                as: 'allIntegrations'
+              }
+            },
+            {
+              $addFields: {
+                work_flows: {
+                  $map: {
+                    input: '$work_flows',
+                    as: 'workflow',
+                    in: {
+                      $mergeObjects: [
+                        '$$workflow',
+                        {
+                          integrations: {
+                            $filter: {
+                              input: '$allIntegrations',
+                              as: 'integration',
+                              cond: {
+                                $in: ['$$integration._id', '$$workflow.integrations']
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              $project: {
+                allIntegrations: 0
+              }
+            }
+          ],
+          as: 'agent_id'
+        }
+      },
+      { $unwind: { path: '$agent_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'created_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'created_by'
+        }
+      },
+      { $unwind: { path: '$created_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'updated_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'updated_by'
+        }
+      },
+      { $unwind: { path: '$updated_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company_id'
+        }
+      },
+      { $unwind: { path: '$company_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'company_owner_id',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'company_owner_id'
+        }
+      },
+      { $unwind: { path: '$company_owner_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'agent_requests',
+          localField: 'agent_request_id',
+          foreignField: '_id',
+          as: 'agent_request_id'
+        }
+      },
+      { $unwind: { path: '$agent_request_id', preserveNullAndEmptyArrays: true } },
+      { $sort: orderBy },
+    
+    ]);
+
+    return deliveredAgents;
+
   }
 
   async findOne(id: string, user: { company_id?: ObjectId }) {
-    const filter: any = { _id: id, is_deleted: false };
+
+    const deliveredAgent = await this.deliveredAgentModel.findOne({_id:id,is_deleted:false});
+    if(!deliveredAgent){
+      throw new NotFoundException('Delivered agent not found');
+    }
+
+    const filter: any = { _id: deliveredAgent._id, is_deleted: false };
     if (user.company_id) {
       filter.company_id = user.company_id;
     }
 
-    const deliveredAgent = await this.deliveredAgentModel
-      .findOne(filter)
-      .populate('agent_id')
-      .populate('agent_request_id')
-      .populate('company_id')
-      .populate('created_by', 'first_name last_name image roles')
-      .populate('updated_by', 'first_name last_name image roles')
-      .populate('company_owner_id', 'first_name last_name image roles');
+    const deliveredAgents = await this.deliveredAgentModel.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'agents',
+          localField: 'agent_id',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'integrations',
+                localField: 'work_flows.integrations',
+                foreignField: '_id',
+                as: 'allIntegrations'
+              }
+            },
+            {
+              $addFields: {
+                work_flows: {
+                  $map: {
+                    input: '$work_flows',
+                    as: 'workflow',
+                    in: {
+                      $mergeObjects: [
+                        '$$workflow',
+                        {
+                          integrations: {
+                            $filter: {
+                              input: '$allIntegrations',
+                              as: 'integration',
+                              cond: {
+                                $in: ['$$integration._id', '$$workflow.integrations']
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              $project: {
+                allIntegrations: 0
+              }
+            }
+          ],
+          as: 'agent_id'
+        }
+      },
+      { $unwind: { path: '$agent_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'created_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'created_by'
+        }
+      },
+      { $unwind: { path: '$created_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'updated_by',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'updated_by'
+        }
+      },
+      { $unwind: { path: '$updated_by', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company_id'
+        }
+      },
+      { $unwind: { path: '$company_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'company_owner_id',
+          foreignField: '_id',
+          pipeline: [
+            { $project: { first_name: 1, last_name: 1, email: 1, image: 1, roles: 1 } }
+          ],
+          as: 'company_owner_id'
+        }
+      },
+      { $unwind: { path: '$company_owner_id', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'agent_requests',
+          localField: 'agent_request_id',
+          foreignField: '_id',
+          as: 'agent_request_id'
+        }
+      },
+      { $unwind: { path: '$agent_request_id', preserveNullAndEmptyArrays: true } },
+      { $sort: {created_at: -1} },
+    
+    ]);
 
-    if (!deliveredAgent) {
-      throw new NotFoundException('Delivered agent not found');
-    }
-
-    return deliveredAgent;
+    return deliveredAgents[0];
   }
 
   async updateMaintenanceStatus(
