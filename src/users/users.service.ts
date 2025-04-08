@@ -66,6 +66,11 @@ export class UsersService {
       .findOne({ _id: id, is_deleted: false }).populate('company_id');
   }
 
+  async getUserByIdForAuth(id): Promise<IUsers> {
+    return await this.userModel
+      .findOne({ _id: id, is_deleted: false });
+  }
+
   async getUserData(user: { userId?: ObjectId }): Promise<IUsers> {
     return await this.userModel
       .findOne({ _id: user.userId, is_deleted: false })
