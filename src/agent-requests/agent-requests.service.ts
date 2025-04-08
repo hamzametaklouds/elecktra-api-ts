@@ -8,7 +8,7 @@ import { AgentsService } from 'src/agents/agents.service';
 import { AgentRequestStatus } from './agent-requests.constants';
 import { CompanyService } from 'src/company/company.service';
 import { DeliveredAgentsService } from 'src/delivered-agents/delivered-agents.service';
-import { isValidObjectId } from 'src/app/mongo.utils';
+import { isValidObjectId, matchFilters } from 'src/app/mongo.utils';
 
 @Injectable()
 export class AgentRequestsService {
@@ -99,13 +99,19 @@ export class AgentRequestsService {
       filter['company_id'] = user.company_id;
     }
 
+
+    const newFilter = matchFilters(filter);
+
+    console.log('newFilter', newFilter);
+
     const skip: number = (page - 1) * rpp;
-    const totalDocuments: number = await this.agentRequestModel.countDocuments(filter);
+    const totalDocuments: number = await this.agentRequestModel.countDocuments(newFilter);
     const totalPages: number = Math.ceil(totalDocuments / rpp);
     page = page > totalPages ? totalPages : page;
 
+
     const requests = await this.agentRequestModel.aggregate([
-      { $match: filter },
+      { $match: newFilter },
       {
         $lookup: {
           from: 'agents',
@@ -222,8 +228,12 @@ export class AgentRequestsService {
       filter['company_id'] = user.company_id;
     }
 
+    const newFilter = matchFilters(filter);
+
+    console.log('newFilter', ...newFilter);
+
     return await this.agentRequestModel.aggregate([
-      { $match: filter },
+      { $match: newFilter },
       {
         $lookup: {
           from: 'agents',
