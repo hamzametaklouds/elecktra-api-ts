@@ -32,7 +32,7 @@ export class CompanyService {
 
   async getCompanyById(id) {
     return await this.companyModel
-      .findOne({ _id: id, is_disabled: false,is_deleted: false });
+      .findOne({ _id: id,is_deleted: false });
   }
 
   async getCompanyByIdForLogin(id) {

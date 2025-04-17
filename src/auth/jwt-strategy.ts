@@ -30,6 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Restricted Access');
     }
 
+    console.log(userExists.company_id,userExists?.company)
     // Check if user has a company and if it's disabled
     if (userExists.company_id && userExists?.company?.is_disabled) {
       throw new UnauthorizedException('Restricted Access');
