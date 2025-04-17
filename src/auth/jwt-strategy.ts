@@ -26,6 +26,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid Token');
     }
 
+    if (userExists.is_disabled) {
+      throw new UnauthorizedException('Restricted Access');
+    }
+
     // Check if user has a company and if it's disabled
     if (userExists.company_id && userExists?.company?.is_disabled) {
       throw new UnauthorizedException('Restricted Access');
