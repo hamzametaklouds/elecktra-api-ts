@@ -66,9 +66,16 @@ export class UsersService {
       .findOne({ _id: id, is_deleted: false }).populate('company_id');
   }
 
-  async getUserByIdForAuth(id): Promise<IUsers> {
-    return await this.userModel
-      .findOne({ _id: id, is_deleted: false });
+  async getUserByIdForAuth(id) {
+    const user= await this.userModel
+      .findOne({ _id: id, is_deleted: false })
+
+      const company= await this.companyService.getCompanyById(user.company_id)
+
+      return {
+        ...user,
+        company: company
+      }
   }
 
   async getUserData(user: { userId?: ObjectId }): Promise<IUsers> {

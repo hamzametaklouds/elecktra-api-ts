@@ -18,22 +18,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-
     console.log(payload)
-
-  
+    
     const userExists = await this.userService.getUserByIdForAuth(payload.sub);
 
     if (!userExists) {
       throw new UnauthorizedException('Invalid Token');
     }
 
+    // Check if user has a company and if it's disabled
+    if (userExists.company_id && userExists?.company?.is_disabled) {
+      throw new UnauthorizedException('Restricted Access');
+    }
+
     return {
       userId: userExists._id,
       username: userExists.first_name,
       roles: userExists.roles,
-      company_id: userExists?.company_id ||null,
+      company_id: userExists?.company_id || null,
     };
   }
-
 }
