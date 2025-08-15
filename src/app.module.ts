@@ -16,6 +16,7 @@ import { AgentRequestsModule } from './agent-requests/agent-requests.module';
 import { ChatModule } from './chat/chat.module';
 import { DeliveredAgentsModule } from './delivered-agents/delivered-agents.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { FileUploadModule } from './file-upload/file-upload.module';
     ChatModule,
     DeliveredAgentsModule,
     FileUploadModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
