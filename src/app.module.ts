@@ -12,6 +12,7 @@ import { InvitationsModule } from './invitations/invitations.module';
 import { CompanyModule } from './company/company.module';
 import { AgentsModule } from './agents/agents.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { ToolsModule } from './tools/tools.module';
 import { AgentRequestsModule } from './agent-requests/agent-requests.module';
 import { ChatModule } from './chat/chat.module';
 import { DeliveredAgentsModule } from './delivered-agents/delivered-agents.module';
@@ -42,6 +43,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CompanyModule,
     AgentsModule,
     IntegrationsModule,
+    ToolsModule,
     AgentRequestsModule,
     AuthModule,
     ChatModule,

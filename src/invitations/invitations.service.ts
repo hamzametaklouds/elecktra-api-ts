@@ -204,11 +204,19 @@ export class InvitationsService {
 
     const invitations = await this.invitationModel
       .find(filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
+      .populate('agent_id', 'title')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp)
    
-    return { pages: `Page ${page} of ${totalPages}`, total: totalDocuments, data: invitations };
+    // Transform invitations to include agent info
+    const transformedInvitations = this.transformInvitationsWithAgentInfo(invitations);
+    
+    return { 
+      pages: `Page ${page} of ${totalPages}`, 
+      total: totalDocuments, 
+      data: transformedInvitations 
+    };
   }
 
   /**
@@ -244,9 +252,13 @@ export class InvitationsService {
     console.log('filter-----', $filter)
 
 
-    return await this.invitationModel
+    const invitations = await this.invitationModel
       .find($filter, { created_at: 0, updated_at: 0, __v: 0, is_deleted: 0, is_disabled: 0, created_by: 0, updated_by: 0 })
-      .sort($orderBy)
+      .populate('agent_id', 'title')
+      .sort($orderBy);
+    
+    // Transform invitations to include agent info
+    return this.transformInvitationsWithAgentInfo(invitations);
      
   }
 
@@ -524,6 +536,194 @@ export class InvitationsService {
     }
 
     return updatedInvitation;
+  }
+
+  /**
+   * Creates or reuses an existing invitation for agent assignment
+   * @param params Object containing email, role, agent_id, company_id, and invitee_name
+   * @returns Promise containing the created or reused invitation
+   */
+  async createOrReuseInvite(params: {
+    email: string;
+    role: string;
+    agent_id: string;
+    company_id?: string;
+    invitee_name?: string;
+    created_by?: string;
+  }): Promise<IInvitations> {
+    const { email, role, agent_id, company_id, invitee_name, created_by } = params;
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check for existing active invitation for same email and company
+    const existingInvitation = await this.invitationModel.findOne({
+      email: normalizedEmail,
+      company_id: company_id || null,
+      is_used: false,
+      invitation_status: { $in: [InvitationStatus.P, InvitationStatus.O] },
+      is_deleted: false
+    });
+
+    // If existing invitation is for the same agent, return it
+    if (existingInvitation && existingInvitation.agent_id?.toString() === agent_id) {
+      return existingInvitation;
+    }
+
+    // If existing invitation is for a different agent but same company/email, 
+    // create new invitation (allowing multiple agent invites per user)
+    // Generate unique invitation link ID
+    const generatedLinkId = uuidv4();
+
+    // Generate a JWT token with the `link_id`
+    const token = jwt.sign({ link_id: generatedLinkId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const invitationLink = `https://electra-seven-wine.vercel.app/signup?t=${token}`;
+
+    // Create new invitation
+    const invitation = await new this.invitationModel({
+      email: normalizedEmail,
+      invitee_name,
+      link_id: generatedLinkId,
+      token,
+      company_id: company_id || null,
+      agent_id,
+      role,
+      invitation_status: InvitationStatus.P,
+      is_forget_password: false,
+      created_by: created_by || null
+    }).save();
+
+    // Send invitation email
+    const emailSubject = `You're Invited to Join Electra Agent`;
+    const emailMessage = `
+      <html>
+          <body>
+              <h1>Welcome to Electra!</h1>
+              <p>You have been invited to join our platform for a specific agent. Click the link below to accept your invitation:</p>
+              <a href="${invitationLink}" style="color: blue; text-decoration: underline;">Accept Invitation</a>
+              <p>Thank you,<br>Electra Team</p>
+          </body>
+      </html>
+    `;
+
+    await this.sendEmail(normalizedEmail, emailSubject, emailMessage);
+
+    return invitation;
+  }
+
+  /**
+   * Updates invitation status when link is opened
+   * @param invitationId The invitation ID to update
+   * @returns Promise containing the updated invitation
+   */
+  async markInvitationOpened(invitationId: string): Promise<IInvitations> {
+    return await this.invitationModel.findByIdAndUpdate(
+      invitationId,
+      { 
+        invitation_status: InvitationStatus.O,
+        opened_at: new Date()
+      },
+      { new: true }
+    );
+  }
+
+  /**
+   * Updates invitation status when accepted
+   * @param invitationId The invitation ID to update
+   * @returns Promise containing the updated invitation
+   */
+  async markInvitationAccepted(invitationId: string): Promise<IInvitations> {
+    return await this.invitationModel.findByIdAndUpdate(
+      invitationId,
+      { 
+        invitation_status: InvitationStatus.A,
+        accepted_at: new Date(),
+        is_used: true
+      },
+      { new: true }
+    );
+  }
+
+  /**
+   * Updates invitation status when discarded
+   * @param invitationId The invitation ID to update
+   * @returns Promise containing the updated invitation
+   */
+  async markInvitationDiscarded(invitationId: string): Promise<IInvitations> {
+    return await this.invitationModel.findByIdAndUpdate(
+      invitationId,
+      { 
+        invitation_status: InvitationStatus.D,
+        discarded_at: new Date(),
+        is_deleted: true
+      },
+      { new: true }
+    );
+  }
+
+  /**
+   * Get invitations by agent ID
+   * @param agentId The agent ID
+   * @returns Promise containing array of invitations
+   */
+  async getInvitationsByAgentId(agentId: string): Promise<IInvitations[]> {
+    return await this.invitationModel
+      .find({ 
+        agent_id: agentId, 
+        is_deleted: false 
+      })
+      .populate('company_id', 'name')
+      .populate('agent_id', 'title')
+      .sort({ created_at: -1 });
+  }
+
+  /**
+   * Auto-expire old invitations (can be called by a cron job)
+   * @returns Promise containing the number of expired invitations
+   */
+  async expireOldInvitations(): Promise<number> {
+    const result = await this.invitationModel.updateMany(
+      {
+        expires_at: { $lt: new Date() },
+        invitation_status: InvitationStatus.P,
+        is_used: false,
+        is_deleted: false
+      },
+      {
+        invitation_status: InvitationStatus.D,
+        discarded_at: new Date(),
+        is_deleted: true
+      }
+    );
+
+    return result.modifiedCount;
+  }
+
+  /**
+   * Transform invitations to include agent information
+   * @param invitations Array of invitation documents
+   * @returns Transformed invitations with agent info
+   */
+  private transformInvitationsWithAgentInfo(invitations: any[]): any[] {
+    return invitations.map(invitation => {
+      const invitationObj = invitation.toObject ? invitation.toObject() : invitation;
+      
+      // Extract agent information
+      const assignedAgents = [];
+      let assignedAgentCount = 0;
+      
+      if (invitationObj.agent_id) {
+        assignedAgents.push({
+          _id: invitationObj.agent_id._id,
+          title: invitationObj.agent_id.title
+        });
+        assignedAgentCount = 1;
+      }
+      
+      return {
+        ...invitationObj,
+        assigned_agents: assignedAgents,
+        assigned_agent_count: assignedAgentCount
+      };
+    });
   }
 
 }

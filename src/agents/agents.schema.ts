@@ -1,14 +1,17 @@
 import { Schema } from 'mongoose';
 import { AGENTS_COLLECTION } from './agents.constants';
 import { INTEGRATIONS_COLLECTION } from 'src/integrations/integrations.constants';
+import { COMPANY_COLLECTION } from 'src/company/company.constants';
+import { USERS_COLLECTION } from 'src/users/users.constants';
 
 export enum AgentStatus {
-  ACTIVE = 'Active',
+  DRAFT = 'Draft',
+  ACTIVE = 'Active', 
   MAINTENANCE = 'Maintenance',
   TERMINATED = 'Terminated'
 }
 
-interface IWorkflow {
+export interface IWorkflow {
   _id?: Schema.Types.ObjectId;
   title: string;
   description: string;
@@ -19,7 +22,7 @@ interface IWorkflow {
   integrations: Schema.Types.ObjectId[];
 }
 
-interface IPricing {
+export interface IPricing {
   installation_price?: number;
   subscription_price?: number;
 }
@@ -35,6 +38,12 @@ export interface IAgent {
   status: AgentStatus;
   pricing: IPricing;
   work_flows: IWorkflow[];
+  company_id?: Schema.Types.ObjectId;
+  normalized_title: string;
+  tags: string[];
+  client_id?: Schema.Types.ObjectId;
+  tools_selected: Schema.Types.ObjectId[];
+  tools_count?: number;
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
   is_disabled?: boolean;
@@ -99,7 +108,7 @@ export const AgentSchema = new Schema<IAgent>(
     status: {
       type: String,
       enum: AgentStatus,
-      default: AgentStatus.ACTIVE,
+      default: AgentStatus.DRAFT,
       required: true
     },
     service_type: {
@@ -117,14 +126,53 @@ export const AgentSchema = new Schema<IAgent>(
       }
     },
     work_flows: [WorkflowSchema],
+    company_id: {
+      type: Schema.Types.ObjectId,
+      ref: COMPANY_COLLECTION,
+      required: false
+    },
+    normalized_title: {
+      type: String,
+      required: false
+    },
+    tags: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: function(v: string[]) {
+          return v.length <= 5;
+        },
+        message: 'Tags array cannot exceed 5 items'
+      }
+    },
+    client_id: {
+      type: Schema.Types.ObjectId,
+      ref: USERS_COLLECTION,
+      required: false
+    },
+    tools_selected: {
+      type: [Schema.Types.ObjectId],
+      ref: 'tools',
+      default: [],
+      validate: {
+        validator: function(v: Schema.Types.ObjectId[]) {
+          return v.length <= 24;
+        },
+        message: 'Tools selected cannot exceed 24 items'
+      }
+    },
+    tools_count: {
+      type: Number,
+      default: 0
+    },
     created_by: {
       type: Schema.Types.ObjectId,
-      ref: 'users',
+      ref: USERS_COLLECTION,
       required: false
     },
     updated_by: {
       type: Schema.Types.ObjectId,
-      ref: 'users',
+      ref: USERS_COLLECTION,
       required: false
     },
     is_disabled: {
@@ -146,6 +194,78 @@ export const AgentSchema = new Schema<IAgent>(
     collection: AGENTS_COLLECTION,
   }
 );
+
+// Indexes
+AgentSchema.index({ company_id: 1, normalized_title: 1 }, { 
+  unique: true, 
+  partialFilterExpression: { is_deleted: false } 
+});
+AgentSchema.index({ status: 1 });
+AgentSchema.index({ tags: 1 });
+AgentSchema.index({ created_at: -1 });
+AgentSchema.index({ tools_selected: 1 });
+AgentSchema.index({ 
+  title: 'text', 
+  description: 'text', 
+  display_description: 'text' 
+});
+
+// Pre-save hook to sanitize data
+AgentSchema.pre('save', function(next) {
+  // Always set normalized_title from title
+  this.normalized_title = (this.title || '').toLowerCase().trim();
+  
+  if (this.tags && this.tags.length > 0) {
+    // Dedupe, uppercase, and limit to 5
+    const uniqueTags = Array.from(new Set(
+      this.tags.map(tag => tag.toUpperCase().trim())
+    )).slice(0, 5);
+    this.tags = uniqueTags;
+  }
+  
+  if (this.tools_selected && this.tools_selected.length > 0) {
+    // Dedupe and limit to 24
+    const uniqueTools = Array.from(new Set(
+      this.tools_selected.map(tool => tool.toString())
+    )).slice(0, 24);
+    this.tools_selected = uniqueTools.map(id => new Schema.Types.ObjectId(id));
+    this.tools_count = this.tools_selected.length;
+  } else {
+    this.tools_count = 0;
+  }
+  
+  next();
+});
+
+AgentSchema.pre('findOneAndUpdate', function(next) {
+  const update = this.getUpdate() as any;
+  
+  // Always set normalized_title from title if title is being updated
+  if (update.title) {
+    update.normalized_title = update.title.toLowerCase().trim();
+  }
+  
+  if (update.tags && update.tags.length > 0) {
+    const uniqueTags = Array.from(new Set(
+      update.tags.map(tag => tag.toUpperCase().trim())
+    )).slice(0, 5);
+    update.tags = uniqueTags;
+  }
+  
+  if (update.tools_selected !== undefined) {
+    if (update.tools_selected.length > 0) {
+      const uniqueTools = Array.from(new Set(
+        update.tools_selected.map(tool => tool.toString())
+      )).slice(0, 24);
+      update.tools_selected = uniqueTools.map(id => new Schema.Types.ObjectId(id as string));
+      update.tools_count = update.tools_selected.length;
+    } else {
+      update.tools_count = 0;
+    }
+  }
+  
+  next();
+});
 
 AgentSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function () {
   this.lean();

@@ -1,0 +1,2 @@
+export const TOOLS_PROVIDER_TOKEN = 'TOOLS_PROVIDER_TOKEN';
+export const TOOLS_COLLECTION = 'tools';

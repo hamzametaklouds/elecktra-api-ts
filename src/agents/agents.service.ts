@@ -1,21 +1,33 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { IAgent, AgentStatus } from './agents.schema';
 import { AGENTS_PROVIDER_TOKEN } from './agents.constants';
 import { CreateAgentDto } from './dtos/create-agent.dto';
 import { UpdateAgentDto } from './dtos/update-agent.dto';
+import { UpdateAgentBasicDto } from './dtos/update-agent-basic.dto';
+import { UpdateAgentToolsDto } from './dtos/update-agent-tools.dto';
+import { UpdateAgentAssignmentDto } from './dtos/update-agent-assignment.dto';
+import { ToolsService } from '../tools/tools.service';
+import { InvitationsService } from '../invitations/invitations.service';
 
 @Injectable()
 export class AgentsService {
   constructor(
     @Inject(AGENTS_PROVIDER_TOKEN)
     private agentModel: Model<IAgent>,
+    private toolsService: ToolsService,
+    @Inject(forwardRef(() => InvitationsService))
+    private invitationsService: InvitationsService,
   ) {}
 
-  async create(createAgentDto: CreateAgentDto, user: { userId?: ObjectId }) {
+  async create(createAgentDto: CreateAgentDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    // Check title uniqueness within company
+    await this.checkTitleUniqueness(createAgentDto.title, user.company_id?.toString());
+
     const agent = new this.agentModel({
       ...createAgentDto,
-      status: AgentStatus.ACTIVE,
+      status: AgentStatus.DRAFT,
+      company_id: user.company_id,
       created_by: user.userId,
     });
     return await agent.save();
@@ -163,7 +175,7 @@ export class AgentsService {
       path: 'work_flows.integrations',
       select: '_id title api_key_required',
       match: { is_deleted: false }
-    })
+    }    )
     .populate({
       path: 'created_by',
       select: 'first_name last_name'
@@ -172,5 +184,295 @@ export class AgentsService {
       path: 'updated_by',
       select: 'first_name last_name'
     });
+  }
+
+  // Wizard Methods
+
+  /**
+   * Step 1: Update basic agent information
+   */
+  async updateAgentBasic(id: string, updateDto: UpdateAgentBasicDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    const agent = await this.findOne(id);
+    
+    // Check if user has access to this agent
+    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+      throw new BadRequestException('You do not have access to this agent');
+    }
+
+    // Check title uniqueness if title is being updated
+    if (updateDto.title && updateDto.title !== agent.title) {
+      await this.checkTitleUniqueness(updateDto.title, user.company_id?.toString(), id);
+    }
+
+    return await this.agentModel.findByIdAndUpdate(
+      id,
+      {
+        ...updateDto,
+        updated_by: user.userId,
+      },
+      { new: true }
+    )
+    .populate('company_id', 'name')
+    .populate('created_by', 'first_name last_name')
+    .populate('updated_by', 'first_name last_name');
+  }
+
+  /**
+   * Step 2: Update agent tools selection
+   */
+  async updateAgentTools(id: string, updateDto: UpdateAgentToolsDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    const agent = await this.findOne(id);
+    
+    // Check if user has access to this agent
+    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+      throw new BadRequestException('You do not have access to this agent');
+    }
+
+    // Validate that all tools exist and are enabled
+    const isValid = await this.toolsService.validateTools(updateDto.tools_selected);
+    if (!isValid) {
+      throw new BadRequestException('One or more selected tools are invalid or disabled');
+    }
+
+    const updatedAgent = await this.agentModel.findByIdAndUpdate(
+      id,
+      {
+        tools_selected: updateDto.tools_selected,
+        tools_count: updateDto.tools_selected.length,
+        updated_by: user.userId,
+      },
+      { new: true }
+    )
+    .populate('tools_selected', 'key title icon_url category')
+    .populate('company_id', 'name')
+    .populate('created_by', 'first_name last_name')
+    .populate('updated_by', 'first_name last_name');
+
+    return updatedAgent;
+  }
+
+  /**
+   * Step 3: Update agent assignment and send invitations
+   */
+  async updateAgentAssignment(id: string, updateDto: UpdateAgentAssignmentDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    const agent = await this.findOne(id);
+    
+    // Check if user has access to this agent
+    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+      throw new BadRequestException('You do not have access to this agent');
+    }
+
+    const updateData: any = {
+      updated_by: user.userId,
+    };
+
+    if (updateDto.client_id) {
+      updateData.client_id = updateDto.client_id;
+    }
+
+    // Update agent
+    const updatedAgent = await this.agentModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    )
+    .populate('client_id', 'first_name last_name email')
+    .populate('company_id', 'name')
+    .populate('created_by', 'first_name last_name')
+    .populate('updated_by', 'first_name last_name');
+
+    // Send invitations if provided
+    const invitations = [];
+    if (updateDto.invitees && updateDto.invitees.length > 0) {
+      for (const invitee of updateDto.invitees) {
+        try {
+          const invitation = await this.invitationsService.createOrReuseInvite({
+            email: invitee.email,
+            role: invitee.role,
+            agent_id: id,
+            company_id: user.company_id?.toString(),
+            invitee_name: invitee.name,
+            created_by: user.userId?.toString(),
+          });
+          
+          // Update invitation with created_by - will be handled in the invitations service
+
+          invitations.push(invitation);
+        } catch (error) {
+          console.error(`Failed to create invitation for ${invitee.email}:`, error);
+        }
+      }
+    }
+
+    return {
+      agent: updatedAgent,
+      invitations
+    };
+  }
+
+  /**
+   * Step 4: Integrate agent (finalize and activate)
+   */
+  async integrateAgent(id: string, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    const agent = await this.findOne(id);
+    
+    // Check if user has access to this agent
+    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+      throw new BadRequestException('You do not have access to this agent');
+    }
+
+    // Business rule validations
+    if (agent.status !== AgentStatus.DRAFT && agent.status !== AgentStatus.MAINTENANCE) {
+      throw new BadRequestException('Agent must be in Draft or Maintenance status to integrate');
+    }
+
+    if (!agent.tools_selected || agent.tools_selected.length === 0) {
+      throw new BadRequestException('Agent must have at least one tool selected to integrate');
+    }
+
+    // Update status to Active
+    const updatedAgent = await this.agentModel.findByIdAndUpdate(
+      id,
+      {
+        status: AgentStatus.ACTIVE,
+        updated_by: user.userId,
+      },
+      { new: true }
+    )
+    .populate('tools_selected', 'key title icon_url category')
+    .populate('client_id', 'first_name last_name email')
+    .populate('company_id', 'name')
+    .populate('created_by', 'first_name last_name')
+    .populate('updated_by', 'first_name last_name');
+
+    // Get related invitations
+    const invitations = await this.invitationsService.getInvitationsByAgentId(id);
+
+    return {
+      agent: updatedAgent,
+      invitations
+    };
+  }
+
+  /**
+   * Get detailed agent with tools and invitations
+   */
+  async getAgentDetails(id: string, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    const agent = await this.agentModel
+      .findOne({ _id: id, is_deleted: false })
+      .populate('tools_selected', 'key title icon_url category enabled')
+      .populate('client_id', 'first_name last_name email')
+      .populate('company_id', 'name')
+      .populate('created_by', 'first_name last_name')
+      .populate('updated_by', 'first_name last_name');
+
+    if (!agent) {
+      throw new NotFoundException('Agent not found');
+    }
+
+    // Check if user has access to this agent
+    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+      throw new BadRequestException('You do not have access to this agent');
+    }
+
+    // Get related invitations
+    const invitations = await this.invitationsService.getInvitationsByAgentId(id);
+
+    return {
+      ...agent.toObject(),
+      invitations
+    };
+  }
+
+  /**
+   * Enhanced search with filters for status, tags, tools
+   */
+  async searchAgents(params: {
+    q?: string;
+    status?: string[];
+    tags?: string[];
+    tools?: string[];
+    limit?: number;
+    cursor?: string;
+    user: { userId?: ObjectId, company_id?: ObjectId };
+  }) {
+    const { q, status, tags, tools, limit = 20, cursor, user } = params;
+    
+    const filter: any = { is_deleted: false };
+    
+    // Apply company filter for business users
+    if (user.company_id) {
+      filter.company_id = user.company_id;
+      filter.is_disabled = false;
+    }
+
+    // Text search
+    if (q) {
+      filter.$text = { $search: q };
+    }
+
+    // Status filter
+    if (status && status.length > 0) {
+      filter.status = { $in: status };
+    }
+
+    // Tags filter
+    if (tags && tags.length > 0) {
+      filter.tags = { $in: tags.map(tag => tag.toUpperCase()) };
+    }
+
+    // Tools filter
+    if (tools && tools.length > 0) {
+      filter.tools_selected = { $in: tools };
+    }
+
+    // Cursor pagination
+    if (cursor) {
+      filter._id = { $gt: cursor };
+    }
+
+    const agents = await this.agentModel
+      .find(filter)
+      .populate('tools_selected', 'key title icon_url category')
+      .populate('company_id', 'name')
+      .populate('created_by', 'first_name last_name')
+      .sort({ _id: 1 })
+      .limit(limit + 1); // Get one extra to check if there are more
+
+    const hasMore = agents.length > limit;
+    if (hasMore) {
+      agents.pop(); // Remove the extra item
+    }
+
+    const nextCursor = hasMore && agents.length > 0 ? agents[agents.length - 1]._id : null;
+
+    return {
+      data: agents,
+      hasMore,
+      nextCursor
+    };
+  }
+
+  /**
+   * Helper method to check title uniqueness within company
+   */
+  private async checkTitleUniqueness(title: string, companyId?: string, excludeId?: string) {
+    const filter: any = {
+      normalized_title: title.toLowerCase().trim(),
+      is_deleted: false,
+    };
+
+    if (companyId) {
+      filter.company_id = companyId;
+    }
+
+    if (excludeId) {
+      filter._id = { $ne: excludeId };
+    }
+
+    const existingAgent = await this.agentModel.findOne(filter);
+    if (existingAgent) {
+      throw new BadRequestException(`Agent with title '${title}' already exists in this workspace`);
+    }
   }
 } 

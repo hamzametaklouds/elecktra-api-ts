@@ -103,13 +103,16 @@ export class UsersService {
     const totalPages: number = Math.ceil(totalDocuments / rpp);
     page = page > totalPages ? totalPages : page;
 
-    const bandCategorySection = await this.userModel
+    const users = await this.userModel
       .find(filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp).populate('company_id');
 
-    return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: bandCategorySection };
+    // Transform users to include agent info
+    const transformedUsers = await this.transformUsersWithAgentInfo(users);
+
+    return { pages: `Page ${page} of ${totalPages}`, current_page: page, total_pages: totalPages, total_records: totalDocuments, data: transformedUsers };
   }
 
 
@@ -139,9 +142,12 @@ export class UsersService {
 
     console.log($filter)
 
-    return await this.userModel
+    const users = await this.userModel
       .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy).populate('company_id');
+
+    // Transform users to include agent info
+    return await this.transformUsersWithAgentInfo(users);
   }
 
 
@@ -574,6 +580,49 @@ export class UsersService {
       );
 
     return users;
+  }
+
+  /**
+   * Transform users to include assigned agent information
+   * @param users Array of user documents
+   * @returns Transformed users with agent info
+   */
+  private async transformUsersWithAgentInfo(users: any[]): Promise<any[]> {
+    // We need to create a simple MongoDB connection since we can't inject AgentsService due to circular dependency
+    const Connection = require('mongoose').connection;
+    
+    return Promise.all(users.map(async (user) => {
+      const userObj = user.toObject ? user.toObject() : user;
+      
+      try {
+        // Find agents where this user is assigned as client_id
+        const agents = await Connection.collection('agents').find({
+          client_id: userObj._id,
+          is_deleted: false
+        }, {
+          projection: { _id: 1, title: 1 }
+        }).toArray();
+        
+        const assignedAgents = agents.map(agent => ({
+          _id: agent._id,
+          title: agent.title
+        }));
+        
+        return {
+          ...userObj,
+          assigned_agents: assignedAgents,
+          assigned_agent_count: assignedAgents.length
+        };
+      } catch (error) {
+        // If there's an error, return user with empty agent data
+        console.error('Error fetching agents for user:', userObj._id, error);
+        return {
+          ...userObj,
+          assigned_agents: [],
+          assigned_agent_count: 0
+        };
+      }
+    }));
   }
 
 }
