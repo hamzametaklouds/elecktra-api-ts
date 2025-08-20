@@ -7,6 +7,7 @@ import { UpdateAgentDto } from './dtos/update-agent.dto';
 import { UpdateAgentBasicDto } from './dtos/update-agent-basic.dto';
 import { UpdateAgentToolsDto } from './dtos/update-agent-tools.dto';
 import { UpdateAgentAssignmentDto } from './dtos/update-agent-assignment.dto';
+import { CreateAgentWizardDto } from './dtos/create-agent-wizard.dto';
 import { ToolsService } from '../tools/tools.service';
 import { InvitationsService } from '../invitations/invitations.service';
 
@@ -351,6 +352,125 @@ export class AgentsService {
     return {
       agent: updatedAgent,
       invitations
+    };
+  }
+
+  /**
+   * Unified method: Create agent with complete wizard data in one step
+   */
+  async createAgentComplete(createDto: CreateAgentWizardDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    // Step 1: Create agent with basic information
+    const agentData: CreateAgentDto = {
+      title: createDto.title || 'New Agent',
+      description: createDto.description || 'Agent created via unified wizard',
+      display_description: createDto.display_description || 'Agent created via unified wizard',
+      service_type: createDto.service_type || 'general',
+      assistant_id: createDto.assistant_id,
+      image: createDto.image,
+      pricing: { installation_price: 0, subscription_price: 0 },
+      work_flows: []
+    };
+
+    // Check title uniqueness within company
+    await this.checkTitleUniqueness(agentData.title, user.company_id?.toString());
+
+    // Create the agent
+    const agent = new this.agentModel({
+      ...agentData,
+      status: AgentStatus.DRAFT,
+      company_id: user.company_id,
+      created_by: user.userId,
+      tags: createDto.tags,
+    });
+    
+    const savedAgent = await agent.save();
+
+    // Step 2: Update tools selection (required)
+    // Validate that all tools exist and are enabled
+    const isValid = await this.toolsService.validateTools(createDto.tools_selected);
+    if (!isValid) {
+      throw new BadRequestException('One or more selected tools are invalid or disabled');
+    }
+
+    // Update agent with tools
+    await this.agentModel.findByIdAndUpdate(
+      savedAgent._id,
+      {
+        tools_selected: createDto.tools_selected,
+        tools_count: createDto.tools_selected.length,
+        updated_by: user.userId,
+      }
+    );
+
+    // Step 3: Update assignment and send invitations (optional)
+    const updateData: any = {
+      updated_by: user.userId,
+    };
+
+    if (createDto.client_id) {
+      updateData.client_id = createDto.client_id;
+    }
+
+    // Update agent with assignment
+    await this.agentModel.findByIdAndUpdate(
+      savedAgent._id,
+      updateData
+    );
+
+    // Send invitations if provided
+    const invitations = [];
+    if (createDto.invitees && createDto.invitees.length > 0) {
+      for (const invitee of createDto.invitees) {
+        try {
+          const invitation = await this.invitationsService.createOrReuseInvite({
+            email: invitee.email,
+            role: invitee.role,
+            agent_id: savedAgent._id.toString(),
+            company_id: user.company_id?.toString(),
+            invitee_name: invitee.name,
+            created_by: user.userId?.toString(),
+          });
+          
+          invitations.push(invitation);
+        } catch (error) {
+          console.error(`Failed to create invitation for ${invitee.email}:`, error);
+        }
+      }
+    }
+
+    // Step 4: Integration (optional - controlled by auto_integrate flag)
+    let finalStatus = AgentStatus.DRAFT;
+    if (createDto.auto_integrate) {
+      // Business rule validations for integration
+      if (createDto.tools_selected && createDto.tools_selected.length > 0) {
+        finalStatus = AgentStatus.ACTIVE;
+        await this.agentModel.findByIdAndUpdate(
+          savedAgent._id,
+          {
+            status: AgentStatus.ACTIVE,
+            updated_by: user.userId,
+          }
+        );
+      } else {
+        throw new BadRequestException('Agent must have at least one tool selected to auto-integrate');
+      }
+    }
+
+    // Return final agent with all populated data
+    const finalAgent = await this.agentModel.findById(savedAgent._id)
+      .populate('tools_selected', 'key title icon_url category')
+      .populate('client_id', 'first_name last_name email')
+      .populate('company_id', 'name')
+      .populate('created_by', 'first_name last_name')
+      .populate('updated_by', 'first_name last_name');
+
+    return {
+      agent: finalAgent,
+      invitations,
+      status: finalStatus,
+      message: createDto.auto_integrate && finalStatus === AgentStatus.ACTIVE 
+        ? 'Agent created and integrated successfully' 
+        : 'Agent created successfully. Manual integration required to activate.'
     };
   }
 

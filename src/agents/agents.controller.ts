@@ -3,9 +3,8 @@ import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags, ApiOperation, ApiResponse } 
 import { AgentsService } from './agents.service';
 import { CreateAgentDto } from './dtos/create-agent.dto';
 import { UpdateAgentDto } from './dtos/update-agent.dto';
-import { UpdateAgentBasicDto } from './dtos/update-agent-basic.dto';
-import { UpdateAgentToolsDto } from './dtos/update-agent-tools.dto';
-import { UpdateAgentAssignmentDto } from './dtos/update-agent-assignment.dto';
+
+import { CreateAgentWizardDto } from './dtos/create-agent-wizard.dto';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { RolesGuard } from 'src/app/guards/role-guard';
 import { Roles } from 'src/app/dtos/roles-decorator';
@@ -38,129 +37,32 @@ export class AgentsController {
   }
 
 
-  @Post('create-wizard')
+
+
+  @Post('create-complete')
   @ApiBearerAuth(AuthorizationHeader)
   @UseGuards(JWTAuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.SUPPORT_ADMIN)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Step 1: Create agent with basic information (wizard start)' })
-  @ApiResponse({ status: 201, description: 'Agent created successfully with wizard data' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiOperation({ summary: 'Create agent with complete wizard data in one step' })
+  @ApiResponse({ status: 201, description: 'Agent created successfully with all wizard steps' })
+  @ApiResponse({ status: 400, description: 'Bad Request - Validation failed or tools invalid' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBody({ type: UpdateAgentBasicDto })
-  async createAgentWizard(
-    @Body() createDto: UpdateAgentBasicDto,
+  @ApiBody({ type: CreateAgentWizardDto })
+  async createAgentComplete(
+    @Body() createDto: CreateAgentWizardDto,
     @Req() req: Request,
   ) {
-    // Create agent with the basic info provided
-    const agentData: CreateAgentDto = {
-      title: createDto.title || 'New Agent',
-      description: createDto.description || 'Agent created via wizard',
-      display_description: createDto.display_description || 'Agent created via wizard',
-      service_type: createDto.service_type || 'general',
-      assistant_id: createDto.assistant_id,
-      image: createDto.image,
-      pricing: { installation_price: 0, subscription_price: 0 },
-      work_flows: []
-    };
-
-    const result = await this.agentsService.create(agentData, req.user);
+    const result = await this.agentsService.createAgentComplete(createDto, req.user);
     return {
       status: true,
       statusCode: 201,
-      message: 'Agent created successfully. Proceed to select tools.',
-      data: result
-    };
-  }
-
-  @Put(':id/basic')
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.SUPPORT_ADMIN)
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Update agent basic information (optional edit)' })
-  @ApiResponse({ status: 200, description: 'Agent basic info updated successfully' })
-  @ApiResponse({ status: 404, description: 'Agent not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBody({ type: UpdateAgentBasicDto })
-  async updateAgentBasic(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateAgentBasicDto,
-    @Req() req: Request,
-  ) {
-    const result = await this.agentsService.updateAgentBasic(id, updateDto, req.user);
-    return {
-      status: true,
-      statusCode: 200,
-      message: 'Agent basic information updated successfully',
-      data: result
-    };
-  }
-
-  @Put(':id/tools')
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.SUPPORT_ADMIN)
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Step 2: Select tools for the agent (required)' })
-  @ApiResponse({ status: 200, description: 'Agent tools updated successfully' })
-  @ApiResponse({ status: 404, description: 'Agent not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBody({ type: UpdateAgentToolsDto })
-  async updateAgentTools(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateAgentToolsDto,
-    @Req() req: Request,
-  ) {
-    const result = await this.agentsService.updateAgentTools(id, updateDto, req.user);
-    return {
-      status: true,
-      statusCode: 200,
-      message: 'Agent tools updated successfully',
-      data: result
-    };
-  }
-
-  @Put(':id/assignment')
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.SUPPORT_ADMIN)
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Step 3: Assign client and send invitations (optional)' })
-  @ApiResponse({ status: 200, description: 'Agent assignment updated and invitations sent' })
-  @ApiResponse({ status: 404, description: 'Agent not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBody({ type: UpdateAgentAssignmentDto })
-  async updateAgentAssignment(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateAgentAssignmentDto,
-    @Req() req: Request,
-  ) {
-    const result = await this.agentsService.updateAgentAssignment(id, updateDto, req.user);
-    return {
-      status: true,
-      statusCode: 200,
-      message: 'Agent assignment updated and invitations sent successfully',
-      data: result
-    };
-  }
-
-  @Post(':id/integrate')
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.SUPPORT_ADMIN)
-  @ApiOperation({ summary: 'Step 4: Integrate agent - finalize and activate (required)' })
-  @ApiResponse({ status: 200, description: 'Agent integrated successfully' })
-  @ApiResponse({ status: 404, description: 'Agent not found' })
-  @ApiResponse({ status: 400, description: 'Agent validation failed' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async integrateAgent(@Param('id') id: string, @Req() req: Request) {
-    const result = await this.agentsService.integrateAgent(id, req.user);
-    return {
-      status: true,
-      statusCode: 200,
-      message: 'Agent integrated successfully',
-      data: result
+      message: result.message,
+      data: {
+        agent: result.agent,
+        invitations: result.invitations,
+        status: result.status
+      }
     };
   }
 
