@@ -14,7 +14,11 @@ import { OAuth2Client } from 'google-auth-library';
 import { CompanyService } from 'src/company/company.service';
 import { ObjectId } from 'mongoose';
 
-const client = new OAuth2Client();
+const client = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
 
 
 @Injectable()
@@ -395,6 +399,102 @@ export class AuthService {
     // Update password
     await this.usersService.updateUserPassword(userData._id, body.newPassword);
     return { success: true };
+  }
+
+  async getGoogleAuthUrl(successRedirectUrl: string): Promise<string> {
+    // Store the success redirect URL in the state parameter
+    const state = Buffer.from(JSON.stringify({ successRedirectUrl })).toString('base64');
+
+    const url = client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email',
+      ],
+      state: state,
+      prompt: 'consent'
+    });
+
+    return url;
+  }
+
+  async handleGoogleCallback(code: string, state: string): Promise<any> {
+    try {
+      // Get the success redirect URL from state
+      const stateData = JSON.parse(Buffer.from(state, 'base64').toString());
+      const { successRedirectUrl } = stateData;
+
+      // Exchange code for tokens
+      const { tokens } = await client.getToken(code);
+      const ticket = await client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: process.env.GOOGLE_CLIENT_ID
+      });
+
+      const payload = ticket.getPayload();
+      
+      // Check if user exists
+      let user = await this.usersService.getUserByEmail(payload.email);
+
+      // If user doesn't exist, create new user
+      if (!user) {
+        user = await this.usersService.createGoogleUser({
+          first_name: payload.given_name || payload.name?.split(' ')[0] || '',
+          last_name: payload.family_name || (payload.name?.split(' ').slice(1).join(' ') || ''),
+          email: payload.email,
+          uuid: payload.sub,
+          image: payload.picture || '',
+        });
+      }
+
+      // Check if user is disabled
+      if (user.is_disabled) {
+        throw new ForbiddenException('Your account has been temporarily blocked. Please contact support.');
+      }
+
+      // Check company status if user has a company
+      if (user?.company_id) {
+        const company = await this.companyService.getCompanyByIdForLogin(user.company_id);
+        
+        if (!company) {
+          throw new BadRequestException('Your associated company no longer exists. Please contact support for assistance.');
+        }
+
+        if (company.is_disabled) {
+          throw new ForbiddenException('Your company account has been temporarily suspended. Please contact our support team to resolve this issue.');
+        }
+
+        if (company.is_deleted) {
+          throw new BadRequestException('Your company account has been deactivated. Please contact our support team for more information.');
+        }
+
+        user['company'] = {
+          id: company._id,
+          name: company.name
+        };
+      }
+
+      // Generate JWT token
+      const access_token = this.jwtService.sign({ 
+        userName: user.first_name, 
+        sub: user._id 
+      });
+
+      // Remove sensitive data
+      const { password: _, ...userWithoutPassword } = user;
+
+      // Return success URL with token
+      const redirectUrl = new URL(successRedirectUrl);
+      redirectUrl.searchParams.append('token', access_token);
+      redirectUrl.searchParams.append('user', JSON.stringify(userWithoutPassword));
+
+      return {
+        redirectUrl: redirectUrl.toString()
+      };
+    } catch (error) {
+      console.error('Google callback error:', error);
+      throw new BadRequestException('Failed to authenticate with Google');
+    }
   }
 
 }

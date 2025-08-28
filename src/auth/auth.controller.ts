@@ -1,9 +1,10 @@
-import { Body, Controller, Post, UnauthorizedException, UseFilters, UsePipes, ValidationPipe, Get, Param, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, UnauthorizedException, UseFilters, UsePipes, ValidationPipe, Get, Param, Request, UseGuards, Query, Res } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { HttpExceptionFilter } from 'src/app/filters/http-exception.filter';
 import { AuthService } from './auth.service';
 import { SignUpUserDto } from './dtos/sign-up.dto';
 import { GoogleLoginDto } from './dtos/google-log-in.dto';
+import { GoogleOAuthInitDto } from './dtos/google-oauth-init.dto';
 import { LoginDto } from './dtos/log-in.dto';
 import { AdminLoginDto } from './dtos/admin-log-in.dto';
 import { AppleLoginDto } from './dtos/apple-log-in';
@@ -16,6 +17,7 @@ import { JWTAuthGuard } from './guards/jwt-auth-guard';
 import { RolesGuard } from 'src/app/guards/role-guard';
 import { Roles } from 'src/app/dtos/roles-decorator';
 import { Role } from 'src/roles/roles.schema';
+import { Response } from 'express';
 
 
 UseFilters(HttpExceptionFilter);
@@ -65,6 +67,30 @@ export class AuthController {
     async googleLogin(@Body() body: GoogleLoginDto) {
         const createAuth = await this.authService.googleLoginUser(body);
         return createAuth;
+    }
+
+    @Post('google/init')
+    @ApiBody({ type: GoogleOAuthInitDto })
+    async initiateGoogleAuth(@Body() body: GoogleOAuthInitDto) {
+        const authUrl = await this.authService.getGoogleAuthUrl(body.successRedirectUrl);
+        return {
+            status: true,
+            statusCode: 200,
+            message: 'Google OAuth URL generated successfully',
+            data: { authUrl }
+        };
+    }
+
+    @Get('google/callback')
+    @ApiQuery({ name: 'code', required: true })
+    @ApiQuery({ name: 'state', required: true })
+    async handleGoogleCallback(
+        @Query('code') code: string,
+        @Query('state') state: string,
+        @Res() res: Response
+    ) {
+        const { redirectUrl } = await this.authService.handleGoogleCallback(code, state);
+        return res.redirect(redirectUrl);
     }
 
     /**
