@@ -23,8 +23,9 @@ export class WebSocketAdapter extends IoAdapter {
     const optionsWithCORS: ServerOptions = {
       ...options,
       cors: {
-        origin: '*',
-        methods: ['GET', 'POST', 'OPTIONS'],
+        origin: true, // Allow all origins
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
         credentials: true,
       },
       transports: ['websocket', 'polling'],

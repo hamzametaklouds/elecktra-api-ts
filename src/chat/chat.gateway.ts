@@ -15,7 +15,9 @@ import { CreateMessageDto } from './dtos/create-message.dto';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: true, // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     credentials: true,
   },
   transports: ['websocket', 'polling'],
