@@ -19,6 +19,7 @@ import { ChatModule } from './chat/chat.module';
 import { DeliveredAgentsModule } from './delivered-agents/delivered-agents.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationSettingsModule } from './notification-settings/notification-settings.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { TagsModule } from './tags/tags.module';
 
@@ -54,6 +55,7 @@ import { TagsModule } from './tags/tags.module';
     DeliveredAgentsModule,
     FileUploadModule,
     NotificationsModule,
+    NotificationSettingsModule,
     DashboardModule,
     TagsModule,
   ],

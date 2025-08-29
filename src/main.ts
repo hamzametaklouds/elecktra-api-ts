@@ -28,7 +28,7 @@ async function bootstrap() {
   logger.log('Configuring CORS...');
   app.enableCors({
     origin: true, // Allow all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PUT', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     credentials: true,
     preflightContinue: false,

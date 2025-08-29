@@ -66,6 +66,35 @@ export class AgentsController {
     };
   }
 
+  @Put(':id/update-complete')
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.SUPPORT_ADMIN)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiOperation({ summary: 'Update agent with complete wizard data in one step' })
+  @ApiResponse({ status: 200, description: 'Agent updated successfully with all wizard steps' })
+  @ApiResponse({ status: 400, description: 'Bad Request - Validation failed or tools invalid' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Agent not found' })
+  @ApiBody({ type: CreateAgentWizardDto })
+  async updateAgentComplete(
+    @Param('id') id: string,
+    @Body() updateDto: CreateAgentWizardDto,
+    @Req() req: Request,
+  ) {
+    const result = await this.agentsService.updateAgentComplete(id, updateDto, req.user);
+    return {
+      status: true,
+      statusCode: 200,
+      message: result.message,
+      data: {
+        agent: result.agent,
+        invitations: result.invitations,
+        status: result.status
+      }
+    };
+  }
+
   // @Get('search')
   // @ApiBearerAuth(AuthorizationHeader)
   // @UseGuards(JWTAuthGuard, RolesGuard)

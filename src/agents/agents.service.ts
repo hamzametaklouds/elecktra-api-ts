@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, forwardRef } from '@nestjs/common';
-import { Model, ObjectId } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { IAgent, AgentStatus } from './agents.schema';
 import { AGENTS_PROVIDER_TOKEN } from './agents.constants';
 import { CreateAgentDto } from './dtos/create-agent.dto';
@@ -273,19 +273,21 @@ export class AgentsService {
       throw new BadRequestException('One or more selected tools are invalid or disabled');
     }
 
+    // Convert strings to ObjectIds manually
+    const toolsObjectIds = updateDto.tools_selected.map(id => new Types.ObjectId(id));
     const updatedAgent = await this.agentModel.findByIdAndUpdate(
       id,
       {
-        tools_selected: updateDto.tools_selected,
+        tools_selected: toolsObjectIds,
         tools_count: updateDto.tools_selected.length,
         updated_by: user.userId,
       },
       { new: true }
     )
-    .populate('tools_selected', 'key title icon_url category')
-    .populate('company_id', 'name')
-    .populate('created_by', 'first_name last_name')
-    .populate('updated_by', 'first_name last_name');
+      .populate('tools_selected', 'key title icon_url category')
+      .populate('company_id', 'name')
+      .populate('created_by', 'first_name last_name')
+      .populate('updated_by', 'first_name last_name');
 
     return updatedAgent;
   }
@@ -411,9 +413,7 @@ export class AgentsService {
       work_flows: []
     };
 
-    // Check title uniqueness within company
-    await this.checkTitleUniqueness(agentData.title, user.company_id?.toString());
-
+ 
     // Process tags if provided
     let processedTags: ObjectId[] = [];
     if (createDto.tags && createDto.tags.length > 0) {
@@ -438,11 +438,12 @@ export class AgentsService {
       throw new BadRequestException('One or more selected tools are invalid or disabled');
     }
 
-    // Update agent with tools
+    // Update agent with tools - convert strings to ObjectIds manually
+    const toolsObjectIds = createDto.tools_selected.map(id => new Types.ObjectId(id));
     await this.agentModel.findByIdAndUpdate(
       savedAgent._id,
       {
-        tools_selected: createDto.tools_selected,
+        tools_selected: toolsObjectIds,
         tools_count: createDto.tools_selected.length,
         updated_by: user.userId,
       }
@@ -506,7 +507,7 @@ export class AgentsService {
 
     // Return final agent with all populated data
     const finalAgent = await this.agentModel.findById(savedAgent._id)
-      .populate('tools_selected', 'key title icon_url category')
+      .populate('tools_selected', 'title description icon category is_disabled')
       .populate('client_id', 'first_name last_name email')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
@@ -520,6 +521,167 @@ export class AgentsService {
       message: createDto.auto_integrate && finalStatus === AgentStatus.ACTIVE 
         ? 'Agent created and integrated successfully' 
         : 'Agent created successfully. Manual integration required to activate.'
+    };
+  }
+
+  /**
+   * Update agent with complete wizard data in one step
+   */
+  async updateAgentComplete(id: string, updateDto: CreateAgentWizardDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    // Step 1: Check if agent exists and user has access
+    const existingAgent = await this.agentModel.findOne({ _id: id, is_deleted: false });
+    if (!existingAgent) {
+      throw new NotFoundException('Agent not found');
+    }
+
+    // Check if user has access to this agent
+    if (user.company_id && existingAgent.company_id?.toString() !== user.company_id.toString()) {
+      throw new BadRequestException('You do not have access to this agent');
+    }
+
+    // Step 2: Check title uniqueness if title is being updated
+    if (updateDto.title && updateDto.title !== existingAgent.title) {
+      await this.checkTitleUniqueness(updateDto.title, user.company_id?.toString());
+    }
+
+    // Step 3: Process tags if provided
+    let processedTags: ObjectId[] = [];
+    if (updateDto.tags && updateDto.tags.length > 0) {
+      processedTags = await this.tagsService.processTagsArray(updateDto.tags, user);
+    }
+
+    // Step 4: Update basic agent information
+    const agentUpdateData: any = {
+      updated_by: user.userId,
+    };
+
+    if (updateDto.title) agentUpdateData.title = updateDto.title;
+    if (updateDto.description) agentUpdateData.description = updateDto.description;
+    if (updateDto.display_description) agentUpdateData.display_description = updateDto.display_description;
+    if (updateDto.service_type) agentUpdateData.service_type = updateDto.service_type;
+    if (updateDto.assistant_id) agentUpdateData.assistant_id = updateDto.assistant_id;
+    if (updateDto.image) agentUpdateData.image = updateDto.image;
+    if (processedTags.length > 0) agentUpdateData.tags = processedTags;
+
+    // Update agent with basic information
+    await this.agentModel.findByIdAndUpdate(id, agentUpdateData);
+
+    // Step 5: Update tools selection (required)
+    if (updateDto.tools_selected) {
+      // Validate that all tools exist and are enabled
+      const isValid = await this.toolsService.validateTools(updateDto.tools_selected);
+      if (!isValid) {
+        throw new BadRequestException('One or more selected tools are invalid or disabled');
+      }
+
+      // Update agent with tools - convert strings to ObjectIds manually
+      const toolsObjectIds = updateDto.tools_selected.map(id => new Types.ObjectId(id));
+      await this.agentModel.findByIdAndUpdate(
+        id,
+        {
+          tools_selected: toolsObjectIds,
+          tools_count: updateDto.tools_selected.length,
+          updated_by: user.userId,
+        }
+      );
+    }
+
+    // Step 6: Update assignment (optional)
+    if (updateDto.client_id !== undefined) {
+      const assignmentUpdateData: any = {
+        updated_by: user.userId,
+      };
+
+      if (updateDto.client_id) {
+        assignmentUpdateData.client_id = updateDto.client_id;
+        assignmentUpdateData.client_name = null; // Will be populated by populate
+      } else {
+        assignmentUpdateData.client_id = null;
+        assignmentUpdateData.client_name = null;
+      }
+
+      // Update agent with assignment
+      await this.agentModel.findByIdAndUpdate(id, assignmentUpdateData);
+    }
+
+    // Step 7: Handle invitations (optional)
+    const invitations = [];
+    if (updateDto.invitees && updateDto.invitees.length > 0) {
+      // Get existing invitations for this agent and delete them
+      const existingInvitations = await this.invitationsService.getInvitationsByAgentId(id);
+      for (const invitation of existingInvitations) {
+        try {
+          await this.invitationsService.deleteInvitation(invitation._id.toString());
+        } catch (error) {
+          console.error(`Failed to delete invitation ${invitation._id}:`, error);
+        }
+      }
+
+      // Create new invitations
+      for (const invitee of updateDto.invitees) {
+        try {
+          const invitation = await this.invitationsService.createOrReuseInvite({
+            email: invitee.email,
+            role: invitee.role,
+            agent_id: id,
+            company_id: user.company_id?.toString(),
+            invitee_name: invitee.name,
+            created_by: user.userId?.toString(),
+          });
+          
+          invitations.push(invitation);
+        } catch (error) {
+          console.error(`Failed to create invitation for ${invitee.email}:`, error);
+        }
+      }
+    }
+
+    // Step 8: Handle integration status (optional - controlled by auto_integrate flag)
+    let finalStatus = existingAgent.status;
+    if (updateDto.auto_integrate !== undefined) {
+      if (updateDto.auto_integrate) {
+        // Business rule validations for integration
+        if (updateDto.tools_selected && updateDto.tools_selected.length > 0) {
+          finalStatus = AgentStatus.ACTIVE;
+          await this.agentModel.findByIdAndUpdate(
+            id,
+            {
+              status: AgentStatus.ACTIVE,
+              updated_by: user.userId,
+            }
+          );
+        } else {
+          throw new BadRequestException('Agent must have at least one tool selected to auto-integrate');
+        }
+      } else {
+        // If auto_integrate is false, set to DRAFT
+        finalStatus = AgentStatus.DRAFT;
+        await this.agentModel.findByIdAndUpdate(
+          id,
+          {
+            status: AgentStatus.DRAFT,
+            updated_by: user.userId,
+          }
+        );
+      }
+    }
+
+    // Return final agent with all populated data
+    const finalAgent = await this.agentModel.findById(id)
+      .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('client_id', 'first_name last_name email')
+      .populate('company_id', 'name')
+      .populate('created_by', 'first_name last_name')
+      .populate('updated_by', 'first_name last_name')
+      .populate('tags', 'name color description');
+
+    return {
+      agent: finalAgent,
+      invitations,
+      status: finalStatus,
+      message: updateDto.auto_integrate && finalStatus === AgentStatus.ACTIVE 
+        ? 'Agent updated and integrated successfully' 
+        : 'Agent updated successfully. Manual integration required to activate.'
     };
   }
 

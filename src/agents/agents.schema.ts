@@ -231,12 +231,8 @@ AgentSchema.pre('save', function(next) {
     this.tags = uniqueTags.map(id => new Schema.Types.ObjectId(id));
   }
   
+  // Set tools_count based on tools_selected length
   if (this.tools_selected && this.tools_selected.length > 0) {
-    // Dedupe and limit to 24
-    const uniqueTools = Array.from(new Set(
-      this.tools_selected.map(tool => tool.toString())
-    )).slice(0, 24);
-    this.tools_selected = uniqueTools.map(id => new Schema.Types.ObjectId(id));
     this.tools_count = this.tools_selected.length;
   } else {
     this.tools_count = 0;
@@ -261,15 +257,7 @@ AgentSchema.pre('findOneAndUpdate', function(next) {
   }
   
   if (update.tools_selected !== undefined) {
-    if (update.tools_selected.length > 0) {
-      const uniqueTools = Array.from(new Set(
-        update.tools_selected.map(tool => tool.toString())
-      )).slice(0, 24);
-      update.tools_selected = uniqueTools.map(id => new Schema.Types.ObjectId(id as string));
-      update.tools_count = update.tools_selected.length;
-    } else {
-      update.tools_count = 0;
-    }
+    update.tools_count = update.tools_selected.length || 0;
   }
   
   next();
