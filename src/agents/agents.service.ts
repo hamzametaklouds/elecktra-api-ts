@@ -196,7 +196,7 @@ export class AgentsService {
       select: 'first_name last_name'
     })
     .populate('tags', 'name color description')
-    .populate('client_id', 'first_name last_name email')
+    .populate('client_id', 'first_name last_name email image')
     .populate('tools_selected', 'title description icon category is_disabled');
   }
 
@@ -229,7 +229,7 @@ export class AgentsService {
       select: 'first_name last_name'
     })
     .populate('tags', 'name color description')
-    .populate('client_id', 'first_name last_name email')
+    .populate('client_id', 'first_name last_name email image')
     .populate('tools_selected', 'title description icon category is_disabled');
   }
 
@@ -275,7 +275,7 @@ export class AgentsService {
     .populate('created_by', 'first_name last_name')
     .populate('updated_by', 'first_name last_name')
     .populate('tags', 'name color description')
-    .populate('client_id', 'first_name last_name email');
+    .populate('client_id', 'first_name last_name email image');
   }
 
   /**
@@ -341,7 +341,7 @@ export class AgentsService {
       updateData,
       { new: true }
     )
-    .populate('client_id', 'first_name last_name email')
+    .populate('client_id', 'first_name last_name email image')
     .populate('company_id', 'name')
     .populate('created_by', 'first_name last_name')
     .populate('updated_by', 'first_name last_name');
@@ -405,7 +405,7 @@ export class AgentsService {
       { new: true }
     )
     .populate('tools_selected', 'key title icon_url category')
-    .populate('client_id', 'first_name last_name email')
+    .populate('client_id', 'first_name last_name email image')
     .populate('company_id', 'name')
     .populate('created_by', 'first_name last_name')
     .populate('updated_by', 'first_name last_name');
@@ -530,7 +530,7 @@ export class AgentsService {
     // Return final agent with all populated data
     const finalAgent = await this.agentModel.findById(savedAgent._id)
       .populate('tools_selected', 'title description icon category is_disabled')
-      .populate('client_id', 'first_name last_name email')
+      .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
@@ -691,7 +691,7 @@ export class AgentsService {
     // Return final agent with all populated data
     const finalAgent = await this.agentModel.findById(id)
       .populate('tools_selected', 'title description icon category is_disabled')
-      .populate('client_id', 'first_name last_name email')
+      .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
@@ -714,7 +714,7 @@ export class AgentsService {
     const agent = await this.agentModel
       .findOne({ _id: id, is_deleted: false })
       .populate('tools_selected', 'title description icon category is_disabled')
-      .populate('client_id', 'first_name last_name email')
+      .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
@@ -788,6 +788,7 @@ export class AgentsService {
     const agents = await this.agentModel
       .find(filter)
       .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
       .populate('tags', 'name color description')
