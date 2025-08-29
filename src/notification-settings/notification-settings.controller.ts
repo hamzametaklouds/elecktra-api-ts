@@ -23,9 +23,10 @@ import { UpdateNotificationSettingsDto } from './dtos/update-notification-settin
 import { NotificationSettingsResponseDto } from './dtos/notification-settings-response.dto';
 import { JWTAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { NotificationSettingsTransformer } from './notification-settings.transformer';
+import { AuthorizationHeader } from '../app/swagger.constant';
 
 @ApiTags('Notification Settings')
-@ApiBearerAuth()
+@ApiBearerAuth(AuthorizationHeader)
 @UseGuards(JWTAuthGuard)
 @Controller('notification-settings')
 export class NotificationSettingsController {
@@ -51,10 +52,15 @@ export class NotificationSettingsController {
   async create(
     @Body() createNotificationSettingsDto: CreateNotificationSettingsDto,
     @Request() req,
-  ): Promise<NotificationSettingsResponseDto> {
-    const userId = req.user._id;
+  ) {
+    const userId = req.user.userId;
     const result = await this.notificationSettingsService.create(createNotificationSettingsDto, userId);
-    return NotificationSettingsTransformer.toResponseDto(result);
+    return {
+      status: true,
+      statusCode: 201,
+      message: 'Notification settings created successfully',
+      data: NotificationSettingsTransformer.toResponseDto(result)
+    };
   }
 
   @Get()
@@ -64,9 +70,14 @@ export class NotificationSettingsController {
     description: 'List of all notification settings',
     type: [NotificationSettingsResponseDto],
   })
-  async findAll(): Promise<NotificationSettingsResponseDto[]> {
+  async findAll() {
     const result = await this.notificationSettingsService.findAll();
-    return NotificationSettingsTransformer.toResponseDtoArray(result);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Notification settings retrieved successfully',
+      data: NotificationSettingsTransformer.toResponseDtoArray(result)
+    };
   }
 
   @Get('my-settings')
@@ -80,10 +91,15 @@ export class NotificationSettingsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Notification settings not found',
   })
-  async getMySettings(@Request() req): Promise<NotificationSettingsResponseDto> {
-    const userId = req.user._id;
+  async getMySettings(@Request() req) {
+    const userId = req.user.userId;
     const result = await this.notificationSettingsService.getUserNotificationSettings(userId);
-    return NotificationSettingsTransformer.toResponseDto(result);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'User notification settings retrieved successfully',
+      data: NotificationSettingsTransformer.toResponseDto(result)
+    };
   }
 
   @Get(':id')
@@ -98,9 +114,14 @@ export class NotificationSettingsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Notification settings not found',
   })
-  async findOne(@Param('id') id: string): Promise<NotificationSettingsResponseDto> {
+  async findOne(@Param('id') id: string) {
     const result = await this.notificationSettingsService.findOne(id);
-    return NotificationSettingsTransformer.toResponseDto(result);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Notification settings retrieved successfully',
+      data: NotificationSettingsTransformer.toResponseDto(result)
+    };
   }
 
   @Put(':id')
@@ -123,10 +144,15 @@ export class NotificationSettingsController {
     @Param('id') id: string,
     @Body() updateNotificationSettingsDto: UpdateNotificationSettingsDto,
     @Request() req,
-  ): Promise<NotificationSettingsResponseDto> {
-    const userId = req.user._id;
+  ) {
+    const userId = req.user.userId;
     const result = await this.notificationSettingsService.update(id, updateNotificationSettingsDto, userId);
-    return NotificationSettingsTransformer.toResponseDto(result);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Notification settings updated successfully',
+      data: NotificationSettingsTransformer.toResponseDto(result)
+    };
   }
 
   @Put('my-settings')
@@ -147,10 +173,15 @@ export class NotificationSettingsController {
   async updateMySettings(
     @Body() updateNotificationSettingsDto: UpdateNotificationSettingsDto,
     @Request() req,
-  ): Promise<NotificationSettingsResponseDto> {
-    const userId = req.user._id;
+  ) {
+    const userId = req.user.userId;
     const result = await this.notificationSettingsService.updateByUserId(userId, updateNotificationSettingsDto);
-    return NotificationSettingsTransformer.toResponseDto(result);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'User notification settings updated successfully',
+      data: NotificationSettingsTransformer.toResponseDto(result)
+    };
   }
 
   @Delete(':id')
@@ -164,9 +195,15 @@ export class NotificationSettingsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Notification settings not found',
   })
-  async remove(@Param('id') id: string, @Request() req): Promise<void> {
-    const userId = req.user._id;
-    return this.notificationSettingsService.remove(id, userId);
+  async remove(@Param('id') id: string, @Request() req) {
+    const userId = req.user.userId;
+    await this.notificationSettingsService.remove(id, userId);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Notification settings deleted successfully',
+      data: null
+    };
   }
 
   @Delete('my-settings')
@@ -179,8 +216,14 @@ export class NotificationSettingsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Notification settings not found',
   })
-  async removeMySettings(@Request() req): Promise<void> {
-    const userId = req.user._id;
-    return this.notificationSettingsService.removeByUserId(userId);
+  async removeMySettings(@Request() req) {
+    const userId = req.user.userId;
+    await this.notificationSettingsService.removeByUserId(userId);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'User notification settings deleted successfully',
+      data: null
+    };
   }
 } 

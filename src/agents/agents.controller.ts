@@ -170,23 +170,23 @@ export class AgentsController {
     return this.agentsService.findOne(id);
   }
 
-  @Put(':id')
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiOperation({ summary: 'Update an agent' })
-  @ApiResponse({ status: 200, description: 'Agent successfully updated' })
-  @ApiResponse({ status: 404, description: 'Agent not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBody({ type: UpdateAgentDto })
-  update(
-    @Param('id') id: string,
-    @Body() updateAgentDto: UpdateAgentDto,
-    @Req() req: Request,
-  ) {
-    return this.agentsService.update(id, updateAgentDto, req.user);
-  }//hello pushing code 
+  // @Put(':id')
+  // @ApiBearerAuth(AuthorizationHeader)
+  // @UseGuards(JWTAuthGuard, RolesGuard)
+  // @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
+  // @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  // @ApiOperation({ summary: 'Update an agent' })
+  // @ApiResponse({ status: 200, description: 'Agent successfully updated' })
+  // @ApiResponse({ status: 404, description: 'Agent not found' })
+  // @ApiResponse({ status: 401, description: 'Unauthorized' })
+  // @ApiBody({ type: UpdateAgentDto })
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateAgentDto: UpdateAgentDto,
+  //   @Req() req: Request,
+  // ) {
+  //   return this.agentsService.update(id, updateAgentDto, req.user);
+  // }//hello pushing code 
 
   @Delete(':id')
   @ApiBearerAuth(AuthorizationHeader)
