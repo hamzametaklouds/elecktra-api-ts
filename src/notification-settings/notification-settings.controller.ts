@@ -102,6 +102,35 @@ export class NotificationSettingsController {
     };
   }
 
+  @Put('my-settings')
+  @ApiOperation({ summary: 'Update current user notification settings' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User notification settings updated successfully',
+    type: NotificationSettingsResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Notification settings not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad request - Invalid data provided',
+  })
+  async updateMySettings(
+    @Body() updateNotificationSettingsDto: UpdateNotificationSettingsDto,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+    const result = await this.notificationSettingsService.updateByUserId(userId, updateNotificationSettingsDto);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'User notification settings updated successfully',
+      data: NotificationSettingsTransformer.toResponseDto(result)
+    };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get notification settings by ID' })
   @ApiParam({ name: 'id', description: 'Notification settings ID' })
@@ -151,35 +180,6 @@ export class NotificationSettingsController {
       status: true,
       statusCode: 200,
       message: 'Notification settings updated successfully',
-      data: NotificationSettingsTransformer.toResponseDto(result)
-    };
-  }
-
-  @Put('my-settings')
-  @ApiOperation({ summary: 'Update current user notification settings' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'User notification settings updated successfully',
-    type: NotificationSettingsResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Notification settings not found',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Bad request - Invalid data provided',
-  })
-  async updateMySettings(
-    @Body() updateNotificationSettingsDto: UpdateNotificationSettingsDto,
-    @Request() req,
-  ) {
-    const userId = req.user.userId;
-    const result = await this.notificationSettingsService.updateByUserId(userId, updateNotificationSettingsDto);
-    return {
-      status: true,
-      statusCode: 200,
-      message: 'User notification settings updated successfully',
       data: NotificationSettingsTransformer.toResponseDto(result)
     };
   }
