@@ -103,7 +103,6 @@ export class CreateAgentWizardDto {
   })
   @IsArray()
   @IsMongoId({ each: true })
-  @MaxLength(24, { message: 'Maximum 24 tools allowed' })
   tools_selected: string[];
 
   // Assignment and Invitations (Step 3)
