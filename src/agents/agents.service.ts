@@ -75,6 +75,7 @@ export class AgentsService {
       })
       .populate('tags', 'name color description')
       .populate('client_id', 'first_name last_name email')
+      .populate('tools_selected', 'title description icon category is_disabled')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
@@ -117,6 +118,7 @@ export class AgentsService {
       })
       .populate('tags', 'name color description')
       .populate('client_id', 'first_name last_name email')
+      .populate('tools_selected', 'title description icon category is_disabled')
       .sort(orderBy);
   }
 
@@ -131,7 +133,8 @@ export class AgentsService {
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
       .populate('tags', 'name color description')
-      .populate('client_id', 'first_name last_name email');
+      .populate('client_id', 'first_name last_name email')
+      .populate('tools_selected', 'title description icon category is_disabled');
 
     if (!agent) {
       throw new NotFoundException('Agent not found');
@@ -171,7 +174,8 @@ export class AgentsService {
       select: 'first_name last_name'
     })
     .populate('tags', 'name color description')
-    .populate('client_id', 'first_name last_name email');
+    .populate('client_id', 'first_name last_name email')
+    .populate('tools_selected', 'title description icon category is_disabled');
   }
 
   async remove(id: string, user: { userId?: ObjectId }) {
@@ -203,7 +207,8 @@ export class AgentsService {
       select: 'first_name last_name'
     })
     .populate('tags', 'name color description')
-    .populate('client_id', 'first_name last_name email');
+    .populate('client_id', 'first_name last_name email')
+    .populate('tools_selected', 'title description icon category is_disabled');
   }
 
   // Wizard Methods
@@ -524,7 +529,7 @@ export class AgentsService {
   async getAgentDetails(id: string, user: { userId?: ObjectId, company_id?: ObjectId }) {
     const agent = await this.agentModel
       .findOne({ _id: id, is_deleted: false })
-      .populate('tools_selected', 'key title icon_url category enabled')
+      .populate('tools_selected', 'title description icon category is_disabled')
       .populate('client_id', 'first_name last_name email')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
@@ -598,7 +603,7 @@ export class AgentsService {
 
     const agents = await this.agentModel
       .find(filter)
-      .populate('tools_selected', 'key title icon_url category')
+      .populate('tools_selected', 'title description icon category is_disabled')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
       .populate('tags', 'name color description')
