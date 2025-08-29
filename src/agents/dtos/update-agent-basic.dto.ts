@@ -57,10 +57,10 @@ export class UpdateAgentBasicDto {
   image?: string;
 
   @ApiProperty({
-    description: 'Agent tags (max 5)',
+    description: 'Agent tags (max 5) - can be tag names (strings) or existing tag IDs',
     required: false,
     type: [String],
-    example: ['EMAIL', 'AUTOMATION', 'PRODUCTIVITY']
+    example: ['EMAIL', 'AUTOMATION', 'PRODUCTIVITY', '60f7b3b3b3b3b3b3b3b3b3b3']
   })
   @IsOptional()
   @IsArray()

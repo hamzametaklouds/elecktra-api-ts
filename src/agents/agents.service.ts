@@ -10,6 +10,7 @@ import { UpdateAgentAssignmentDto } from './dtos/update-agent-assignment.dto';
 import { CreateAgentWizardDto } from './dtos/create-agent-wizard.dto';
 import { ToolsService } from '../tools/tools.service';
 import { InvitationsService } from '../invitations/invitations.service';
+import { TagsService } from '../tags/tags.service';
 
 @Injectable()
 export class AgentsService {
@@ -19,17 +20,25 @@ export class AgentsService {
     private toolsService: ToolsService,
     @Inject(forwardRef(() => InvitationsService))
     private invitationsService: InvitationsService,
+    private tagsService: TagsService,
   ) {}
 
   async create(createAgentDto: CreateAgentDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
     // Check title uniqueness within company
     await this.checkTitleUniqueness(createAgentDto.title, user.company_id?.toString());
 
+    // Process tags if provided
+    let processedTags: ObjectId[] = [];
+    if (createAgentDto.tags && createAgentDto.tags.length > 0) {
+      processedTags = await this.tagsService.processTagsArray(createAgentDto.tags, user);
+    }
+
     const agent = new this.agentModel({
       ...createAgentDto,
       status: AgentStatus.DRAFT,
       company_id: user.company_id,
       created_by: user.userId,
+      tags: processedTags,
     });
     return await agent.save();
   }
@@ -64,6 +73,8 @@ export class AgentsService {
         path: 'updated_by',
         select: 'first_name last_name image roles'
       })
+      .populate('tags', 'name color description')
+      .populate('client_id', 'first_name last_name email')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
@@ -104,6 +115,8 @@ export class AgentsService {
         path: 'updated_by',
         select: 'first_name last_name'
       })
+      .populate('tags', 'name color description')
+      .populate('client_id', 'first_name last_name email')
       .sort(orderBy);
   }
 
@@ -116,7 +129,9 @@ export class AgentsService {
         select: '_id title api_key_required'
       })
       .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name');
+      .populate('updated_by', 'first_name last_name')
+      .populate('tags', 'name color description')
+      .populate('client_id', 'first_name last_name email');
 
     if (!agent) {
       throw new NotFoundException('Agent not found');
@@ -154,7 +169,9 @@ export class AgentsService {
     .populate({
       path: 'updated_by',
       select: 'first_name last_name'
-    });
+    })
+    .populate('tags', 'name color description')
+    .populate('client_id', 'first_name last_name email');
   }
 
   async remove(id: string, user: { userId?: ObjectId }) {
@@ -184,7 +201,9 @@ export class AgentsService {
     .populate({
       path: 'updated_by',
       select: 'first_name last_name'
-    });
+    })
+    .populate('tags', 'name color description')
+    .populate('client_id', 'first_name last_name email');
   }
 
   // Wizard Methods
@@ -205,17 +224,31 @@ export class AgentsService {
       await this.checkTitleUniqueness(updateDto.title, user.company_id?.toString(), id);
     }
 
+    // Process tags if provided
+    let processedTags: ObjectId[] = [];
+    if (updateDto.tags && updateDto.tags.length > 0) {
+      processedTags = await this.tagsService.processTagsArray(updateDto.tags, user);
+    }
+
+    const updateData: any = {
+      ...updateDto,
+      updated_by: user.userId,
+    };
+
+    if (processedTags.length > 0) {
+      updateData.tags = processedTags;
+    }
+
     return await this.agentModel.findByIdAndUpdate(
       id,
-      {
-        ...updateDto,
-        updated_by: user.userId,
-      },
+      updateData,
       { new: true }
     )
     .populate('company_id', 'name')
     .populate('created_by', 'first_name last_name')
-    .populate('updated_by', 'first_name last_name');
+    .populate('updated_by', 'first_name last_name')
+    .populate('tags', 'name color description')
+    .populate('client_id', 'first_name last_name email');
   }
 
   /**
@@ -269,6 +302,8 @@ export class AgentsService {
 
     if (updateDto.client_id) {
       updateData.client_id = updateDto.client_id;
+      // Set client_name to null initially, will be populated by the populate
+      updateData.client_name = null;
     }
 
     // Update agent
@@ -374,13 +409,19 @@ export class AgentsService {
     // Check title uniqueness within company
     await this.checkTitleUniqueness(agentData.title, user.company_id?.toString());
 
+    // Process tags if provided
+    let processedTags: ObjectId[] = [];
+    if (createDto.tags && createDto.tags.length > 0) {
+      processedTags = await this.tagsService.processTagsArray(createDto.tags, user);
+    }
+
     // Create the agent
     const agent = new this.agentModel({
       ...agentData,
       status: AgentStatus.DRAFT,
       company_id: user.company_id,
       created_by: user.userId,
-      tags: createDto.tags,
+      tags: processedTags,
     });
     
     const savedAgent = await agent.save();
@@ -409,6 +450,8 @@ export class AgentsService {
 
     if (createDto.client_id) {
       updateData.client_id = createDto.client_id;
+      // Set client_name to null initially, will be populated by the populate
+      updateData.client_name = null;
     }
 
     // Update agent with assignment
@@ -462,7 +505,8 @@ export class AgentsService {
       .populate('client_id', 'first_name last_name email')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name');
+      .populate('updated_by', 'first_name last_name')
+      .populate('tags', 'name color description');
 
     return {
       agent: finalAgent,
@@ -484,7 +528,8 @@ export class AgentsService {
       .populate('client_id', 'first_name last_name email')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
-      .populate('updated_by', 'first_name last_name');
+      .populate('updated_by', 'first_name last_name')
+      .populate('tags', 'name color description');
 
     if (!agent) {
       throw new NotFoundException('Agent not found');
@@ -538,7 +583,7 @@ export class AgentsService {
 
     // Tags filter
     if (tags && tags.length > 0) {
-      filter.tags = { $in: tags.map(tag => tag.toUpperCase()) };
+      filter.tags = { $in: tags };
     }
 
     // Tools filter
@@ -556,6 +601,7 @@ export class AgentsService {
       .populate('tools_selected', 'key title icon_url category')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
+      .populate('tags', 'name color description')
       .sort({ _id: 1 })
       .limit(limit + 1); // Get one extra to check if there are more
 

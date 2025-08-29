@@ -11,7 +11,6 @@ export interface IUsers {
   first_name: string;
   last_name: string;
   email: string;
-  business_name: string;
   country_code: string;
   password: string;
   phone_no: string;
@@ -48,11 +47,6 @@ export const UsersSchema = new Schema<IUsers>(
       type: String,
       required: false,
       default: ''
-    },
-    business_name: {
-      type: String,
-      required: false,
-      default: null
     },
     last_name: {
       type: String,

@@ -7,6 +7,8 @@ import { USERS_COLLECTION } from 'src/users/users.constants';
 export enum AgentStatus {
   DRAFT = 'Draft',
   ACTIVE = 'Active', 
+  PAUSED = 'Paused',
+  SUSPENDED = 'Suspended',
   MAINTENANCE = 'Maintenance',
   TERMINATED = 'Terminated'
 }
@@ -40,8 +42,9 @@ export interface IAgent {
   work_flows: IWorkflow[];
   company_id?: Schema.Types.ObjectId;
   normalized_title: string;
-  tags: string[];
+  tags: Schema.Types.ObjectId[];
   client_id?: Schema.Types.ObjectId;
+  client_name?: string;
   tools_selected: Schema.Types.ObjectId[];
   tools_count?: number;
   created_by?: Schema.Types.ObjectId;
@@ -136,10 +139,11 @@ export const AgentSchema = new Schema<IAgent>(
       required: false
     },
     tags: {
-      type: [String],
+      type: [Schema.Types.ObjectId],
+      ref: 'tags',
       default: [],
       validate: {
-        validator: function(v: string[]) {
+        validator: function(v: Schema.Types.ObjectId[]) {
           return v.length <= 5;
         },
         message: 'Tags array cannot exceed 5 items'
@@ -148,6 +152,10 @@ export const AgentSchema = new Schema<IAgent>(
     client_id: {
       type: Schema.Types.ObjectId,
       ref: USERS_COLLECTION,
+      required: false
+    },
+    client_name: {
+      type: String,
       required: false
     },
     tools_selected: {
@@ -216,11 +224,11 @@ AgentSchema.pre('save', function(next) {
   this.normalized_title = (this.title || '').toLowerCase().trim();
   
   if (this.tags && this.tags.length > 0) {
-    // Dedupe, uppercase, and limit to 5
+    // Dedupe and limit to 5
     const uniqueTags = Array.from(new Set(
-      this.tags.map(tag => tag.toUpperCase().trim())
+      this.tags.map(tag => tag.toString())
     )).slice(0, 5);
-    this.tags = uniqueTags;
+    this.tags = uniqueTags.map(id => new Schema.Types.ObjectId(id));
   }
   
   if (this.tools_selected && this.tools_selected.length > 0) {

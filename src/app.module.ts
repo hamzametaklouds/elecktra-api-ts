@@ -20,6 +20,7 @@ import { DeliveredAgentsModule } from './delivered-agents/delivered-agents.modul
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     FileUploadModule,
     NotificationsModule,
     DashboardModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

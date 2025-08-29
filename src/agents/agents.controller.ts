@@ -66,38 +66,38 @@ export class AgentsController {
     };
   }
 
-  @Get('search')
-  @ApiBearerAuth(AuthorizationHeader)
-  @UseGuards(JWTAuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER, Role.SUPPORT_ADMIN)
-  @ApiOperation({ summary: 'Search agents with simple filters' })
-  @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async searchAgents(
-    @Req() req: Request,
-    @Query('q') q?: string,              // Text search: "email assistant"
-    @Query('status') status?: string,    // Single status: "Active" or "Draft"
-    @Query('page') page: number = 1,     // Page number (simple!)
-    @Query('limit') limit: number = 20   // Results per page
-  ) {
-    const result = await this.agentsService.getPaginatedAgents(
-      limit,
-      page,
-      { 
-        ...(q && { $text: { $search: q } }),
-        ...(status && { status }),
-      },
-      { created_at: -1 }, // Most recent first
-      req.user
-    );
+  // @Get('search')
+  // @ApiBearerAuth(AuthorizationHeader)
+  // @UseGuards(JWTAuthGuard, RolesGuard)
+  // @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER, Role.SUPPORT_ADMIN)
+  // @ApiOperation({ summary: 'Search agents with simple filters' })
+  // @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
+  // @ApiResponse({ status: 401, description: 'Unauthorized' })
+  // async searchAgents(
+  //   @Req() req: Request,
+  //   @Query('q') q?: string,              // Text search: "email assistant"
+  //   @Query('status') status?: string,    // Single status: "Active" or "Draft"
+  //   @Query('page') page: number = 1,     // Page number (simple!)
+  //   @Query('limit') limit: number = 20   // Results per page
+  // ) {
+  //   const result = await this.agentsService.getPaginatedAgents(
+  //     limit,
+  //     page,
+  //     { 
+  //       ...(q && { $text: { $search: q } }),
+  //       ...(status && { status }),
+  //     },
+  //     { created_at: -1 }, // Most recent first
+  //     req.user
+  //   );
 
-    return {
-      status: true,
-      statusCode: 200,
-      message: 'Agents retrieved successfully',
-      data: result
-    };
-  }
+  //   return {
+  //     status: true,
+  //     statusCode: 200,
+  //     message: 'Agents retrieved successfully',
+  //     data: result
+  //   };
+  // }
 
   @Get()
   @ApiBearerAuth(AuthorizationHeader)

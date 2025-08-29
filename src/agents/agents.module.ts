@@ -6,6 +6,7 @@ import { AgentsController } from './agents.controller';
 import { AgentsService } from './agents.service';
 import { ToolsModule } from 'src/tools/tools.module';
 import { InvitationsModule } from 'src/invitations/invitations.module';
+import { TagsModule } from 'src/tags/tags.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { InvitationsModule } from 'src/invitations/invitations.module';
     ConfigModule,
     ToolsModule,
     forwardRef(() => InvitationsModule),
+    TagsModule,
   ],
   controllers: [AgentsController],
   providers: [AgentsService, ...AgentsModel],
