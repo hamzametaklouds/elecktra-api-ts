@@ -74,18 +74,28 @@ export class AgentsService {
         select: 'first_name last_name image roles'
       })
       .populate('tags', 'name color description')
-      .populate('client_id', 'first_name last_name email')
+      .populate('client_id', 'first_name last_name email image')
       .populate('tools_selected', 'title description icon category is_disabled')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
+
+    // Transform agents to add client_name from populated client_id
+    const transformedAgents = agents.map(agent => {
+      const agentObj = agent.toObject ? agent.toObject() : agent;
+      if (agentObj.client_id && typeof agentObj.client_id === 'object' && 'first_name' in agentObj.client_id) {
+        const client = agentObj.client_id as any;
+        agentObj.client_name = `${client.first_name || ''} ${client.last_name || ''}`.trim();
+      }
+      return agentObj;
+    });
 
     return { 
       pages: `Page ${page} of ${totalPages}`, 
       current_page: page, 
       total_pages: totalPages, 
       total_records: totalDocuments, 
-      data: agents 
+      data: transformedAgents 
     };
   }
 
@@ -101,7 +111,7 @@ export class AgentsService {
     }
 
 
-    return await this.agentModel
+    const agents = await this.agentModel
       .find(filter)
       .populate({
         path: 'work_flows.integrations',
@@ -117,9 +127,21 @@ export class AgentsService {
         select: 'first_name last_name'
       })
       .populate('tags', 'name color description')
-      .populate('client_id', 'first_name last_name email')
+      .populate('client_id', 'first_name last_name email image')
       .populate('tools_selected', 'title description icon category is_disabled')
       .sort(orderBy);
+
+    // Transform agents to add client_name from populated client_id
+    const transformedAgents = agents.map(agent => {
+      const agentObj = agent.toObject ? agent.toObject() : agent;
+      if (agentObj.client_id && typeof agentObj.client_id === 'object' && 'first_name' in agentObj.client_id) {
+        const client = agentObj.client_id as any;
+        agentObj.client_name = `${client.first_name || ''} ${client.last_name || ''}`.trim();
+      }
+      return agentObj;
+    });
+
+    return transformedAgents;
   }
 
   async findOne(id: string) {
@@ -133,7 +155,7 @@ export class AgentsService {
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
       .populate('tags', 'name color description')
-      .populate('client_id', 'first_name last_name email')
+      .populate('client_id', 'first_name last_name email image')
       .populate('tools_selected', 'title description icon category is_disabled');
 
     if (!agent) {
