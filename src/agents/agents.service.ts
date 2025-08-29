@@ -664,17 +664,24 @@ export class AgentsService {
       }
     }
 
-    // Step 8: Handle integration status (optional - controlled by auto_integrate flag)
+    // Step 8: Handle integration status
     let finalStatus = existingAgent.status;
+    
+    // Get the updated agent to check current state
+    const updatedAgent = await this.agentModel.findById(id);
+    
+    // Determine if agent is complete (has all required fields)
+    const hasTitle = updatedAgent.title && updatedAgent.title.trim() !== '';
+    const hasDescription = updatedAgent.description && updatedAgent.description.trim() !== '';
+    const hasTools = updatedAgent.tools_selected && updatedAgent.tools_selected.length > 0;
+    const hasClient = updatedAgent.client_id;
+    
+    const isAgentComplete = hasTitle && hasDescription && hasTools && hasClient;
+    
+    // Auto-integrate logic (if explicitly provided)
     if (updateDto.auto_integrate !== undefined) {
       if (updateDto.auto_integrate) {
-        // Business rule validations for integration
-        // Check if tools_selected is provided in this update or if agent already has tools
-        const agent = await this.agentModel.findById(id);
-        const hasToolsInUpdate = updateDto.tools_selected && updateDto.tools_selected.length > 0;
-        const hasExistingTools = agent.tools_selected && agent.tools_selected.length > 0;
-        
-        if (hasToolsInUpdate || hasExistingTools) {
+        if (hasTools) {
           finalStatus = AgentStatus.ACTIVE;
           await this.agentModel.findByIdAndUpdate(
             id,
@@ -688,6 +695,27 @@ export class AgentsService {
         }
       } else {
         // If auto_integrate is false, set to DRAFT
+        finalStatus = AgentStatus.DRAFT;
+        await this.agentModel.findByIdAndUpdate(
+          id,
+          {
+            status: AgentStatus.DRAFT,
+            updated_by: user.userId,
+          }
+        );
+      }
+    } else {
+      // Automatic status update based on completeness
+      if (isAgentComplete && finalStatus === AgentStatus.DRAFT) {
+        finalStatus = AgentStatus.ACTIVE;
+        await this.agentModel.findByIdAndUpdate(
+          id,
+          {
+            status: AgentStatus.ACTIVE,
+            updated_by: user.userId,
+          }
+        );
+      } else if (!isAgentComplete && finalStatus === AgentStatus.ACTIVE) {
         finalStatus = AgentStatus.DRAFT;
         await this.agentModel.findByIdAndUpdate(
           id,
