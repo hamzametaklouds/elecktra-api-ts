@@ -641,6 +641,12 @@ export class AgentsService {
 
       // Create new invitations
       for (const invitee of updateDto.invitees) {
+        // Skip invitation if required fields are missing
+        if (!invitee.email || !invitee.role) {
+          console.warn('Skipping invitation - missing required fields:', invitee);
+          continue;
+        }
+        
         try {
           const invitation = await this.invitationsService.createOrReuseInvite({
             email: invitee.email,
@@ -663,7 +669,12 @@ export class AgentsService {
     if (updateDto.auto_integrate !== undefined) {
       if (updateDto.auto_integrate) {
         // Business rule validations for integration
-        if (updateDto.tools_selected && updateDto.tools_selected.length > 0) {
+        // Check if tools_selected is provided in this update or if agent already has tools
+        const agent = await this.agentModel.findById(id);
+        const hasToolsInUpdate = updateDto.tools_selected && updateDto.tools_selected.length > 0;
+        const hasExistingTools = agent.tools_selected && agent.tools_selected.length > 0;
+        
+        if (hasToolsInUpdate || hasExistingTools) {
           finalStatus = AgentStatus.ACTIVE;
           await this.agentModel.findByIdAndUpdate(
             id,

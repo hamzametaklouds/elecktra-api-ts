@@ -5,10 +5,11 @@ import { Type } from 'class-transformer';
 export class InviteeDto {
   @ApiProperty({
     description: 'Invitee email address',
-    required: true,
+    required: false,
     example: 'user@example.com'
   })
-  email: string;
+  @IsOptional()
+  email?: string;
 
   @ApiProperty({
     description: 'Invitee name',
@@ -20,10 +21,11 @@ export class InviteeDto {
 
   @ApiProperty({
     description: 'Role to assign to invitee',
-    required: true,
+    required: false,
     example: 'USER'
   })
-  role: string;
+  @IsOptional()
+  role?: string;
 }
 
 export class CreateAgentWizardDto {
@@ -97,13 +99,14 @@ export class CreateAgentWizardDto {
   // Tools Selection (Step 2)
   @ApiProperty({
     description: 'Array of selected tool IDs (max 24)',
-    required: true,
+    required: false,
     type: [String],
     example: ['60f7b3b3b3b3b3b3b3b3b3b3', '60f7b3b3b3b3b3b3b3b3b3b4']
   })
+  @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  tools_selected: string[];
+  tools_selected?: string[];
 
   // Assignment and Invitations (Step 3)
   @ApiProperty({
