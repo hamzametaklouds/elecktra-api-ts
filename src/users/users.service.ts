@@ -104,7 +104,7 @@ export class UsersService {
     page = page > totalPages ? totalPages : page;
 
     const users = await this.userModel
-      .find(filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
+      .find(filter, { updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort(orderBy)
       .skip(skip)
       .limit(rpp).populate('company_id');
@@ -143,7 +143,7 @@ export class UsersService {
     console.log($filter)
 
     const users = await this.userModel
-      .find($filter, { created_at: 0, updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
+      .find($filter, { updated_at: 0, __v: 0, created_by: 0, updated_by: 0 })
       .sort($orderBy).populate('company_id');
 
     // Transform users to include agent info
