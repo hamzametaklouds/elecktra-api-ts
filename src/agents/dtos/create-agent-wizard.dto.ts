@@ -1,6 +1,7 @@
-import { IsString, IsOptional, IsArray, MaxLength, ArrayMaxSize, IsMongoId, ValidateNested } from 'class-validator';
+import { IsString, IsOptional, IsArray, MaxLength, ArrayMaxSize, IsMongoId, ValidateNested, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { AgentStatus } from '../agents.schema';
 
 export class InviteeDto {
   @ApiProperty({
@@ -138,4 +139,15 @@ export class CreateAgentWizardDto {
   })
   @IsOptional()
   auto_integrate?: boolean;
+
+  // Status Control
+  @ApiProperty({
+    enum: AgentStatus,
+    description: 'Agent status to set explicitly',
+    required: false,
+    example: AgentStatus.ACTIVE
+  })
+  @IsEnum(AgentStatus)
+  @IsOptional()
+  status?: AgentStatus;
 }

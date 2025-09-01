@@ -26,21 +26,14 @@ async function bootstrap() {
 
   // Enable CORS
   logger.log('Configuring CORS...');
-  app.enableCors({
-    origin: true, // Allow all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PUT', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  });
+  app.enableCors();
 
   app.useGlobalPipes(new ValidationPipe());
 
   // Initialize WebSocket adapter
   logger.log('Initializing WebSocket adapter...');
-  // const wsAdapter = new WebSocketAdapter(app);
-  // app.useWebSocketAdapter(wsAdapter);
+  const wsAdapter = new WebSocketAdapter(app);
+  app.useWebSocketAdapter(wsAdapter);
 
   logger.log('WebSocket adapter initialized');
 

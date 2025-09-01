@@ -678,8 +678,19 @@ export class AgentsService {
     
     const isAgentComplete = hasTitle && hasDescription && hasTools && hasClient;
     
-    // Auto-integrate logic (if explicitly provided)
-    if (updateDto.auto_integrate !== undefined) {
+    // Priority 1: Explicit status provided (highest priority)
+    if (updateDto.status !== undefined) {
+      finalStatus = updateDto.status;
+      await this.agentModel.findByIdAndUpdate(
+        id,
+        {
+          status: updateDto.status,
+          updated_by: user.userId,
+        }
+      );
+    }
+    // Priority 2: Auto-integrate logic (if explicitly provided)
+    else if (updateDto.auto_integrate !== undefined) {
       if (updateDto.auto_integrate) {
         if (hasTools) {
           finalStatus = AgentStatus.ACTIVE;
@@ -704,8 +715,9 @@ export class AgentsService {
           }
         );
       }
-    } else {
-      // Automatic status update based on completeness
+    } 
+    // Priority 3: Automatic status update based on completeness (lowest priority)
+    else {
       if (isAgentComplete && finalStatus === AgentStatus.DRAFT) {
         finalStatus = AgentStatus.ACTIVE;
         await this.agentModel.findByIdAndUpdate(

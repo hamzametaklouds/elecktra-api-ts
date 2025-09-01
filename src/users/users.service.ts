@@ -85,12 +85,12 @@ export class UsersService {
 
 
   async getPaginatedUsers(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
-    if (user?.company_id) {
-      filter['company_id'] = user?.company_id;
-      filter['roles'] = { 
-        $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN,Role.BUSINESS_OWNER] 
-      };
-    }
+    // if (user?.company_id) {
+    //   filter['company_id'] = user?.company_id;
+    //   filter['roles'] = { 
+    //     $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN,Role.BUSINESS_OWNER] 
+    //   };
+    // }
 
     if (user?.userId) {
       filter['_id'] = { $ne: user.userId };
@@ -124,21 +124,21 @@ export class UsersService {
    * @returns bandCategory based on filter
    */
   async getFilteredUsers($filter: Object, $orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
-    if (user?.company_id) {
-      $filter['company_id'] = user?.company_id;
-      $filter['roles'] = { 
-        $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN,Role.BUSINESS_OWNER] 
-      };
-    }
+    // if (user?.company_id) {
+    //   $filter['company_id'] = user?.company_id;
+    //   $filter['roles'] = { 
+    //     $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN,Role.BUSINESS_OWNER] 
+    //   };
+    // }
 
     if (user?.userId) {
       $filter['_id'] = { $ne: user.userId };
     }
 
     // Add condition to exclude super admin and support admin roles
-    $filter['roles'] = { 
-      $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN] 
-    };
+    // $filter['roles'] = { 
+    //   $nin: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN] 
+    // };
 
     console.log($filter)
 
@@ -604,8 +604,14 @@ export class UsersService {
         }).toArray();
         
         const assignedAgents = agents.map(agent => ({
-          _id: agent._id,
-          title: agent.title
+          _id: agent?._id,
+          title: agent?.title,
+          image: agent?.image,
+          email: agent?.email,
+          phone_no: agent?.phone_no,
+          country_code: agent?.country_code,
+          gender: agent?.gender,
+          biography: agent?.biography,
         }));
         
         return {

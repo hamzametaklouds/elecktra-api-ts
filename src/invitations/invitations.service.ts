@@ -284,14 +284,14 @@ export class InvitationsService {
     const adminRoles = [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN];
 
     // Check if user is a business role trying to invite admin roles
-    if (businessRoles.includes(user.roles[0] as Role) && adminRoles.includes(role as Role)) {
-      throw new BadRequestException('You are not authorized to invite administrators');
-    }
+    // if (businessRoles.includes(user.roles[0] as Role) && adminRoles.includes(role as Role)) {
+    //   throw new BadRequestException('You are not authorized to invite administrators');
+    // }
 
     // Check if user is super admin trying to invite business roles
-    if (user.roles[0] === Role.SUPER_ADMIN && businessRoles.includes(role as Role)) {
-      throw new BadRequestException('Super admin cannot invite business users');
-    }
+    // if (user.roles[0] === Role.SUPER_ADMIN && businessRoles.includes(role as Role)) {
+    //   throw new BadRequestException('Super admin cannot invite business users');
+    // }
 
     const userWithEmail = await this.usersService.getUserByEmail(email.toLowerCase())
 
