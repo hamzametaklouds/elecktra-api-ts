@@ -769,7 +769,8 @@ export class AgentsService {
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
-      .populate('tags', 'name color description');
+      .populate('tags', 'name color description')
+      .lean(); // Use lean() to get plain objects
 
     if (!agent) {
       throw new NotFoundException('Agent not found');
@@ -784,7 +785,7 @@ export class AgentsService {
     const invitations = await this.invitationsService.getInvitationsByAgentId(id);
 
     return {
-      ...agent.toObject(),
+      ...agent,
       invitations
     };
   }
