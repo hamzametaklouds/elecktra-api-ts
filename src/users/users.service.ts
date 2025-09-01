@@ -608,6 +608,7 @@ export class UsersService {
           title: agent?.title,
           image: agent?.image,
           email: agent?.email,
+          status: agent?.status,
           phone_no: agent?.phone_no,
           country_code: agent?.country_code,
           gender: agent?.gender,
