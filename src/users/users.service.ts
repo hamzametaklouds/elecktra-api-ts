@@ -11,7 +11,6 @@ import { SignUpUserDto } from 'src/auth/dtos/sign-up.dto';
 import { InvitationsService } from 'src/invitations/invitations.service';
 import { Role } from 'src/roles/roles.schema';
 import { CompanyService } from 'src/company/company.service';
-import { ChatService } from 'src/chat/chat.service';
 const bcrypt = require('bcryptjs');
 
 const { RESOURCE_NOT_FOUND } = getMessages('users(s)');
@@ -26,8 +25,6 @@ export class UsersService {
     private invitationService: InvitationsService,
     @Inject(forwardRef(() => CompanyService))
     private companyService: CompanyService,
-    @Inject(forwardRef(() => ChatService))
-    private chatService: ChatService,
   ) { }
 
   async getUserByEmail(email: string): Promise<IUsers> {

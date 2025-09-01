@@ -6,7 +6,6 @@ import admin from 'firebase-admin';
 import { AppModule } from './app.module';
 import { AuthorizationHeader, AuthorizationHeaderSchema } from './app/swagger.constant';
 import { FirebaseServiceAccount } from './app/fire-base';
-import { WebSocketAdapter } from './chat/websocket.adapter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -30,10 +29,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  // Initialize WebSocket adapter
-  logger.log('Initializing WebSocket adapter...');
-  const wsAdapter = new WebSocketAdapter(app);
-  app.useWebSocketAdapter(wsAdapter);
+  // // Initialize WebSocket adapter
+  // logger.log('Initializing WebSocket adapter...');
+  // const wsAdapter = new WebSocketAdapter(app);
+  // app.useWebSocketAdapter(wsAdapter);
 
   logger.log('WebSocket adapter initialized');
 

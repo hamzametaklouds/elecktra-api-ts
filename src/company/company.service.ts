@@ -6,15 +6,12 @@ import { CreateCompanyDto } from './dtos/create-company.dto';
 import { UpdateCompanyDto } from './dtos/update-company.dto';
 import { IPageinatedDataTable } from 'src/app/interfaces';
 import { Role } from 'src/roles/roles.schema';
-import { ChatService } from 'src/chat/chat.service';
 
 @Injectable()
 export class CompanyService {
   constructor(
     @Inject(COMPANY_PROVIDER_TOKEN)
     private companyModel: Model<ICompany>,
-    @Inject(forwardRef(() => ChatService))
-    private chatService: ChatService,
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto, user: { userId?: ObjectId }): Promise<ICompany> {

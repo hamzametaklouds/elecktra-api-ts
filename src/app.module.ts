@@ -15,7 +15,6 @@ import { AgentsModule } from './agents/agents.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { ToolsModule } from './tools/tools.module';
 import { AgentRequestsModule } from './agent-requests/agent-requests.module';
-import { ChatModule } from './chat/chat.module';
 import { DeliveredAgentsModule } from './delivered-agents/delivered-agents.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -51,7 +50,6 @@ import { TagsModule } from './tags/tags.module';
     ToolsModule,
     AgentRequestsModule,
     AuthModule,
-    ChatModule,
     DeliveredAgentsModule,
     FileUploadModule,
     NotificationsModule,
