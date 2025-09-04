@@ -7,45 +7,6 @@ import { ObjectId } from 'mongoose';
 import { Type } from 'class-transformer';
 
 
-class WorkflowDto {
-
-  @ApiProperty()
-  @IsMongoId()
-  @IsOptional()
-  _id?: ObjectId;
-
-
-  @ApiProperty()
-  @IsString()
-  title: string;
-
-  @ApiProperty()
-  @IsString()
-  description: string;
-
-  @ApiProperty()
-  @IsNumber()
-  price: number;
-
-  @ApiProperty()
-  @IsBoolean()
-  @IsOptional()
-  is_disabled?: boolean;
-
-  @ApiProperty()
-  @IsArray()
-  @IsMongoId({ each: true })
-  @IsOptional()
-  integrations?: ObjectId[];
-
-  @ApiProperty()
-  @IsNumber()
-  weeks: number;
-
-  @ApiProperty()
-  @IsNumber()
-  installation_price: number;
-}
 
 export class UpdateAgentDto extends PartialType(CreateAgentDto) {
   @ApiProperty({
@@ -57,12 +18,6 @@ export class UpdateAgentDto extends PartialType(CreateAgentDto) {
   @IsOptional()
   status?: AgentStatus;
 
-  @ApiProperty({ type: [WorkflowDto] })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => WorkflowDto)
-  @IsOptional()
-  work_flows?: WorkflowDto[];
 
   @ApiProperty()
   @IsBoolean()

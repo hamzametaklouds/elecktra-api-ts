@@ -21,6 +21,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { NotificationSettingsModule } from './notification-settings/notification-settings.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { TagsModule } from './tags/tags.module';
+import { MeteringModule } from './modules/metering/metering.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { TagsModule } from './tags/tags.module';
     NotificationSettingsModule,
     DashboardModule,
     TagsModule,
+    MeteringModule,
   ],
   controllers: [AppController],
   providers: [AppService],

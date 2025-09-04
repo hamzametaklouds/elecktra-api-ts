@@ -3,38 +3,6 @@ import { IsString, IsNumber, IsBoolean, IsArray, IsOptional, ValidateNested, IsM
 import { Type } from 'class-transformer';
 import { ObjectId } from 'mongoose';
 
-class WorkflowDto {
-  @ApiProperty()
-  @IsString()
-  title: string;
-
-  @ApiProperty()
-  @IsString()
-  description: string;
-
-  @ApiProperty()
-  @IsNumber()
-  price: number;
-
-  @ApiProperty()
-  @IsBoolean()
-  @IsOptional()
-  is_disabled?: boolean;
-
-  @ApiProperty()
-  @IsArray()
-  @IsMongoId({ each: true })
-  @IsOptional()
-  integrations?: ObjectId[];
-
-  @ApiProperty()
-  @IsNumber()
-  weeks: number;
-
-  @ApiProperty()
-  @IsNumber()
-  installation_price: number;
-}
 
 class PricingDto {
   @ApiProperty()
@@ -83,11 +51,6 @@ export class CreateAgentDto {
   @IsOptional()
   pricing: PricingDto;
 
-  @ApiProperty({ type: [WorkflowDto] })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => WorkflowDto)
-  work_flows: WorkflowDto[];
 
   @ApiProperty({
     description: 'Agent tags (max 5) - can be tag names (strings) or existing tag IDs',

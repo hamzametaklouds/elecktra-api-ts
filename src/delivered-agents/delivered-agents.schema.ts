@@ -11,29 +11,12 @@ export enum MaintenanceStatus {
   SUBSCRIPTION_CANCELLED = 'Subscription Cancelled'
 }
 
-interface IWorkflow {
-  _id: Schema.Types.ObjectId;
-  title: string;
-  description: string;
-  price: number;
-  weeks: number;
-  installation_price: number;
-  integrations: {
-    _id: Schema.Types.ObjectId;
-    title: string;
-    description: string;
-    image: string;
-  }[];
-}
-
 interface IPricing {
   installation_price?: number;
   subscription_price?: number;
 }
 
 interface IInvoice {
-  workflows_total: number;
-  workflows_installation_total: number;
   installation_price: number;
   subscription_price: number;
   grand_total: number;
@@ -54,7 +37,6 @@ export interface IDeliveredAgent {
   company_owner_id: Schema.Types.ObjectId;
   maintenance_status: MaintenanceStatus;
   pricing: IPricing;
-  work_flows: IWorkflow[];
   invoice: IInvoice;
   request_time_frame: number;
   created_by?: Schema.Types.ObjectId;
@@ -63,24 +45,8 @@ export interface IDeliveredAgent {
   is_deleted?: boolean;
 }
 
-const WorkflowSchema = new Schema({
-  _id: Schema.Types.ObjectId,
-  title: String,
-  description: String,
-  price: Number,
-  weeks: Number,
-  installation_price: Number,
-  integrations: [{
-    _id: Schema.Types.ObjectId,
-    title: String,
-    description: String,
-    image: String
-  }]
-});
 
 const InvoiceSchema = new Schema({
-  workflows_total: Number,
-  workflows_installation_total: Number,
   installation_price: Number,
   subscription_price: Number,
   grand_total: Number,
@@ -151,7 +117,6 @@ export const DeliveredAgentSchema = new Schema<IDeliveredAgent>({
       required: false
     }
   },
-  work_flows: [WorkflowSchema],
   invoice: InvoiceSchema,
   request_time_frame: {
     type: Number,

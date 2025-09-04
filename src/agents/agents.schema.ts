@@ -13,17 +13,6 @@ export enum AgentStatus {
   TERMINATED = 'Terminated'
 }
 
-export interface IWorkflow {
-  _id?: Schema.Types.ObjectId;
-  title: string;
-  description: string;
-  price: number;
-  weeks: number;
-  installation_price: number;
-  is_disabled: boolean;
-  integrations: Schema.Types.ObjectId[];
-}
-
 export interface IPricing {
   installation_price?: number;
   subscription_price?: number;
@@ -39,7 +28,6 @@ export interface IAgent {
   image: string;
   status: AgentStatus;
   pricing: IPricing;
-  work_flows: IWorkflow[];
   company_id?: Schema.Types.ObjectId;
   normalized_title: string;
   tags: Schema.Types.ObjectId[];
@@ -53,36 +41,6 @@ export interface IAgent {
   is_deleted?: boolean;
 }
 
-const WorkflowSchema = new Schema<IWorkflow>({
-  title: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  price: {
-    type: Number,
-    required: true
-  },
-  weeks: {
-    type: Number,
-    required: true
-  },
-  installation_price: {
-    type: Number,
-    required: true
-  },
-  is_disabled: {
-    type: Boolean,
-    default: false
-  },
-  integrations: [{
-    type: Schema.Types.ObjectId,
-    ref: INTEGRATIONS_COLLECTION
-  }]
-});
 
 export const AgentSchema = new Schema<IAgent>(
   {
@@ -128,7 +86,6 @@ export const AgentSchema = new Schema<IAgent>(
         required: false
       }
     },
-    work_flows: [WorkflowSchema],
     company_id: {
       type: Schema.Types.ObjectId,
       ref: COMPANY_COLLECTION,

@@ -5,6 +5,7 @@ import { CreateAgentDto } from './dtos/create-agent.dto';
 import { UpdateAgentDto } from './dtos/update-agent.dto';
 
 import { CreateAgentWizardDto } from './dtos/create-agent-wizard.dto';
+import { UpdateAgentToolsDto } from './dtos/update-agent-tools.dto';
 import { JWTAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { RolesGuard } from 'src/app/guards/role-guard';
 import { Roles } from 'src/app/dtos/roles-decorator';
@@ -95,38 +96,6 @@ export class AgentsController {
     };
   }
 
-  // @Get('search')
-  // @ApiBearerAuth(AuthorizationHeader)
-  // @UseGuards(JWTAuthGuard, RolesGuard)
-  // @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER, Role.SUPPORT_ADMIN)
-  // @ApiOperation({ summary: 'Search agents with simple filters' })
-  // @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
-  // @ApiResponse({ status: 401, description: 'Unauthorized' })
-  // async searchAgents(
-  //   @Req() req: Request,
-  //   @Query('q') q?: string,              // Text search: "email assistant"
-  //   @Query('status') status?: string,    // Single status: "Active" or "Draft"
-  //   @Query('page') page: number = 1,     // Page number (simple!)
-  //   @Query('limit') limit: number = 20   // Results per page
-  // ) {
-  //   const result = await this.agentsService.getPaginatedAgents(
-  //     limit,
-  //     page,
-  //     { 
-  //       ...(q && { $text: { $search: q } }),
-  //       ...(status && { status }),
-  //     },
-  //     { created_at: -1 }, // Most recent first
-  //     req.user
-  //   );
-
-  //   return {
-  //     status: true,
-  //     statusCode: 200,
-  //     message: 'Agents retrieved successfully',
-  //     data: result
-  //   };
-  // }
 
   @Get()
   @ApiBearerAuth(AuthorizationHeader)
@@ -170,23 +139,7 @@ export class AgentsController {
     return this.agentsService.findOne(id);
   }
 
-  // @Put(':id')
-  // @ApiBearerAuth(AuthorizationHeader)
-  // @UseGuards(JWTAuthGuard, RolesGuard)
-  // @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER,Role.SUPPORT_ADMIN)
-  // @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  // @ApiOperation({ summary: 'Update an agent' })
-  // @ApiResponse({ status: 200, description: 'Agent successfully updated' })
-  // @ApiResponse({ status: 404, description: 'Agent not found' })
-  // @ApiResponse({ status: 401, description: 'Unauthorized' })
-  // @ApiBody({ type: UpdateAgentDto })
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateAgentDto: UpdateAgentDto,
-  //   @Req() req: Request,
-  // ) {
-  //   return this.agentsService.update(id, updateAgentDto, req.user);
-  // }//hello pushing code 
+
 
   @Delete(':id')
   @ApiBearerAuth(AuthorizationHeader)
@@ -216,6 +169,49 @@ export class AgentsController {
       status: true,
       statusCode: 200,
       message: 'Agent details retrieved successfully',
+      data: result
+    };
+  }
+
+  @Get(':id/consumption-billing')
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.USER, Role.SUPPORT_ADMIN)
+  @ApiOperation({ summary: 'Get agent consumption and billing data' })
+  @ApiResponse({ status: 200, description: 'Successfully retrieved agent consumption and billing data' })
+  @ApiResponse({ status: 404, description: 'Agent not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getAgentConsumptionBilling(@Param('id') id: string, @Req() req: Request) {
+    const result = await this.agentsService.getAgentConsumptionBilling(id, req.user);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Agent consumption and billing data retrieved successfully',
+      data: result
+    };
+  }
+
+  @Put(':id/tools')
+  @ApiBearerAuth(AuthorizationHeader)
+  @UseGuards(JWTAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.BUSINESS_OWNER, Role.SUPPORT_ADMIN)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiOperation({ summary: 'Update agent tools selection' })
+  @ApiResponse({ status: 200, description: 'Agent tools updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request - Validation failed or tools invalid' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Agent not found' })
+  @ApiBody({ type: UpdateAgentToolsDto })
+  async updateAgentTools(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateAgentToolsDto,
+    @Req() req: Request,
+  ) {
+    const result = await this.agentsService.updateAgentTools(id, updateDto, req.user);
+    return {
+      status: true,
+      statusCode: 200,
+      message: 'Agent tools updated successfully',
       data: result
     };
   }

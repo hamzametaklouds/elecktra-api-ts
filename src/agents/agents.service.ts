@@ -11,6 +11,10 @@ import { CreateAgentWizardDto } from './dtos/create-agent-wizard.dto';
 import { ToolsService } from '../tools/tools.service';
 import { InvitationsService } from '../invitations/invitations.service';
 import { TagsService } from '../tags/tags.service';
+import { METERING_PROVIDER_TOKENS } from 'src/modules/metering/metering.model';
+import { DailyAgentUsage } from 'src/modules/metering/schemas/daily-agent-usage.schema';
+import { AgentPricing } from 'src/modules/metering/schemas/agent-pricing.schema';
+import { Invoice } from 'src/modules/metering/schemas/invoice.schema';
 
 @Injectable()
 export class AgentsService {
@@ -21,6 +25,9 @@ export class AgentsService {
     @Inject(forwardRef(() => InvitationsService))
     private invitationsService: InvitationsService,
     private tagsService: TagsService,
+    @Inject(METERING_PROVIDER_TOKENS.DAILY_AGENT_USAGE) private dailyUsageModel: Model<DailyAgentUsage>,
+    @Inject(METERING_PROVIDER_TOKENS.AGENT_PRICING) private agentPricingModel: Model<AgentPricing>,
+    @Inject(METERING_PROVIDER_TOKENS.INVOICE) private invoiceModel: Model<Invoice>,
   ) {}
 
   async create(createAgentDto: CreateAgentDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
@@ -75,7 +82,7 @@ export class AgentsService {
       })
       .populate('tags', 'name color description')
       .populate('client_id', 'first_name last_name email image')
-      .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('tools_selected', 'title description icon_url category is_disabled')
       .sort(orderBy)
       .skip(skip)
       .limit(rpp);
@@ -128,7 +135,7 @@ export class AgentsService {
       })
       .populate('tags', 'name color description')
       .populate('client_id', 'first_name last_name email image')
-      .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('tools_selected', 'title description icon_url category is_disabled')
       .sort(orderBy);
 
     // Transform agents to add client_name from populated client_id
@@ -156,7 +163,7 @@ export class AgentsService {
       .populate('updated_by', 'first_name last_name')
       .populate('tags', 'name color description')
       .populate('client_id', 'first_name last_name email image')
-      .populate('tools_selected', 'title description icon category is_disabled');
+      .populate('tools_selected', 'title description icon_url category is_disabled');
 
     if (!agent) {
       throw new NotFoundException('Agent not found');
@@ -197,7 +204,7 @@ export class AgentsService {
     })
     .populate('tags', 'name color description')
     .populate('client_id', 'first_name last_name email image')
-    .populate('tools_selected', 'title description icon category is_disabled');
+    .populate('tools_selected', 'title description icon_url category is_disabled');
   }
 
   async remove(id: string, user: { userId?: ObjectId }) {
@@ -230,7 +237,7 @@ export class AgentsService {
     })
     .populate('tags', 'name color description')
     .populate('client_id', 'first_name last_name email image')
-    .populate('tools_selected', 'title description icon category is_disabled');
+    .populate('tools_selected', 'title description icon_url category is_disabled');
   }
 
   // Wizard Methods
@@ -306,7 +313,7 @@ export class AgentsService {
       },
       { new: true }
     )
-      .populate('tools_selected', 'key title icon_url category')
+      .populate('tools_selected', 'title description icon_url category is_disabled')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name');
@@ -404,7 +411,7 @@ export class AgentsService {
       },
       { new: true }
     )
-    .populate('tools_selected', 'key title icon_url category')
+    .populate('tools_selected', 'title description icon_url category is_disabled')
     .populate('client_id', 'first_name last_name email image')
     .populate('company_id', 'name')
     .populate('created_by', 'first_name last_name')
@@ -432,7 +439,6 @@ export class AgentsService {
       assistant_id: createDto.assistant_id,
       image: createDto.image,
       pricing: { installation_price: 0, subscription_price: 0 },
-      work_flows: []
     };
 
  
@@ -529,7 +535,7 @@ export class AgentsService {
 
     // Return final agent with all populated data
     const finalAgent = await this.agentModel.findById(savedAgent._id)
-      .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('tools_selected', 'title description icon_url category is_disabled')
       .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
@@ -741,7 +747,7 @@ export class AgentsService {
 
     // Return final agent with all populated data
     const finalAgent = await this.agentModel.findById(id)
-      .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('tools_selected', 'title description icon_url category is_disabled')
       .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
@@ -764,7 +770,7 @@ export class AgentsService {
   async getAgentDetails(id: string, user: { userId?: ObjectId, company_id?: ObjectId }) {
     const agent = await this.agentModel
       .findOne({ _id: id, is_deleted: false })
-      .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('tools_selected', 'title description icon_url category is_disabled')
       .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
@@ -839,7 +845,7 @@ export class AgentsService {
 
     const agents = await this.agentModel
       .find(filter)
-      .populate('tools_selected', 'title description icon category is_disabled')
+      .populate('tools_selected', 'title description icon_url category is_disabled')
       .populate('client_id', 'first_name last_name email image')
       .populate('company_id', 'name')
       .populate('created_by', 'first_name last_name')
@@ -882,5 +888,191 @@ export class AgentsService {
     if (existingAgent) {
       throw new BadRequestException(`Agent with title '${title}' already exists in this workspace`);
     }
+  }
+
+  /**
+   * Get agent consumption and billing data
+   */
+  async getAgentConsumptionBilling(id: string, user: { userId?: ObjectId, company_id?: ObjectId }) {
+    // First verify agent exists and user has access
+    const agent = await this.agentModel
+      .findOne({ _id: id, is_deleted: false })
+      .select('_id company_id')
+      .lean();
+
+    if (!agent) {
+      throw new NotFoundException('Agent not found');
+    }
+
+    // Check if user has access to this agent
+    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+      throw new BadRequestException('You do not have access to this agent');
+    }
+
+    // Get current month's usage data
+    const now = new Date();
+    const currentMonth = now.toISOString().slice(0, 7); // YYYY-MM format
+    const startOfMonth = `${currentMonth}-01`;
+    const endOfMonth = `${currentMonth}-${new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()}`;
+
+    // Get daily usage for current month
+    const dailyUsage = await this.getDailyUsageData(id, startOfMonth, endOfMonth);
+    
+    // Get pricing information
+    const pricing = await this.getAgentPricing(id);
+    
+    // Get recent invoices
+    const invoices = await this.getRecentInvoices(id);
+    
+    // Calculate current month totals
+    const currentMonthTotals = this.calculateMonthTotals(dailyUsage, pricing);
+    
+    // Get KPI breakdown
+    const kpiBreakdown = this.getKpiBreakdown(dailyUsage, pricing);
+
+    return {
+      agent_id: id,
+      current_month: currentMonth,
+      period: {
+        start: startOfMonth,
+        end: endOfMonth
+      },
+      usage_summary: {
+        runtime_minutes: currentMonthTotals.runtime_minutes,
+        total_cost: currentMonthTotals.total_cost,
+        kpi_breakdown: kpiBreakdown
+      },
+      pricing: pricing,
+      recent_invoices: invoices,
+      daily_usage: dailyUsage
+    };
+  }
+
+  /**
+   * Get daily usage data for an agent
+   */
+  private async getDailyUsageData(agentId: string, startDate: string, endDate: string) {
+    try {
+      const dailyUsage = await this.dailyUsageModel.find({
+        agent_id: agentId,
+        date: { $gte: startDate, $lte: endDate }
+      }).lean();
+      return dailyUsage;
+    } catch (error) {
+      console.error('Error fetching daily usage data:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get agent pricing information
+   */
+  private async getAgentPricing(agentId: string) {
+    try {
+      const pricing = await this.agentPricingModel.findOne({ agent_id: agentId })
+        .sort({ version: -1 })
+        .lean();
+      
+      if (!pricing) {
+        return {
+          version: 'v1',
+          fixed_per_min_rate: 0.02,
+          kpi_rates: []
+        };
+      }
+      
+      return pricing;
+    } catch (error) {
+      console.error('Error fetching agent pricing:', error);
+      return {
+        version: 'v1',
+        fixed_per_min_rate: 0.02,
+        kpi_rates: []
+      };
+    }
+  }
+
+  /**
+   * Get recent invoices for an agent
+   */
+  private async getRecentInvoices(agentId: string) {
+    try {
+      const invoices = await this.invoiceModel.find({ agent_id: agentId })
+        .sort({ created_at: -1 })
+        .limit(5)
+        .lean();
+      return invoices;
+    } catch (error) {
+      console.error('Error fetching recent invoices:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Calculate month totals from daily usage data
+   */
+  private calculateMonthTotals(dailyUsage: any[], pricing: any) {
+    let runtimeMinutes = 0;
+    const kpiTotals: Record<string, number> = {};
+
+    // Calculate totals from daily usage
+    dailyUsage.forEach(day => {
+      runtimeMinutes += day.totals?.runtime_minutes || 0;
+      if (day.totals?.kpis) {
+        Object.entries(day.totals.kpis).forEach(([key, value]) => {
+          kpiTotals[key] = (kpiTotals[key] || 0) + (typeof value === 'number' ? value : 0);
+        });
+      }
+    });
+
+    // Calculate costs
+    const runtimeCost = runtimeMinutes * (pricing.fixed_per_min_rate || 0);
+    let kpiCost = 0;
+
+    pricing.kpi_rates?.forEach((rate: any) => {
+      const quantity = kpiTotals[rate.kpi_key] || 0;
+      kpiCost += quantity * rate.unit_cost;
+    });
+
+    const totalCost = runtimeCost + kpiCost;
+
+    return {
+      runtime_minutes: runtimeMinutes,
+      runtime_cost: runtimeCost,
+      kpi_cost: kpiCost,
+      total_cost: totalCost
+    };
+  }
+
+  /**
+   * Get KPI breakdown for display
+   */
+  private getKpiBreakdown(dailyUsage: any[], pricing: any) {
+    const kpiTotals: Record<string, number> = {};
+    const kpiCosts: Record<string, number> = {};
+
+    // Calculate KPI totals
+    dailyUsage.forEach(day => {
+      if (day.totals?.kpis) {
+        Object.entries(day.totals.kpis).forEach(([key, value]) => {
+          kpiTotals[key] = (kpiTotals[key] || 0) + (typeof value === 'number' ? value : 0);
+        });
+      }
+    });
+
+    // Calculate KPI costs
+    pricing.kpi_rates?.forEach((rate: any) => {
+      const quantity = kpiTotals[rate.kpi_key] || 0;
+      kpiCosts[rate.kpi_key] = quantity * rate.unit_cost;
+    });
+
+    // Format for display
+    return Object.keys(kpiTotals).map(key => ({
+      key,
+      quantity: kpiTotals[key],
+      unit_cost: pricing.kpi_rates?.find((r: any) => r.kpi_key === key)?.unit_cost || 0,
+      total_cost: kpiCosts[key] || 0,
+      unit: pricing.kpi_rates?.find((r: any) => r.kpi_key === key)?.unit || 'unit'
+    }));
   }
 } 

@@ -37,28 +37,13 @@ export class AgentRequestsService {
       }
     }
 
-    // Validate and get selected workflows with all their integrations
-    const selectedWorkflows = agent.work_flows.filter(agentWorkflow => 
-      createAgentRequestDto.workflow_ids.some(workflowId => 
-        workflowId.toString() === agentWorkflow._id.toString()
-      )
-    );
-
-    // Validate if all requested workflow IDs exist
-    if (selectedWorkflows.length !== createAgentRequestDto.workflow_ids.length) {
-      throw new BadRequestException('Invalid workflow IDs provided');
-    }
-
     // Calculate totals
-    const workflowsTotal = selectedWorkflows.reduce((sum, workflow) => sum + workflow.price, 0);
-    const workflowsInstallationTotal = selectedWorkflows.reduce((sum, workflow) => sum + workflow.installation_price, 0);
     const baseInstallationPrice = agent.pricing.installation_price || 0;
-    const totalInstallationPrice = baseInstallationPrice + workflowsInstallationTotal;
     const subscriptionPrice = agent.pricing.subscription_price || 0;
-    const grandTotal = workflowsTotal + totalInstallationPrice + subscriptionPrice;
+    const grandTotal = baseInstallationPrice + subscriptionPrice;
     
-    // Calculate request time frame
-    const requestTimeFrame = selectedWorkflows.reduce((sum, workflow) => sum + workflow.weeks, 0);
+    // Set default request time frame
+    const requestTimeFrame = 1;
 
     // Create agent request with cloned data
     const agentRequest = new this.agentRequestModel({
@@ -74,14 +59,11 @@ export class AgentRequestsService {
       status: AgentRequestStatus.SUBMITTED,
       request_time_frame: requestTimeFrame,
       pricing: {
-        installation_price: totalInstallationPrice,
+        installation_price: baseInstallationPrice,
         subscription_price: subscriptionPrice
       },
-      work_flows: selectedWorkflows,
       invoice: {
-        workflows_total: workflowsTotal,
-        workflows_installation_total: workflowsInstallationTotal,
-        installation_price: totalInstallationPrice,
+        installation_price: baseInstallationPrice,
         subscription_price: subscriptionPrice,
         grand_total: grandTotal,
         request_time_frame: requestTimeFrame
@@ -117,47 +99,6 @@ export class AgentRequestsService {
           from: 'agents',
           localField: 'agent_id',
           foreignField: '_id',
-          pipeline: [
-            {
-              $lookup: {
-                from: 'integrations',
-                localField: 'work_flows.integrations',
-                foreignField: '_id',
-                as: 'allIntegrations'
-              }
-            },
-            {
-              $addFields: {
-                work_flows: {
-                  $map: {
-                    input: '$work_flows',
-                    as: 'workflow',
-                    in: {
-                      $mergeObjects: [
-                        '$$workflow',
-                        {
-                          integrations: {
-                            $filter: {
-                              input: '$allIntegrations',
-                              as: 'integration',
-                              cond: {
-                                $in: ['$$integration._id', '$$workflow.integrations']
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            },
-            {
-              $project: {
-                allIntegrations: 0
-              }
-            }
-          ],
           as: 'agent_id'
         }
       },
@@ -239,47 +180,6 @@ export class AgentRequestsService {
           from: 'agents',
           localField: 'agent_id',
           foreignField: '_id',
-          pipeline: [
-            {
-              $lookup: {
-                from: 'integrations',
-                localField: 'work_flows.integrations',
-                foreignField: '_id',
-                as: 'allIntegrations'
-              }
-            },
-            {
-              $addFields: {
-                work_flows: {
-                  $map: {
-                    input: '$work_flows',
-                    as: 'workflow',
-                    in: {
-                      $mergeObjects: [
-                        '$$workflow',
-                        {
-                          integrations: {
-                            $filter: {
-                              input: '$allIntegrations',
-                              as: 'integration',
-                              cond: {
-                                $in: ['$$integration._id', '$$workflow.integrations']
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            },
-            {
-              $project: {
-                allIntegrations: 0
-              }
-            }
-          ],
           as: 'agent_id'
         }
       },
@@ -351,47 +251,6 @@ export class AgentRequestsService {
           from: 'agents',
           localField: 'agent_id',
           foreignField: '_id',
-          pipeline: [
-            {
-              $lookup: {
-                from: 'integrations',
-                localField: 'work_flows.integrations',
-                foreignField: '_id',
-                as: 'allIntegrations'
-              }
-            },
-            {
-              $addFields: {
-                work_flows: {
-                  $map: {
-                    input: '$work_flows',
-                    as: 'workflow',
-                    in: {
-                      $mergeObjects: [
-                        '$$workflow',
-                        {
-                          integrations: {
-                            $filter: {
-                              input: '$allIntegrations',
-                              as: 'integration',
-                              cond: {
-                                $in: ['$$integration._id', '$$workflow.integrations']
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            },
-            {
-              $project: {
-                allIntegrations: 0
-              }
-            }
-          ],
           as: 'agent_id'
         }
       },

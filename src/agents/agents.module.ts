@@ -7,6 +7,7 @@ import { AgentsService } from './agents.service';
 import { ToolsModule } from 'src/tools/tools.module';
 import { InvitationsModule } from 'src/invitations/invitations.module';
 import { TagsModule } from 'src/tags/tags.module';
+import { MeteringModule } from 'src/modules/metering/metering.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { TagsModule } from 'src/tags/tags.module';
     ToolsModule,
     forwardRef(() => InvitationsModule),
     TagsModule,
+    MeteringModule,
   ],
   controllers: [AgentsController],
   providers: [AgentsService, ...AgentsModel],

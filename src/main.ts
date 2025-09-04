@@ -57,7 +57,6 @@ async function bootstrap() {
   logger.log('Starting HTTP server...');
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`);
-  logger.log(`WebSocket server is running on: ws://localhost:${wsPort}/chat`);
   logger.log('Application bootstrap completed');
 }
 bootstrap();

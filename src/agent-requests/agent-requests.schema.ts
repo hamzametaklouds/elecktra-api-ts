@@ -4,18 +4,6 @@ import { AgentRequestStatus } from './agent-requests.constants';
 import { COMPANY_COLLECTION } from 'src/company/company.constants';
 import { USERS_COLLECTION } from 'src/users/users.constants';
 
-interface IWorkflowRequest {
-  _id: Schema.Types.ObjectId;
-  title: string;
-  description: string;
-  price: number;
-  weeks: number;
-  installation_price: number;
-  integrations: {
-    _id: Schema.Types.ObjectId;
-    title: string;
-  }[];
-}
 
 interface IPricing {
   installation_price?: number;
@@ -23,8 +11,6 @@ interface IPricing {
 }
 
 interface IInvoice {
-  workflows_total: number;
-  workflows_installation_total: number;
   installation_price: number;
   subscription_price: number;
   grand_total: number;
@@ -45,7 +31,6 @@ export interface IAgentRequest {
   company_owner_id: Schema.Types.ObjectId;
   status: AgentRequestStatus;
   pricing: IPricing;
-  work_flows: IWorkflowRequest[];
   invoice: IInvoice;
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
@@ -54,52 +39,8 @@ export interface IAgentRequest {
   request_time_frame: number;
 }
 
-const WorkflowRequestSchema = new Schema<IWorkflowRequest>({
-  _id: {
-    type: Schema.Types.ObjectId,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  price: {
-    type: Number,
-    required: true
-  },
-  weeks: {
-    type: Number,
-    required: true
-  },
-  installation_price: {
-    type: Number,
-    required: true
-  },
-  integrations: [{
-    _id: {
-      type: Schema.Types.ObjectId,
-      required: true
-    },
-    title: {
-      type: String,
-      required: true
-    }
-  }]
-});
 
 const InvoiceSchema = new Schema<IInvoice>({
-  workflows_total: {
-    type: Number,
-    required: true
-  },
-  workflows_installation_total: {
-    type: Number,
-    required: true
-  },
   installation_price: {
     type: Number,
     required: true
@@ -183,7 +124,6 @@ export const AgentRequestSchema = new Schema<IAgentRequest>(
         required: false
       }
     },
-    work_flows: [WorkflowRequestSchema],
     invoice: InvoiceSchema,
     created_by: {
       type: Schema.Types.ObjectId,

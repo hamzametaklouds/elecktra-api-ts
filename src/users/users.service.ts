@@ -592,24 +592,65 @@ export class UsersService {
       const userObj = user.toObject ? user.toObject() : user;
       
       try {
-        // Find agents where this user is assigned as client_id
+        // Find agents where this user is assigned as client_id with complete data
         const agents = await Connection.collection('agents').find({
           client_id: userObj._id,
           is_deleted: false
-        }, {
-          projection: { _id: 1, title: 1 }
         }).toArray();
         
-        const assignedAgents = agents.map(agent => ({
-          _id: agent?._id,
-          title: agent?.title,
-          image: agent?.image,
-          email: agent?.email,
-          status: agent?.status,
-          phone_no: agent?.phone_no,
-          country_code: agent?.country_code,
-          gender: agent?.gender,
-          biography: agent?.biography,
+        // Populate tools_selected for each agent
+        const assignedAgents = await Promise.all(agents.map(async (agent) => {
+          let populatedTools = [];
+          
+          if (agent.tools_selected && agent.tools_selected.length > 0) {
+            try {
+              // Get tools data with icons
+              const toolIds = agent.tools_selected.map(id => id.toString());
+              const tools = await Connection.collection('tools').find({
+                _id: { $in: toolIds.map(id => new Types.ObjectId(id)) },
+                is_deleted: false
+              }, {
+                projection: { 
+                  _id: 1, 
+                  key: 1, 
+                  title: 1, 
+                  description: 1, 
+                  icon_url: 1, 
+                  category: 1, 
+                  is_disabled: 1 
+                }
+              }).toArray();
+              
+              populatedTools = tools;
+            } catch (error) {
+              console.error('Error populating tools for agent:', agent._id, error);
+            }
+          }
+          
+          return {
+            _id: agent._id,
+            title: agent.title,
+            description: agent.description,
+            display_description: agent.display_description,
+            assistant_id: agent.assistant_id,
+            image: agent.image,
+            status: agent.status,
+            service_type: agent.service_type,
+            pricing: agent.pricing,
+            company_id: agent.company_id,
+            normalized_title: agent.normalized_title,
+            tags: agent.tags,
+            client_id: agent.client_id,
+            client_name: agent.client_name,
+            tools_selected: populatedTools,
+            tools_count: agent.tools_count,
+            created_by: agent.created_by,
+            updated_by: agent.updated_by,
+            is_disabled: agent.is_disabled,
+            is_deleted: agent.is_deleted,
+            created_at: agent.created_at,
+            updated_at: agent.updated_at
+          };
         }));
         
         return {
