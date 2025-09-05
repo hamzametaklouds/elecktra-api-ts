@@ -208,7 +208,15 @@ AgentSchema.pre('findOneAndUpdate', function(next) {
   
   if (update.tags && update.tags.length > 0) {
     const uniqueTags = Array.from(new Set(
-      update.tags.map(tag => tag.toUpperCase().trim())
+      update.tags.map(tag => {
+        // Handle both string tags and ObjectId tags
+        if (typeof tag === 'string') {
+          return tag.toUpperCase().trim();
+        } else {
+          // If it's an ObjectId or other type, convert to string
+          return tag.toString();
+        }
+      })
     )).slice(0, 5);
     update.tags = uniqueTags;
   }
