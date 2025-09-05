@@ -598,9 +598,10 @@ export class UsersService {
           is_deleted: false
         }).toArray();
         
-        // Populate tools_selected for each agent
+        // Populate tools_selected and tags for each agent
         const assignedAgents = await Promise.all(agents.map(async (agent) => {
           let populatedTools = [];
+          let populatedTags = [];
           
           if (agent.tools_selected && agent.tools_selected.length > 0) {
             try {
@@ -626,6 +627,28 @@ export class UsersService {
               console.error('Error populating tools for agent:', agent._id, error);
             }
           }
+
+          if (agent.tags && agent.tags.length > 0) {
+            try {
+              // Get tags data
+              const tagIds = agent.tags.map(id => id.toString());
+              const tags = await Connection.collection('tags').find({
+                _id: { $in: tagIds.map(id => new Types.ObjectId(id)) },
+                is_deleted: false
+              }, {
+                projection: { 
+                  _id: 1, 
+                  name: 1, 
+                  color: 1, 
+                  description: 1 
+                }
+              }).toArray();
+              
+              populatedTags = tags;
+            } catch (error) {
+              console.error('Error populating tags for agent:', agent._id, error);
+            }
+          }
           
           return {
             _id: agent._id,
@@ -639,7 +662,7 @@ export class UsersService {
             pricing: agent.pricing,
             company_id: agent.company_id,
             normalized_title: agent.normalized_title,
-            tags: agent.tags,
+            tags: populatedTags,
             client_id: agent.client_id,
             client_name: agent.client_name,
             tools_selected: populatedTools,

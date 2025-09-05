@@ -1,5 +1,5 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { METERING_PROVIDER_TOKENS } from '../metering.model';
 import { AgentPricing } from '../schemas/agent-pricing.schema';
 
@@ -26,37 +26,55 @@ export class AgentValidationService {
    */
   async validateAgent(agent_id: string): Promise<AgentValidationResult> {
     try {
-      // Check if agent has pricing configured (this implies the agent exists)
-      const pricing = await this.pricing.findOne({ agent_id }).sort({ version: -1 }).lean();
+      // First, check if agent exists in the agents collection
+      const mongoose = require('mongoose');
+      const db = mongoose.connection.db;
+      const agent = await db.collection('agents').findOne({ 
+        _id: new Types.ObjectId(agent_id),
+        is_deleted: false 
+      });
+
+      console.log('agent', agent);
       
-      if (!pricing) {
+      if (!agent) {
         return {
           isValid: false,
-          reason: `Agent ${agent_id} not found or has no pricing configured`,
+          reason: `Agent ${agent_id} not found`,
           agent_id
         };
       }
 
-      // Validate pricing configuration
-      if (!pricing.fixed_per_min_rate || pricing.fixed_per_min_rate <= 0) {
+      // Check if agent has pricing configured in the agents collection
+      if (!agent.pricing || (agent.pricing.installation_price === undefined && agent.pricing.subscription_price === undefined)) {
         return {
           isValid: false,
-          reason: `Agent ${agent_id} has invalid pricing configuration (fixed_per_min_rate must be > 0)`,
-          agent_id,
-          pricing_version: pricing.version
+          reason: `Agent ${agent_id} has no pricing configured`,
+          agent_id
+        };
+      }
+
+      // Validate that at least one pricing field has a valid value
+      const hasValidPricing = (agent.pricing.installation_price !== undefined && agent.pricing.installation_price >= 0) ||
+                             (agent.pricing.subscription_price !== undefined && agent.pricing.subscription_price >= 0);
+
+      if (!hasValidPricing) {
+        return {
+          isValid: false,
+          reason: `Agent ${agent_id} has invalid pricing configuration`,
+          agent_id
         };
       }
 
       // Additional validation could be added here:
-      // - Check if agent is active/enabled (would require AgentsService)
+      // - Check if agent is active/enabled
       // - Check if agent is within usage limits
       // - Check if agent has valid KPI configuration
       
       return {
         isValid: true,
         agent_id,
-        pricing_version: pricing.version,
-        agent_status: 'active' // Assuming active if pricing exists
+        pricing_version: '1.0', // Default version for agent pricing
+        agent_status: agent.status || 'active'
       };
     } catch (error) {
       return {
@@ -110,18 +128,24 @@ export class AgentValidationService {
    */
   async hasValidKpiConfiguration(agent_id: string): Promise<boolean> {
     try {
-      const pricing = await this.pricing.findOne({ agent_id }).sort({ version: -1 }).lean();
+      // For now, we'll consider agents with basic pricing as having valid KPI configuration
+      // In the future, this could be extended to check for specific KPI rates
+      const mongoose = require('mongoose');
+      const db = mongoose.connection.db;
+      const agent = await db.collection('agents').findOne({ 
+        _id: new Types.ObjectId(agent_id),
+        is_deleted: false 
+      });
       
-      if (!pricing || !pricing.kpi_rates) {
+      if (!agent || !agent.pricing) {
         return false;
       }
 
-      // Check if KPI rates are properly configured
-      return pricing.kpi_rates.every(kpi => 
-        kpi.kpi_key && 
-        typeof kpi.unit_cost === 'number' && 
-        kpi.unit_cost > 0
-      );
+      // Check if agent has valid pricing configuration
+      const hasValidPricing = (agent.pricing.installation_price !== undefined && agent.pricing.installation_price >= 0) ||
+                             (agent.pricing.subscription_price !== undefined && agent.pricing.subscription_price >= 0);
+
+      return hasValidPricing;
     } catch (error) {
       return false;
     }
