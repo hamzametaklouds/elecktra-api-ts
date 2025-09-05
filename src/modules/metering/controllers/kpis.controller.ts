@@ -22,6 +22,10 @@ export class KpisController {
     // Find the newly created KPI in the registry (it should be the last one added)
     const newKpi = result.kpis[result.kpis.length - 1];
     
+    if (!newKpi) {
+      throw new Error('Failed to create KPI - no KPI found in result');
+    }
+    
     return {
       kpi_id: parseInt(newKpi.key),
       key: newKpi.key,
