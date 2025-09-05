@@ -68,11 +68,6 @@ export class AgentsService {
     const agents = await this.agentModel
       .find(filter)
       .populate({
-        path: 'work_flows.integrations',
-        select: '_id title api_key_required',
-        match: { is_deleted: false }
-      })
-      .populate({
         path: 'created_by',
         select: 'first_name last_name image roles'
       })
@@ -121,11 +116,6 @@ export class AgentsService {
     const agents = await this.agentModel
       .find(filter)
       .populate({
-        path: 'work_flows.integrations',
-        select: '_id title api_key_required',
-        match: { is_deleted: false }
-      })
-      .populate({
         path: 'created_by',
         select: 'first_name last_name'
       })
@@ -154,11 +144,6 @@ export class AgentsService {
   async findOne(id: string) {
     const agent = await this.agentModel
       .findOne({ _id: id, is_deleted: false })
-      .populate({
-        path: 'work_flows.integrations',
-        match: { is_deleted: false },
-        select: '_id title api_key_required'
-      })
       .populate('created_by', 'first_name last_name')
       .populate('updated_by', 'first_name last_name')
       .populate('tags', 'name color description')
@@ -190,11 +175,6 @@ export class AgentsService {
       { new: true }
     )
     .populate({
-      path: 'work_flows.integrations',
-      select: '_id title api_key_required',
-      match: { is_deleted: false }
-    })
-    .populate({
       path: 'created_by',
       select: 'first_name last_name'
     })
@@ -222,11 +202,6 @@ export class AgentsService {
       },
       { new: true }
     )
-    .populate({
-      path: 'work_flows.integrations',
-      select: '_id title api_key_required',
-      match: { is_deleted: false }
-    }    )
     .populate({
       path: 'created_by',
       select: 'first_name last_name'
