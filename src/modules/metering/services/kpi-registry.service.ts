@@ -54,21 +54,39 @@ export class KpiRegistryService {
    * @param createKpiDto KPI creation data
    * @returns Created KPI registry entry
    */
-  async createCustomKpi(createKpiDto: { agent_id: string; kpi_name: string; title?: string; unit?: string; description?: string }) {
-    const { agent_id, kpi_name, title, unit, description } = createKpiDto;
+  async createCustomKpi(createKpiDto: { agent_id: string; kpi_name: string }) {
+    const { agent_id, kpi_name } = createKpiDto;
     
-    // Check if KPI already exists
+    // Get or create registry for this agent
     const existingRegistry = await this.get(agent_id);
-    if (existingRegistry && existingRegistry.kpis.some(kpi => kpi.key === kpi_name)) {
-      throw new Error(`KPI with key '${kpi_name}' already exists for agent '${agent_id}'`);
+    
+    // Generate next numeric KPI ID
+    let nextId = 1000; // default fallback
+    
+    if (existingRegistry && existingRegistry.kpis.length > 0) {
+      // Parse existing kpi keys as numbers and find max
+      const numericKeys = existingRegistry.kpis
+        .map(kpi => parseInt(kpi.key))
+        .filter(num => !isNaN(num));
+      
+      if (numericKeys.length > 0) {
+        nextId = Math.max(...numericKeys) + 1;
+      }
+    }
+    
+    const kpiKey = String(nextId);
+    
+    // Check if this key already exists (shouldn't happen with our logic, but safety check)
+    if (existingRegistry && existingRegistry.kpis.some(kpi => kpi.key === kpiKey)) {
+      throw new Error(`KPI with key '${kpiKey}' already exists for agent '${agent_id}'`);
     }
 
     // Create new KPI entry
     const newKpi = {
-      key: kpi_name,
-      title: title || kpi_name,
-      unit: unit || 'unit',
-      description: description || ''
+      key: kpiKey,
+      title: kpi_name,
+      unit: 'unit',
+      description: ''
     };
 
     // Add to existing registry or create new one

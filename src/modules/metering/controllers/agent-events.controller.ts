@@ -3,6 +3,10 @@ import { EventHandlerService } from '../services/event-handler.service';
 import { SecurityService } from '../services/security.service';
 import { WebhookEventDto } from '../dtos/webhook-event.dto';
 import { AgentValidationService } from '../services/agent-validation.service';
+import { ExecutionStartedDto } from '../dtos/execution-started.dto';
+import { ExecutionCompletedDto } from '../dtos/execution-completed.dto';
+import { JobStartedDto } from '../dtos/job-started.dto';
+import { JobCompletedDto } from '../dtos/job-completed.dto';
 
 @Controller('v1/agent-events')
 export class AgentEventsController {
@@ -15,8 +19,7 @@ export class AgentEventsController {
   ) {}
 
   @Post()
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  async handleWebhook(@Body() body: WebhookEventDto, @Headers() headers: any) {
+  async handleWebhook(@Body() body: any, @Headers() headers: any) {
     const startTime = Date.now();
     let trace_id: string;
 
@@ -24,7 +27,7 @@ export class AgentEventsController {
       // Extract and validate required headers
       const agentId = this.security.extractAgentId(headers);
       const timestamp = this.security.extractTimestamp(headers);
-      const idempotencyKey = this.security.extractIdempotencyKey(headers);
+      const idempotencyKey = this.security.extractIdempotencyKey(headers) || body.idempotency_key;
       const signature = headers['x-signature'];
 
       // Generate trace ID for logging and tracking
@@ -49,14 +52,37 @@ export class AgentEventsController {
         throw new HttpException('Missing event_type in body', HttpStatus.BAD_REQUEST);
       }
 
-      if (!body.execution_id) {
-        throw new HttpException('Missing execution_id in body', HttpStatus.BAD_REQUEST);
-      }
-
       // Use agent_id from body if not in headers (for backward compatibility)
       const finalAgentId = agentId || body.agent_id;
       if (!finalAgentId) {
         throw new HttpException('Missing agent_id in headers or body', HttpStatus.BAD_REQUEST);
+      }
+
+      // Validate event type and apply appropriate DTO validation
+      let validatedBody: any;
+      const validationPipe = new ValidationPipe({ transform: true, whitelist: true });
+
+      switch (body.event_type) {
+        case 'execution.started':
+          validatedBody = await validationPipe.transform(body, { type: 'body', metatype: ExecutionStartedDto });
+          break;
+        case 'execution.completed':
+          validatedBody = await validationPipe.transform(body, { type: 'body', metatype: ExecutionCompletedDto });
+          break;
+        case 'job.started':
+          validatedBody = await validationPipe.transform(body, { type: 'body', metatype: JobStartedDto });
+          break;
+        case 'job.completed':
+          validatedBody = await validationPipe.transform(body, { type: 'body', metatype: JobCompletedDto });
+          break;
+        default:
+          // For backward compatibility, use the original WebhookEventDto for other event types
+          validatedBody = await validationPipe.transform(body, { type: 'body', metatype: WebhookEventDto });
+          // For legacy events, still require execution_id
+          if (!validatedBody.execution_id) {
+            throw new HttpException('Missing execution_id in body', HttpStatus.BAD_REQUEST);
+          }
+          break;
       }
 
       // Validate timestamp (prevent replay attacks)
@@ -98,25 +124,28 @@ export class AgentEventsController {
       }
 
       // Process the event
-      this.logger.log(`Processing event: ${body.event_type}`, { 
+      this.logger.log(`Processing event: ${validatedBody.event_type}`, { 
         agentId: finalAgentId, 
-        executionId: body.execution_id, 
+        executionId: validatedBody.execution_id, 
         trace_id 
       });
 
-      const applied = await this.handler.handle(body, trace_id);
+      // Add idempotency key to the validated body
+      validatedBody.idempotency_key = idempotencyKey;
+      
+      const applied = await this.handler.handle(validatedBody, trace_id);
       
       const processingTime = Date.now() - startTime;
       this.logger.log(`Webhook processed successfully`, { 
         agentId, 
         trace_id, 
         processingTime,
-        pricingVersion: applied?.version 
+        pricingVersion: (applied as any)?.version 
       });
 
       return { 
         status: 'ok', 
-        pricing_version: applied?.version,
+        pricing_version: (applied as any)?.version,
         trace_id,
         processing_time_ms: processingTime
       };

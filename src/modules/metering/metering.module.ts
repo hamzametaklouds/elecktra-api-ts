@@ -7,6 +7,7 @@ import { KpiRegistryService } from './services/kpi-registry.service';
 import { AgentValidationService } from './services/agent-validation.service';
 import { AgentEventsController } from './controllers/agent-events.controller';
 import { KpiManagementController } from './controllers/kpi-management.controller';
+import { KpisController } from './controllers/kpis.controller';
 import { MeteringModels } from './metering.model';
 
 @Module({
@@ -21,7 +22,7 @@ import { MeteringModels } from './metering.model';
     AgentValidationService,
     ...MeteringModels,
   ],
-  controllers: [AgentEventsController, KpiManagementController],
+  controllers: [AgentEventsController, KpiManagementController, KpisController],
   exports: [BillingService, KpiRegistryService, AgentValidationService, ...MeteringModels],
 })
 export class MeteringModule {}

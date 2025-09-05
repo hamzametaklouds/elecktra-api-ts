@@ -20,41 +20,63 @@ export class EventHandlerService {
     const today = dateKey(now);
     const { event_type, agent_id, execution_id } = evt;
 
-    // store raw usage event
-    await this.usage.create({
-      ts: now,
-      agent_id,
-      execution_id,
-      event_type,
-      tool_key: evt.tool_key, // harmless if sent; not billed
-      kpi_key: evt.kpi_key,
-      value: evt.value,
-      unit: evt.unit,
-      duration_ms: evt.duration_ms,
-      ram_gb: evt.ram_gb,
-      tokens_in: evt.metrics?.tokens_in ?? evt.tokens_in,
-      tokens_out: evt.metrics?.tokens_out ?? evt.tokens_out,
-      metadata: evt.meta || evt.metadata,
-      idempotency_key: evt.idempotency_key
-    });
+    try {
+      // Handle idempotency - if duplicate key error, treat as success
+      await this.usage.create({
+        ts: now,
+        agent_id,
+        execution_id: execution_id || `exec_${Date.now()}`, // Generate execution_id if not provided
+        event_type,
+        tool_key: evt.tool_key, // harmless if sent; not billed
+        kpi_key: evt.kpi_key ? String(evt.kpi_key) : undefined, // Convert to string
+        value: evt.value,
+        unit: evt.unit,
+        duration_ms: evt.duration_ms,
+        ram_gb: evt.ram_gb,
+        tokens_in: evt.metrics?.tokens_in ?? evt.tokens_in,
+        tokens_out: evt.metrics?.tokens_out ?? evt.tokens_out,
+        metadata: evt.meta || evt.metadata,
+        idempotency_key: evt.idempotency_key
+      });
+    } catch (error) {
+      // If duplicate key error on idempotency_key, treat as idempotent success
+      if (error.code === 11000 && error.keyPattern?.idempotency_key) {
+        console.log('Idempotent event detected, returning success', { trace_id, agent_id, event_type });
+        return { status: 'ok' };
+      }
+      throw error;
+    }
 
-    // rollups
+    // Handle different event types according to specification
     const $inc: any = {};
-    if (event_type === 'job.completed') {
-      const minutes = Math.max(0, (evt.duration_ms || 0) / 60000);
-      $inc['totals.runtime_minutes'] = minutes;
+    
+    if (event_type === 'execution.completed') {
+      // Compute runtime minutes from execution.started to execution.completed
+      const minutes = await this.computeRuntimeMinutes(agent_id, now);
+      if (minutes > 0) {
+        $inc['totals.runtime_minutes'] = minutes;
+      }
     }
-    if (event_type === 'kpi.recorded' && evt.kpi_key && typeof evt.value === 'number') {
-      $inc[`totals.kpis.${evt.kpi_key}`] = evt.value;
+    
+    if (event_type === 'job.completed' && evt.kpi_key && typeof evt.value === 'number') {
+      // Increment KPI totals
+      const kpiKey = String(evt.kpi_key);
+      $inc[`totals.kpis.${kpiKey}`] = evt.value;
     }
 
-    const update: any = Object.keys($inc).length ? { $inc } : { $setOnInsert: { totals: {} } };
-    await this.daily.findOneAndUpdate({ agent_id, date: today }, update, { upsert: true, new: true }).lean();
+    // Update daily usage if there are increments to make
+    if (Object.keys($inc).length > 0) {
+      await this.daily.findOneAndUpdate(
+        { agent_id, date: today }, 
+        { $inc }, 
+        { upsert: true, new: true }
+      ).lean();
+    }
 
     // get current pricing version for echo
     const price = await this.pricing.findOne({ agent_id }).sort({ version: -1 }).lean();
 
-    console.log('Event processed (simple pricing)', {
+    console.log('Event processed', {
       trace_id,
       agent_id,
       execution_id,
@@ -64,5 +86,55 @@ export class EventHandlerService {
     });
 
     return price; // may be undefined if not set yet
+  }
+
+  /**
+   * Compute runtime minutes for execution.completed events
+   * @param agent_id Agent ID
+   * @param endTs End timestamp (now)
+   * @returns Runtime in minutes
+   */
+  private async computeRuntimeMinutes(agent_id: string, endTs: Date): Promise<number> {
+    try {
+      // Find the most recent execution.completed before this one
+      const lastCompleted = await this.usage.findOne({
+        agent_id,
+        event_type: 'execution.completed',
+        ts: { $lt: endTs }
+      }).sort({ ts: -1 }).lean();
+
+      // Find the most recent execution.started after the last completed (or from beginning)
+      const startQuery: any = {
+        agent_id,
+        event_type: 'execution.started'
+      };
+
+      if (lastCompleted) {
+        startQuery.ts = { $gt: lastCompleted.ts };
+      }
+
+      const start = await this.usage.findOne(startQuery).sort({ ts: 1 }).lean();
+
+      // If no start found, try to find the latest execution.started as fallback
+      if (!start) {
+        const fallbackStart = await this.usage.findOne({
+          agent_id,
+          event_type: 'execution.started'
+        }).sort({ ts: -1 }).lean();
+
+        if (!fallbackStart) {
+          return 0; // No start event found
+        }
+
+        const minutes = Math.max(0, (endTs.getTime() - fallbackStart.ts.getTime()) / 60000);
+        return minutes;
+      }
+
+      const minutes = Math.max(0, (endTs.getTime() - start.ts.getTime()) / 60000);
+      return minutes;
+    } catch (error) {
+      console.error('Error computing runtime minutes:', error);
+      return 0;
+    }
   }
 }
