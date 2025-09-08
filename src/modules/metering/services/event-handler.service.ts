@@ -58,6 +58,17 @@ export class EventHandlerService {
       }
     }
     
+    if (event_type === 'job.started' && evt.kpi_key) {
+      // Track job started events for incomplete job processing
+      // No immediate billing, just tracking for timeout processing
+      console.log('Job started event tracked for timeout processing', {
+        trace_id,
+        agent_id,
+        kpi_key: evt.kpi_key,
+        execution_id
+      });
+    }
+    
     if (event_type === 'job.completed' && evt.kpi_key && typeof evt.value === 'number') {
       // Increment KPI totals
       const kpiKey = String(evt.kpi_key);

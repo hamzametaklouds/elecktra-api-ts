@@ -214,6 +214,31 @@ All events are processed for billing calculations based on:
 - Custom KPI usage
 - Resource utilization
 
+## Incomplete Jobs Processing
+
+The system automatically handles jobs that start but never complete by assigning them average scores based on historical data.
+
+### Features:
+
+- **Automatic Processing**: Runs every 30 minutes to find and process incomplete jobs
+- **Average Calculation**: Uses historical data from the last 30 days to calculate average values
+- **Default Values**: Provides sensible defaults when no historical data exists
+- **Manual Trigger**: API endpoint to manually process incomplete jobs
+- **Configurable**: Environment variables to customize timeout and processing behavior
+
+### API Endpoints:
+
+- `POST /v1/incomplete-jobs/process` - Manually trigger processing
+- `GET /v1/incomplete-jobs/config` - Get configuration
+
+### Configuration:
+
+- `JOB_TIMEOUT_MINUTES` (default: 60) - Minutes after which a job is considered incomplete
+- `INCOMPLETE_JOBS_AVERAGE_DAYS` (default: 30) - Days to look back for averages
+- `INCOMPLETE_JOBS_AUTO_PROCESS` (default: true) - Enable/disable automatic processing
+
+For detailed documentation, see [incomplete-jobs.md](./docs/incomplete-jobs.md).
+
 ## Error Handling
 
 - **400**: Bad Request (validation failures, missing headers)
