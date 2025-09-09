@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 
 @Schema({ collection: 'agent_kpi_registry' })
 export class KpiRegistry {
-  @Prop({ index: true }) agent_id: string;
+  @Prop({ type: Types.ObjectId, ref: 'Agent', index: true }) agent_id: Types.ObjectId;
   @Prop({ 
     type: [{
       key: { type: String, required: true },

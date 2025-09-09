@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { KpiRegistry } from '../schemas/kpi-registry.schema';
 import { METERING_PROVIDER_TOKENS } from '../metering.model';
 
@@ -11,15 +11,17 @@ export class KpiRegistryService {
 
   /**
    * Upsert KPI registry for an agent
-   * @param agent_id Agent ID
+   * @param agent_id Agent ID (string or ObjectId)
    * @param kpis Array of allowed KPIs
    * @returns Updated KPI registry
    */
-  async upsert(agent_id: string, kpis: Array<{ key: string; title?: string; unit?: string; description?: string }>) {
+  async upsert(agent_id: string | Types.ObjectId, kpis: Array<{ key: string; title?: string; unit?: string; description?: string }>) {
+    const agentObjectId = typeof agent_id === 'string' ? new Types.ObjectId(agent_id) : agent_id;
+    
     return await this.kpiRegistry.findOneAndUpdate(
-      { agent_id },
+      { agent_id: agentObjectId },
       { 
-        agent_id,
+        agent_id: agentObjectId,
         kpis,
         updated_at: new Date()
       },
@@ -29,20 +31,21 @@ export class KpiRegistryService {
 
   /**
    * Get KPI registry for an agent
-   * @param agent_id Agent ID
+   * @param agent_id Agent ID (string or ObjectId)
    * @returns KPI registry or null
    */
-  async get(agent_id: string) {
-    return await this.kpiRegistry.findOne({ agent_id }).lean();
+  async get(agent_id: string | Types.ObjectId) {
+    const agentObjectId = typeof agent_id === 'string' ? new Types.ObjectId(agent_id) : agent_id;
+    return await this.kpiRegistry.findOne({ agent_id: agentObjectId }).lean();
   }
 
   /**
    * Check if a KPI key is allowed for an agent
-   * @param agent_id Agent ID
+   * @param agent_id Agent ID (string or ObjectId)
    * @param kpi_key KPI key to check
    * @returns boolean indicating if KPI is allowed
    */
-  async isKpiAllowed(agent_id: string, kpi_key: string): Promise<boolean> {
+  async isKpiAllowed(agent_id: string | Types.ObjectId, kpi_key: string): Promise<boolean> {
     const registry = await this.get(agent_id);
     if (!registry) return false;
     
@@ -54,7 +57,7 @@ export class KpiRegistryService {
    * @param createKpiDto KPI creation data
    * @returns Created KPI registry entry
    */
-  async createCustomKpi(createKpiDto: { agent_id: string; kpi_name: string }) {
+  async createCustomKpi(createKpiDto: { agent_id: string | Types.ObjectId; kpi_name: string }) {
     const { agent_id, kpi_name } = createKpiDto;
     
     // Get or create registry for this agent
@@ -100,10 +103,10 @@ export class KpiRegistryService {
 
   /**
    * Get all KPIs for a specific agent
-   * @param agent_id Agent ID
+   * @param agent_id Agent ID (string or ObjectId)
    * @returns Array of KPIs
    */
-  async getAgentKpis(agent_id: string) {
+  async getAgentKpis(agent_id: string | Types.ObjectId) {
     const registry = await this.get(agent_id);
     return registry ? registry.kpis : [];
   }

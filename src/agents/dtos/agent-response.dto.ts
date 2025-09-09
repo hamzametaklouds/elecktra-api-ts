@@ -34,6 +34,20 @@ export class InvitationSummaryDto {
   created_at: Date;
 }
 
+export class CustomKpiDto {
+  @ApiProperty()
+  key: string;
+
+  @ApiProperty()
+  title?: string;
+
+  @ApiProperty()
+  unit?: string;
+
+  @ApiProperty()
+  description?: string;
+}
+
 export class AgentResponseDto {
   @ApiProperty()
   _id: string;
@@ -70,6 +84,9 @@ export class AgentResponseDto {
 
   @ApiProperty({ type: [InvitationSummaryDto] })
   invitations?: InvitationSummaryDto[];
+
+  @ApiProperty({ type: [CustomKpiDto] })
+  custom_kpis?: CustomKpiDto[];
 
   @ApiProperty()
   created_at: Date;

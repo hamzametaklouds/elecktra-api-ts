@@ -15,6 +15,7 @@ import { METERING_PROVIDER_TOKENS } from 'src/modules/metering/metering.model';
 import { DailyAgentUsage } from 'src/modules/metering/schemas/daily-agent-usage.schema';
 import { AgentPricing } from 'src/modules/metering/schemas/agent-pricing.schema';
 import { Invoice } from 'src/modules/metering/schemas/invoice.schema';
+import { KpiRegistryService } from 'src/modules/metering/services/kpi-registry.service';
 
 @Injectable()
 export class AgentsService {
@@ -28,6 +29,7 @@ export class AgentsService {
     @Inject(METERING_PROVIDER_TOKENS.DAILY_AGENT_USAGE) private dailyUsageModel: Model<DailyAgentUsage>,
     @Inject(METERING_PROVIDER_TOKENS.AGENT_PRICING) private agentPricingModel: Model<AgentPricing>,
     @Inject(METERING_PROVIDER_TOKENS.INVOICE) private invoiceModel: Model<Invoice>,
+    private kpiRegistryService: KpiRegistryService,
   ) {}
 
   async create(createAgentDto: CreateAgentDto, user: { userId?: ObjectId, company_id?: ObjectId }) {
@@ -740,7 +742,7 @@ export class AgentsService {
   }
 
   /**
-   * Get detailed agent with tools and invitations
+   * Get detailed agent with tools, invitations, and custom KPIs
    */
   async getAgentDetails(id: string, user: { userId?: ObjectId, company_id?: ObjectId }) {
     const agent = await this.agentModel
@@ -765,9 +767,19 @@ export class AgentsService {
     // Get related invitations
     const invitations = await this.invitationsService.getInvitationsByAgentId(id);
 
+    // Get custom KPIs for this agent
+    let customKpis = [];
+    try {
+      customKpis = await this.kpiRegistryService.getAgentKpis(id);
+    } catch (error) {
+      console.warn('Could not fetch custom KPIs for agent:', error.message);
+      // Continue without KPIs if there's an error
+    }
+
     return {
       ...agent,
-      invitations
+      invitations,
+      custom_kpis: customKpis
     };
   }
 

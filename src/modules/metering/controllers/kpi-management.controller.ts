@@ -39,7 +39,7 @@ export class KpiManagementController {
     
     return {
       kpi_id: newKpi.key,
-      agent_id: result.agent_id,
+      agent_id: result.agent_id.toString(),
       kpi_key: newKpi.key,
       title: newKpi.title || createKpiDto.kpi_name,
       unit: newKpi.unit || 'unit',
@@ -88,7 +88,7 @@ export class KpiManagementController {
     return allKpis.flatMap(registry => 
       registry.kpis.map(kpi => ({
         kpi_id: kpi.key,
-        agent_id: registry.agent_id,
+        agent_id: registry.agent_id.toString(),
         kpi_key: kpi.key,
         title: kpi.title || kpi.key,
         unit: kpi.unit || 'unit',
