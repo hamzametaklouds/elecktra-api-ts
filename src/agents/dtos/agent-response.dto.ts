@@ -34,6 +34,17 @@ export class InvitationSummaryDto {
   created_at: Date;
 }
 
+export class DataPointDto {
+  @ApiProperty()
+  x: string;
+
+  @ApiProperty()
+  y: number;
+
+  @ApiProperty({ required: false })
+  label?: string;
+}
+
 export class CustomKpiDto {
   @ApiProperty()
   key: string;
@@ -46,6 +57,18 @@ export class CustomKpiDto {
 
   @ApiProperty()
   description?: string;
+
+  @ApiProperty()
+  image?: string;
+
+  @ApiProperty({ enum: ['image', 'graph'] })
+  type?: string;
+
+  @ApiProperty({ enum: ['line', 'bar', 'pie', 'area', 'scatter', 'doughnut', 'radar', 'polar_area', 'bubble', 'gauge'] })
+  graph_type?: string;
+
+  @ApiProperty({ type: [DataPointDto] })
+  graph_data?: DataPointDto[];
 }
 
 export class AgentResponseDto {

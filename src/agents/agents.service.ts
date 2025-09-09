@@ -790,10 +790,34 @@ export class AgentsService {
     // Get related invitations
     const invitations = await this.invitationsService.getInvitationsByAgentId(id);
 
-    // Get custom KPIs for this agent
+    // Get custom KPIs for this agent with graph data populated
     let customKpis = [];
     try {
-      customKpis = await this.kpiRegistryService.getAgentKpis(id);
+      const kpis = await this.kpiRegistryService.getAgentKpis(id);
+      
+      // For each KPI, if type is 'graph', populate graph data
+      customKpis = await Promise.all(kpis.map(async (kpi) => {
+        if (kpi.type === 'graph') {
+          try {
+            const graphData = await this.kpiRegistryService.getKpiGraphData(id, kpi.key);
+            return {
+              ...kpi,
+              graph_data: graphData ? graphData.data_points : []
+            };
+          } catch (error) {
+            console.warn(`Could not fetch graph data for KPI ${kpi.key}:`, error.message);
+            return {
+              ...kpi,
+              graph_data: []
+            };
+          }
+        } else {
+          return {
+            ...kpi,
+            graph_data: []
+          };
+        }
+      }));
     } catch (error) {
       console.warn('Could not fetch custom KPIs for agent:', error.message);
       // Continue without KPIs if there's an error

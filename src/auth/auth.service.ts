@@ -12,6 +12,7 @@ import { ChangePasswordDto } from './dtos/change-password.dto';
 import * as admin from 'firebase-admin';
 import { OAuth2Client } from 'google-auth-library';
 import { CompanyService } from 'src/company/company.service';
+import { AgentsService } from 'src/agents/agents.service';
 import { ObjectId } from 'mongoose';
 
 const client = new OAuth2Client(
@@ -27,8 +28,27 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private invitationsService: InvitationsService,
-    private companyService: CompanyService
+    private companyService: CompanyService,
+    private agentsService: AgentsService
   ) {   // Initialize Firebase Admin SDK
+  }
+
+  private async getUserAgents(user: any): Promise<any[]> {
+    try {
+      // Create user object with roles for role-based filtering
+      const userWithRoles = {
+        userId: user._id,
+        company_id: user.company_id,
+        roles: user.roles || []
+      };
+
+      // Fetch agents using the same filtering logic as the GET /agents endpoint
+      const agents = await this.agentsService.getFilteredAgents({}, {}, userWithRoles);
+      return agents || [];
+    } catch (error) {
+      console.error('Error fetching user agents:', error);
+      return [];
+    }
   }
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -79,10 +99,14 @@ export class AuthService {
     // Remove sensitive data before sending response
     const { password: _, ...userWithoutPassword } = user;
 
+    // Fetch user's agents with role-based filtering
+    const agents = await this.getUserAgents(user);
+
     return {
       access_token: this.jwtService.sign({ userName: user.first_name, sub: user._id }), 
       message: 'Login Successful', 
-      user: userWithoutPassword
+      user: userWithoutPassword,
+      agents: agents
     };
   }
 
@@ -230,14 +254,18 @@ export class AuthService {
             throw new ForbiddenException('Your account has been temporarily blocked. Please contact support.');
         }
 
-        // Step 6: Return JWT for authentication
+        // Step 6: Fetch user's agents with role-based filtering
+        const agents = await this.getUserAgents(userExists);
+
+        // Step 7: Return JWT for authentication
         return {
             access_token: this.jwtService.sign({ 
                 userName: userExists.first_name, 
                 sub: userExists._id 
             }),
             message: 'Login Successful',
-            user: userExists
+            user: userExists,
+            agents: agents
         };
     } catch (err) {
         console.error(err);

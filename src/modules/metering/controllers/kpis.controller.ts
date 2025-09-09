@@ -1,6 +1,8 @@
 import { Controller, Post, Body, UsePipes, ValidationPipe, Logger } from '@nestjs/common';
 import { KpiRegistryService } from '../services/kpi-registry.service';
 import { CreateKpiDto } from '../dtos/create-kpi.dto';
+import { GraphType } from '../enums/graph-type.enum';
+import { KpiType } from '../enums/kpi-type.enum';
 
 @Controller('v1/kpis')
 export class KpisController {
@@ -29,7 +31,10 @@ export class KpisController {
     return {
       kpi_id: parseInt(newKpi.key),
       key: newKpi.key,
-      kpi_name: createKpiDto.kpi_name
+      kpi_name: createKpiDto.kpi_name,
+      image: newKpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
+      type: newKpi.type || KpiType.IMAGE,
+      graph_type: newKpi.graph_type || GraphType.LINE
     };
   }
 }

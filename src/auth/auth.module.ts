@@ -8,8 +8,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from 'src/users/users.module';
 import { InvitationsModule } from 'src/invitations/invitations.module';
 import { CompanyModule } from 'src/company/company.module';
+import { AgentsModule } from 'src/agents/agents.module';
 @Module({
-  imports: [UsersModule, UsersModule,InvitationsModule,CompanyModule, PassportModule, JwtModule.registerAsync({
+  imports: [UsersModule, UsersModule,InvitationsModule,CompanyModule, AgentsModule, PassportModule, JwtModule.registerAsync({
     imports: [ConfigModule],
     useFactory: async (configService: ConfigService) => ({
       secret: configService.get<string>('JWT_SECRET'),
