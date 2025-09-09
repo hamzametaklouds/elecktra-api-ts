@@ -108,8 +108,14 @@ export class AgentsController {
   async findAll(@ParamsHandler() pagination: IPaginationQuery, @Req() req: Request) {
     const { $rpp, $page, $filter, $orderBy } = pagination;
     
+    // Ensure user object includes roles for role-based filtering
+    const userWithRoles = {
+      ...req.user,
+      roles: (req.user as any)?.roles || []
+    };
+    
     if ($rpp && $page) {
-      const result = await this.agentsService.getPaginatedAgents($rpp, $page, $filter, $orderBy, req.user);
+      const result = await this.agentsService.getPaginatedAgents($rpp, $page, $filter, $orderBy, userWithRoles);
       return {
         status: result ? true : false,
         statusCode: result ? 200 : 400,
@@ -118,7 +124,7 @@ export class AgentsController {
       };
     }
 
-    const result = await this.agentsService.getFilteredAgents($filter, $orderBy, req.user);
+    const result = await this.agentsService.getFilteredAgents($filter, $orderBy, userWithRoles);
     return {
       status: result ? true : false,
       statusCode: result ? 200 : 400,

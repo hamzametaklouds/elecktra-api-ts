@@ -52,7 +52,7 @@ export class AgentsService {
     return await agent.save();
   }
 
-  async getPaginatedAgents(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
+  async getPaginatedAgents(rpp: number, page: number, filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId, roles?: string[] }) {
     filter['is_deleted'] = false;
     if (!filter['status']) {
       filter['status'] = { $ne: AgentStatus.TERMINATED };
@@ -60,6 +60,18 @@ export class AgentsService {
 
     if(user?.company_id){
       filter['is_disabled'] = false;
+    }
+
+    // Role-based filtering: Admin roles see all agents, USER role sees only their own agents
+    const adminRoles = ['SUPER_ADMIN', 'SUPPORT_ADMIN', 'BUSINESS_ADMIN', 'BUSINESS_OWNER'];
+    const isAdmin = user?.roles?.some(role => adminRoles.includes(role));
+    
+    if (!isAdmin && user?.userId) {
+      // For USER role, only show agents where they are the client_id or created_by
+      filter['$or'] = [
+        { client_id: user.userId },
+        { created_by: user.userId }
+      ];
     }
 
     const skip: number = (page - 1) * rpp;
@@ -103,15 +115,26 @@ export class AgentsService {
     };
   }
 
-  async getFilteredAgents(filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId }) {
+  async getFilteredAgents(filter: Object, orderBy, user: { userId?: ObjectId, company_id?: ObjectId, roles?: string[] }) {
     filter['is_deleted'] = false;
     if (!filter['status']) {
       filter['status'] = { $ne: AgentStatus.TERMINATED };
     }
 
-
     if(user?.company_id){
       filter['is_disabled'] = false;
+    }
+
+    // Role-based filtering: Admin roles see all agents, USER role sees only their own agents
+    const adminRoles = ['SUPER_ADMIN', 'SUPPORT_ADMIN', 'BUSINESS_ADMIN', 'BUSINESS_OWNER'];
+    const isAdmin = user?.roles?.some(role => adminRoles.includes(role));
+    
+    if (!isAdmin && user?.userId) {
+      // For USER role, only show agents where they are the client_id or created_by
+      filter['$or'] = [
+        { client_id: user.userId },
+        { created_by: user.userId }
+      ];
     }
 
 
