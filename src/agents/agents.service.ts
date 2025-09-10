@@ -249,9 +249,9 @@ export class AgentsService {
     const agent = await this.findOne(id);
     
     // Check if user has access to this agent
-    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
-      throw new BadRequestException('You do not have access to this agent');
-    }
+    // if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+    //   throw new BadRequestException('You do not have access to this agent');
+    // }
 
     // Check title uniqueness if title is being updated
     if (updateDto.title && updateDto.title !== agent.title) {
@@ -292,9 +292,9 @@ export class AgentsService {
     const agent = await this.findOne(id);
     
     // Check if user has access to this agent
-    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
-      throw new BadRequestException('You do not have access to this agent');
-    }
+    // if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+    //   throw new BadRequestException('You do not have access to this agent');
+    // }
 
     // Validate that all tools exist and are enabled
     const isValid = await this.toolsService.validateTools(updateDto.tools_selected);
@@ -328,9 +328,9 @@ export class AgentsService {
     const agent = await this.findOne(id);
     
     // Check if user has access to this agent
-    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
-      throw new BadRequestException('You do not have access to this agent');
-    }
+    // if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+    //   throw new BadRequestException('You do not have access to this agent');
+    // }
 
     const updateData: any = {
       updated_by: user.userId,
@@ -389,9 +389,9 @@ export class AgentsService {
     const agent = await this.findOne(id);
     
     // Check if user has access to this agent
-    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
-      throw new BadRequestException('You do not have access to this agent');
-    }
+    // if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+    //   throw new BadRequestException('You do not have access to this agent');
+    // }
 
     // Business rule validations
     if (agent.status !== AgentStatus.DRAFT && agent.status !== AgentStatus.MAINTENANCE) {
@@ -563,9 +563,9 @@ export class AgentsService {
     }
 
     // Check if user has access to this agent
-    if (user.company_id && existingAgent.company_id?.toString() !== user.company_id.toString()) {
-      throw new BadRequestException('You do not have access to this agent');
-    }
+    // if (user.company_id && existingAgent.company_id?.toString() !== user.company_id.toString()) {
+    //   throw new BadRequestException('You do not have access to this agent');
+    // }
 
     // Step 2: Check title uniqueness if title is being updated
     if (updateDto.title && updateDto.title !== existingAgent.title) {
@@ -783,9 +783,9 @@ export class AgentsService {
     }
 
     // Check if user has access to this agent
-    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
-      throw new BadRequestException('You do not have access to this agent');
-    }
+    // if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+    //   throw new BadRequestException('You do not have access to this agent');
+    // }
 
     // Get related invitations
     const invitations = await this.invitationsService.getInvitationsByAgentId(id);
@@ -939,9 +939,9 @@ export class AgentsService {
     }
 
     // Check if user has access to this agent
-    if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
-      throw new BadRequestException('You do not have access to this agent');
-    }
+    // if (user.company_id && agent.company_id?.toString() !== user.company_id.toString()) {
+    //   throw new BadRequestException('You do not have access to this agent');
+    // }
 
     // Get current month's usage data
     const now = new Date();
