@@ -51,4 +51,15 @@ export class CreateKpiDto {
   @IsEnum(GraphType)
   @Transform(({ value }) => value || GraphType.LINE)
   graph_type?: GraphType;
+
+  @ApiProperty({
+    description: 'Unit of measurement for the KPI (e.g., "events", "orders", "minutes", "USD")',
+    example: 'events',
+    required: false,
+    default: 'units'
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => value ? value.trim() : 'units')
+  unit?: string;
 }

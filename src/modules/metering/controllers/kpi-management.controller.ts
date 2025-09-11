@@ -5,6 +5,7 @@ import { CreateKpiDto } from '../dtos/create-kpi.dto';
 import { KpiResponseDto } from '../dtos/kpi-response.dto';
 import { UpdateKpiGraphTypeDto } from '../dtos/update-kpi-graph-type.dto';
 import { UpdateKpiImageDto } from '../dtos/update-kpi-image.dto';
+import { UpdateKpiUnitDto } from '../dtos/update-kpi-unit.dto';
 import { UpdateKpiTypeDto, KpiGraphDataDto, AddKpiGraphDataPointDto } from '../dtos/kpi-graph-data.dto';
 import { GraphType } from '../enums/graph-type.enum';
 import { KpiType } from '../enums/kpi-type.enum';
@@ -47,7 +48,7 @@ export class KpiManagementController {
       agent_id: result.agent_id.toString(),
       kpi_key: newKpi.key,
       title: newKpi.title || createKpiDto.kpi_name,
-      unit: newKpi.unit || 'unit',
+      unit: newKpi.unit || 'units',
       description: newKpi.description || '',
       image: newKpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
       type: newKpi.type || KpiType.IMAGE,
@@ -75,7 +76,7 @@ export class KpiManagementController {
       agent_id: agentId,
       kpi_key: kpi.key,
       title: kpi.title || kpi.key,
-      unit: kpi.unit || 'unit',
+      unit: kpi.unit || 'units',
       description: kpi.description || '',
       image: kpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
       type: kpi.type || KpiType.IMAGE,
@@ -102,7 +103,7 @@ export class KpiManagementController {
         agent_id: registry.agent_id.toString(),
         kpi_key: kpi.key,
         title: kpi.title || kpi.key,
-        unit: kpi.unit || 'unit',
+        unit: kpi.unit || 'units',
         description: kpi.description || '',
         image: kpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
         type: kpi.type || KpiType.IMAGE,
@@ -148,7 +149,7 @@ export class KpiManagementController {
       agent_id: result.agent_id.toString(),
       kpi_key: updatedKpi.key,
       title: updatedKpi.title || updatedKpi.key,
-      unit: updatedKpi.unit || 'unit',
+      unit: updatedKpi.unit || 'units',
       description: updatedKpi.description || '',
       image: updatedKpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
       type: updatedKpi.type || KpiType.IMAGE,
@@ -193,7 +194,7 @@ export class KpiManagementController {
       agent_id: result.agent_id.toString(),
       kpi_key: updatedKpi.key,
       title: updatedKpi.title || updatedKpi.key,
-      unit: updatedKpi.unit || 'unit',
+      unit: updatedKpi.unit || 'units',
       description: updatedKpi.description || '',
       image: updatedKpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
       type: updatedKpi.type || KpiType.IMAGE,
@@ -238,7 +239,52 @@ export class KpiManagementController {
       agent_id: result.agent_id.toString(),
       kpi_key: updatedKpi.key,
       title: updatedKpi.title || updatedKpi.key,
-      unit: updatedKpi.unit || 'unit',
+      unit: updatedKpi.unit || 'units',
+      description: updatedKpi.description || '',
+      image: updatedKpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
+      type: updatedKpi.type || KpiType.IMAGE,
+      graph_type: updatedKpi.graph_type || GraphType.LINE,
+      created_at: result.updated_at || new Date()
+    };
+  }
+
+  @Put('agent/:agentId/kpi/:kpiKey/unit')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiOperation({ summary: 'Update unit for a specific KPI' })
+  @ApiParam({ name: 'agentId', description: 'Agent ID', example: 'ag_123' })
+  @ApiParam({ name: 'kpiKey', description: 'KPI Key', example: '1000' })
+  @ApiBody({ type: UpdateKpiUnitDto })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'KPI unit updated successfully',
+    type: KpiResponseDto
+  })
+  @ApiResponse({ status: 404, description: 'Agent or KPI not found' })
+  async updateKpiUnit(
+    @Param('agentId') agentId: string,
+    @Param('kpiKey') kpiKey: string,
+    @Body() updateKpiUnitDto: UpdateKpiUnitDto
+  ): Promise<KpiResponseDto> {
+    this.logger.log(`Updating unit for KPI ${kpiKey} of agent ${agentId} to: ${updateKpiUnitDto.unit}`);
+    
+    const result = await this.kpiRegistryService.updateKpiUnit(agentId, kpiKey, updateKpiUnitDto.unit);
+    
+    if (!result) {
+      throw new Error('Agent or KPI not found');
+    }
+
+    // Find the updated KPI
+    const updatedKpi = result.kpis.find(kpi => kpi.key === kpiKey);
+    if (!updatedKpi) {
+      throw new Error('KPI not found after update');
+    }
+    
+    return {
+      kpi_id: updatedKpi.key,
+      agent_id: result.agent_id.toString(),
+      kpi_key: updatedKpi.key,
+      title: updatedKpi.title || updatedKpi.key,
+      unit: updatedKpi.unit || 'units',
       description: updatedKpi.description || '',
       image: updatedKpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
       type: updatedKpi.type || KpiType.IMAGE,
@@ -268,10 +314,16 @@ export class KpiManagementController {
     if (!graphData) {
       return null;
     }
+
+    // Get the unit from the KPI registry
+    const registry = await this.kpiRegistryService.get(agentId);
+    const kpi = registry?.kpis.find(k => k.key === kpiKey);
+    const unit = kpi?.unit || 'units';
     
     return {
       agent_id: graphData.agent_id.toString(),
       kpi_key: graphData.kpi_key,
+      unit: unit,
       data_points: graphData.data_points,
       created_at: graphData.created_at,
       updated_at: graphData.updated_at
@@ -301,10 +353,16 @@ export class KpiManagementController {
       kpiKey, 
       addKpiGraphDataPointDto
     );
+
+    // Get the unit from the KPI registry
+    const registry = await this.kpiRegistryService.get(agentId);
+    const kpi = registry?.kpis.find(k => k.key === kpiKey);
+    const unit = kpi?.unit || 'units';
     
     return {
       agent_id: result.agent_id.toString(),
       kpi_key: result.kpi_key,
+      unit: unit,
       data_points: result.data_points,
       created_at: result.created_at,
       updated_at: result.updated_at
@@ -324,12 +382,21 @@ export class KpiManagementController {
     
     const graphDataList = await this.kpiRegistryService.getAgentGraphData(agentId);
     
-    return graphDataList.map(graphData => ({
-      agent_id: graphData.agent_id.toString(),
-      kpi_key: graphData.kpi_key,
-      data_points: graphData.data_points,
-      created_at: graphData.created_at,
-      updated_at: graphData.updated_at
-    }));
+    // Get the registry to fetch unit information for each KPI
+    const registry = await this.kpiRegistryService.get(agentId);
+    
+    return graphDataList.map(graphData => {
+      const kpi = registry?.kpis.find(k => k.key === graphData.kpi_key);
+      const unit = kpi?.unit || 'units';
+      
+      return {
+        agent_id: graphData.agent_id.toString(),
+        kpi_key: graphData.kpi_key,
+        unit: unit,
+        data_points: graphData.data_points,
+        created_at: graphData.created_at,
+        updated_at: graphData.updated_at
+      };
+    });
   }
 }

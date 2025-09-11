@@ -112,7 +112,7 @@ export class InvitationsService {
    */
   async sendEmail(to: string, subject: string, message: string) {
     try {
-      const client = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
+      const client = new postmark.ServerClient('f2f075c8-0abd-4d63-8034-4cd81266085a');
       const result = await client.sendEmail({
         From: "hamza@metaklouds.com", // Verified sender email
         To: to,

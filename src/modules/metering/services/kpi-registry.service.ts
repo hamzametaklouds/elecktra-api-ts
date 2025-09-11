@@ -79,8 +79,8 @@ export class KpiRegistryService {
    * @param createKpiDto KPI creation data
    * @returns Created KPI registry entry
    */
-  async createCustomKpi(createKpiDto: { agent_id: string | Types.ObjectId; kpi_name: string; image?: string; type?: KpiType; graph_type?: GraphType }) {
-    const { agent_id, kpi_name, image, type, graph_type } = createKpiDto;
+  async createCustomKpi(createKpiDto: { agent_id: string | Types.ObjectId; kpi_name: string; image?: string; type?: KpiType; graph_type?: GraphType; unit?: string }) {
+    const { agent_id, kpi_name, image, type, graph_type, unit } = createKpiDto;
     
     // Get or create registry for this agent
     const existingRegistry = await this.get(agent_id);
@@ -110,7 +110,7 @@ export class KpiRegistryService {
     const newKpi = {
       key: kpiKey,
       title: kpi_name,
-      unit: 'unit',
+      unit: unit || 'units',
       description: '',
       image: image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
       type: type || KpiType.IMAGE,
@@ -227,6 +227,34 @@ export class KpiRegistryService {
 
     // Update the KPI type
     registry.kpis[kpiIndex].type = type;
+    registry.updated_at = new Date();
+
+    return await registry.save();
+  }
+
+  /**
+   * Update unit for a specific KPI
+   * @param agent_id Agent ID (string or ObjectId)
+   * @param kpi_key KPI key to update
+   * @param unit New KPI unit
+   * @returns Updated KPI registry or null if not found
+   */
+  async updateKpiUnit(agent_id: string | Types.ObjectId, kpi_key: string, unit: string) {
+    const agentObjectId = typeof agent_id === 'string' ? new Types.ObjectId(agent_id) : agent_id;
+    
+    const registry = await this.kpiRegistry.findOne({ agent_id: agentObjectId });
+    if (!registry) {
+      return null;
+    }
+
+    // Find and update the specific KPI
+    const kpiIndex = registry.kpis.findIndex(kpi => kpi.key === kpi_key);
+    if (kpiIndex === -1) {
+      return null;
+    }
+
+    // Update the KPI unit (trim whitespace)
+    registry.kpis[kpiIndex].unit = unit.trim();
     registry.updated_at = new Date();
 
     return await registry.save();

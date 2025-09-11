@@ -41,6 +41,12 @@ export class KpiGraphDataDto {
   kpi_key: string;
 
   @ApiProperty({
+    description: 'Unit of measurement for the KPI values',
+    example: 'events'
+  })
+  unit: string;
+
+  @ApiProperty({
     description: 'Array of data points for the graph',
     type: [DataPointDto]
   })

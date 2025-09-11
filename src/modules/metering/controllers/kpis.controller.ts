@@ -32,6 +32,7 @@ export class KpisController {
       kpi_id: parseInt(newKpi.key),
       key: newKpi.key,
       kpi_name: createKpiDto.kpi_name,
+      unit: newKpi.unit || 'units',
       image: newKpi.image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
       type: newKpi.type || KpiType.IMAGE,
       graph_type: newKpi.graph_type || GraphType.LINE
