@@ -7,6 +7,8 @@ import { ExecutionStartedDto } from '../dtos/execution-started.dto';
 import { ExecutionCompletedDto } from '../dtos/execution-completed.dto';
 import { JobStartedDto } from '../dtos/job-started.dto';
 import { JobCompletedDto } from '../dtos/job-completed.dto';
+import { KpiEventDto, CountKpiEventDto, GraphKpiEventDto } from '../dtos/kpi-event.dto';
+import { KpiType } from '../enums/kpi-type.enum';
 
 @Controller('v1/agent-events')
 export class AgentEventsController {
@@ -17,6 +19,26 @@ export class AgentEventsController {
     private readonly security: SecurityService,
     private readonly agentValidation: AgentValidationService,
   ) {}
+
+  private async validateKpiEvent(body: any, validationPipe: ValidationPipe): Promise<any> {
+    // First validate as base KPI event
+    const baseEvent = await validationPipe.transform(body, { type: 'body', metatype: KpiEventDto });
+
+    // Get KPI type from registry
+    const kpi = await this.handler.getKpiType(baseEvent.agent_id, baseEvent.kpi_key);
+    if (!kpi) {
+      throw new HttpException(`KPI not found: ${baseEvent.kpi_key}`, HttpStatus.BAD_REQUEST);
+    }
+
+    // Validate based on KPI type
+    if (kpi.type === KpiType.COUNT) {
+      return await validationPipe.transform(body, { type: 'body', metatype: CountKpiEventDto });
+    } else if (kpi.type === KpiType.GRAPH) {
+      return await validationPipe.transform(body, { type: 'body', metatype: GraphKpiEventDto });
+    }
+
+    return baseEvent;
+  }
 
   @Post()
   async handleWebhook(@Body() body: any, @Headers() headers: any) {
@@ -70,10 +92,18 @@ export class AgentEventsController {
           validatedBody = await validationPipe.transform(body, { type: 'body', metatype: ExecutionCompletedDto });
           break;
         case 'job.started':
-          validatedBody = await validationPipe.transform(body, { type: 'body', metatype: JobStartedDto });
+          if (body.kpi_key) {
+            validatedBody = await this.validateKpiEvent(body, validationPipe);
+          } else {
+            validatedBody = await validationPipe.transform(body, { type: 'body', metatype: JobStartedDto });
+          }
           break;
         case 'job.completed':
-          validatedBody = await validationPipe.transform(body, { type: 'body', metatype: JobCompletedDto });
+          if (body.kpi_key) {
+            validatedBody = await this.validateKpiEvent(body, validationPipe);
+          } else {
+            validatedBody = await validationPipe.transform(body, { type: 'body', metatype: JobCompletedDto });
+          }
           break;
         default:
           // For backward compatibility, use the original WebhookEventDto for other event types

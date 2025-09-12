@@ -3,17 +3,33 @@ import { Model } from 'mongoose';
 import { UsageEvent } from '../schemas/usage-event.schema';
 import { DailyAgentUsage } from '../schemas/daily-agent-usage.schema';
 import { AgentPricing } from '../schemas/agent-pricing.schema';
+import { KpiRegistry } from '../schemas/kpi-registry.schema';
+import { KpiType } from '../enums/kpi-type.enum';
 import { METERING_PROVIDER_TOKENS } from '../metering.model';
 
 function dateKey(d: Date) { return d.toISOString().slice(0,10); }
 
+import { IEventHandlerService } from '../interfaces/event-handler.interface';
+
 @Injectable()
-export class EventHandlerService {
+export class EventHandlerService implements IEventHandlerService {
   constructor(
     @Inject(METERING_PROVIDER_TOKENS.USAGE_EVENT) private usage: Model<UsageEvent>,
     @Inject(METERING_PROVIDER_TOKENS.DAILY_AGENT_USAGE) private daily: Model<DailyAgentUsage>,
     @Inject(METERING_PROVIDER_TOKENS.AGENT_PRICING) private pricing: Model<AgentPricing>,
+    @Inject(METERING_PROVIDER_TOKENS.KPI_REGISTRY) private kpiRegistry: Model<KpiRegistry>,
   ) {}
+
+  /**
+   * Get KPI type from registry
+   * @param agent_id Agent ID
+   * @param kpi_key KPI key
+   * @returns KPI configuration or undefined if not found
+   */
+  public async getKpiType(agent_id: string, kpi_key: string): Promise<{ key: string; type: KpiType; graph_type?: GraphType } | undefined> {
+    const registry = await this.kpiRegistry.findOne({ agent_id });
+    return registry?.kpis.find(k => k.key === String(kpi_key));
+  }
 
   async handle(evt: any, trace_id?: string) {
     const now = new Date();
@@ -59,20 +75,82 @@ export class EventHandlerService {
     }
     
     if (event_type === 'job.started' && evt.kpi_key) {
-      // Track job started events for incomplete job processing
-      // No immediate billing, just tracking for timeout processing
-      console.log('Job started event tracked for timeout processing', {
+      // Get KPI type from registry
+      const registry = await this.kpiRegistry.findOne({ agent_id });
+      const kpi = registry?.kpis.find(k => k.key === String(evt.kpi_key));
+
+      if (!kpi) {
+        console.warn('KPI not found in registry', { agent_id, kpi_key: evt.kpi_key });
+        return { status: 'error', message: 'KPI not found' };
+      }
+
+      // Handle based on KPI type
+      if (kpi.type === KpiType.COUNT) {
+        // For count type, just store the value
+        if (typeof evt.value === 'number') {
+          $inc[`totals.kpis.${evt.kpi_key}`] = evt.value;
+        }
+      } else if (kpi.type === KpiType.GRAPH) {
+        // For graph type, store the data point with date_time and events
+        if (evt.date_time && typeof evt.events === 'number') {
+          await this.usage.create({
+            ts: now,
+            agent_id,
+            execution_id,
+            event_type,
+            kpi_key: String(evt.kpi_key),
+            value: evt.events,
+            metadata: {
+              date_time: evt.date_time,
+              x_value: evt.date_time,
+              y_value: evt.events
+            }
+          });
+        }
+      }
+
+      console.log('Job started event processed', {
         trace_id,
         agent_id,
         kpi_key: evt.kpi_key,
-        execution_id
+        execution_id,
+        kpi_type: kpi.type
       });
     }
     
-    if (event_type === 'job.completed' && evt.kpi_key && typeof evt.value === 'number') {
-      // Increment KPI totals
-      const kpiKey = String(evt.kpi_key);
-      $inc[`totals.kpis.${kpiKey}`] = evt.value;
+    if (event_type === 'job.completed' && evt.kpi_key) {
+      // Get KPI type from registry
+      const registry = await this.kpiRegistry.findOne({ agent_id });
+      const kpi = registry?.kpis.find(k => k.key === String(evt.kpi_key));
+
+      if (!kpi) {
+        console.warn('KPI not found in registry', { agent_id, kpi_key: evt.kpi_key });
+        return { status: 'error', message: 'KPI not found' };
+      }
+
+      // Handle based on KPI type
+      if (kpi.type === KpiType.COUNT && typeof evt.value === 'number') {
+        // For count type, increment the total
+        const kpiKey = String(evt.kpi_key);
+        $inc[`totals.kpis.${kpiKey}`] = evt.value;
+      } else if (kpi.type === KpiType.GRAPH) {
+        // For graph type, update the graph data
+        if (evt.date_time && typeof evt.events === 'number') {
+          await this.usage.create({
+            ts: now,
+            agent_id,
+            execution_id,
+            event_type,
+            kpi_key: String(evt.kpi_key),
+            value: evt.events,
+            metadata: {
+              date_time: evt.date_time,
+              x_value: evt.date_time,
+              y_value: evt.events
+            }
+          });
+        }
+      }
     }
 
     // Update daily usage if there are increments to make
@@ -105,6 +183,17 @@ export class EventHandlerService {
    * @param endTs End timestamp (now)
    * @returns Runtime in minutes
    */
+  /**
+   * Get KPI type from registry
+   * @param agent_id Agent ID
+   * @param kpi_key KPI key
+   * @returns KPI configuration or undefined if not found
+   */
+  public async getKpiType(agent_id: string, kpi_key: string): Promise<{ key: string; type: KpiType; graph_type?: GraphType } | undefined> {
+    const registry = await this.kpiRegistry.findOne({ agent_id });
+    return registry?.kpis.find(k => k.key === String(kpi_key));
+  }
+
   private async computeRuntimeMinutes(agent_id: string, endTs: Date): Promise<number> {
     try {
       // Find the most recent execution.completed before this one

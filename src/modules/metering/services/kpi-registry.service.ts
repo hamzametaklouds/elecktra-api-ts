@@ -79,8 +79,30 @@ export class KpiRegistryService {
    * @param createKpiDto KPI creation data
    * @returns Created KPI registry entry
    */
-  async createCustomKpi(createKpiDto: { agent_id: string | Types.ObjectId; kpi_name: string; image?: string; type?: KpiType; graph_type?: GraphType; unit?: string }) {
-    const { agent_id, kpi_name, image, type, graph_type, unit } = createKpiDto;
+  async createCustomKpi(createKpiDto: { 
+    agent_id: string | Types.ObjectId; 
+    kpi_name: string; 
+    image?: string; 
+    type?: KpiType; 
+    graph_type?: GraphType; 
+    unit?: string;
+    xAxis?: { name: string; type: string };
+    yAxis?: { name: string; type: string };
+    name?: string;
+    datatype?: string;
+  }) {
+    const { 
+      agent_id, 
+      kpi_name, 
+      image, 
+      type = KpiType.COUNT, 
+      graph_type, 
+      unit,
+      xAxis,
+      yAxis,
+      name,
+      datatype
+    } = createKpiDto;
     
     // Get or create registry for this agent
     const existingRegistry = await this.get(agent_id);
@@ -106,16 +128,37 @@ export class KpiRegistryService {
       throw new Error(`KPI with key '${kpiKey}' already exists for agent '${agent_id}'`);
     }
 
-    // Create new KPI entry
-    const newKpi = {
+    // Create new KPI entry based on type
+    const baseKpi = {
       key: kpiKey,
       title: kpi_name,
-      unit: unit || 'units',
       description: '',
       image: image || 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=KPI',
-      type: type || KpiType.IMAGE,
-      graph_type: graph_type || GraphType.LINE
+      type
     };
+
+    let newKpi;
+    if (type === KpiType.GRAPH) {
+      newKpi = {
+        ...baseKpi,
+        graph_type: graph_type || GraphType.LINE,
+        xAxis,
+        yAxis,
+        unit: unit || 'units'
+      };
+    } else if (type === KpiType.COUNT) {
+      newKpi = {
+        ...baseKpi,
+        name,
+        datatype,
+        unit: unit || 'units'
+      };
+    } else {
+      newKpi = {
+        ...baseKpi,
+        unit: unit || 'units'
+      };
+    }
 
     // Add to existing registry or create new one
     if (existingRegistry) {

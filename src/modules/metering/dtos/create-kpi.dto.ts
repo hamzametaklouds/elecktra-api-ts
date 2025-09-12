@@ -1,8 +1,25 @@
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsEnum, ValidateIf, IsObject, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { GraphType } from '../enums/graph-type.enum';
 import { KpiType } from '../enums/kpi-type.enum';
+import { ValueType } from '../enums/value-type.enum';
+
+export class AxisConfig {
+  @ApiProperty({
+    description: 'Name of the axis',
+    example: 'date_time'
+  })
+  @IsString()
+  name: string;
+
+  @ApiProperty({
+    description: 'Type of the axis data',
+    example: 'datetime'
+  })
+  @IsString()
+  type: string;
+}
 
 export class CreateKpiDto {
   @ApiProperty({
@@ -29,37 +46,72 @@ export class CreateKpiDto {
   image?: string;
 
   @ApiProperty({
-    description: 'Type of KPI display - image for single value display, graph for chart visualization',
+    description: 'Type of KPI display - image for single value display, graph for chart visualization, count for numeric values',
     enum: KpiType,
-    example: KpiType.IMAGE,
+    example: KpiType.COUNT,
     required: false,
-    default: KpiType.IMAGE
+    default: KpiType.COUNT
   })
   @IsOptional()
   @IsEnum(KpiType)
-  @Transform(({ value }) => value || KpiType.IMAGE)
+  @Transform(({ value }) => value || KpiType.COUNT)
   type?: KpiType;
 
   @ApiProperty({
     description: 'Graph type for displaying the KPI data (only used when type is graph)',
     enum: GraphType,
     example: GraphType.LINE,
-    required: false,
-    default: GraphType.LINE
+    required: false
   })
-  @IsOptional()
+  @ValidateIf(o => o.type === KpiType.GRAPH)
   @IsEnum(GraphType)
-  @Transform(({ value }) => value || GraphType.LINE)
   graph_type?: GraphType;
 
   @ApiProperty({
-    description: 'Unit of measurement for the KPI (e.g., "events", "orders", "minutes", "USD")',
-    example: 'events',
+    description: 'X-axis configuration for graph type KPIs',
     required: false,
-    default: 'units'
+    type: AxisConfig
   })
-  @IsOptional()
+  @ValidateIf(o => o.type === KpiType.GRAPH)
+  @IsObject()
+  @Type(() => AxisConfig)
+  xAxis?: AxisConfig;
+
+  @ApiProperty({
+    description: 'Y-axis configuration for graph type KPIs',
+    required: false,
+    type: AxisConfig
+  })
+  @ValidateIf(o => o.type === KpiType.GRAPH)
+  @IsObject()
+  @Type(() => AxisConfig)
+  yAxis?: AxisConfig;
+
+  @ApiProperty({
+    description: 'Name of the time unit for count type KPIs',
+    example: 'time',
+    required: false
+  })
+  @ValidateIf(o => o.type === KpiType.COUNT)
   @IsString()
-  @Transform(({ value }) => value ? value.trim() : 'units')
-  unit?: string;
+  name?: string;
+
+  @ApiProperty({
+    description: 'Value type for the KPI (Int, Percentage, Seconds, Minutes, Hours)',
+    enum: ValueType,
+    example: ValueType.INT,
+    required: false
+  })
+  @ValidateIf(o => o.type === KpiType.COUNT)
+  @IsEnum(ValueType)
+  value_type?: ValueType;
+
+  @ApiProperty({
+    description: 'Initial value for count type KPIs',
+    example: 0,
+    required: false
+  })
+  @ValidateIf(o => o.type === KpiType.COUNT)
+  @IsNumber()
+  initial_value?: number;
 }
