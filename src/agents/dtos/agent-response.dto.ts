@@ -34,15 +34,21 @@ export class InvitationSummaryDto {
   created_at: Date;
 }
 
-export class DataPointDto {
-  @ApiProperty()
-  x: string;
-
-  @ApiProperty()
-  y: number;
+export class KpiDataPointDto {
+  @ApiProperty({ required: false })
+  xAxis?: string | number;
 
   @ApiProperty({ required: false })
-  label?: string;
+  yaxis?: number;
+
+  @ApiProperty({ required: false })
+  name?: string;
+
+  @ApiProperty({ required: false })
+  value?: number;
+
+  @ApiProperty({ required: false, enum: ['Int', 'Percentage', 'Seconds', 'Minutes', 'Hours'] })
+  type?: string;
 }
 
 export class CustomKpiDto {
@@ -50,25 +56,39 @@ export class CustomKpiDto {
   key: string;
 
   @ApiProperty()
-  title?: string;
+  title: string;
 
   @ApiProperty()
-  unit?: string;
+  unit: string;
 
   @ApiProperty()
-  description?: string;
+  description: string;
 
-  @ApiProperty()
-  image?: string;
+  @ApiProperty({ enum: ['graph', 'count'] })
+  type: string;
 
-  @ApiProperty({ enum: ['image', 'graph'] })
-  type?: string;
-
-  @ApiProperty({ enum: ['line', 'bar', 'pie', 'area', 'scatter', 'doughnut', 'radar', 'polar_area', 'bubble', 'gauge'] })
+  @ApiProperty({ required: false, enum: ['line'] })
   graph_type?: string;
 
-  @ApiProperty({ type: [DataPointDto] })
-  graph_data?: DataPointDto[];
+  @ApiProperty()
+  _id?: string;
+
+  @ApiProperty({ type: [KpiDataPointDto] })
+  data: KpiDataPointDto[];
+}
+
+export class CoreKpiDto {
+  @ApiProperty()
+  _id: string;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  description: string;
+
+  @ApiProperty({ type: [KpiDataPointDto] })
+  data: KpiDataPointDto[];
 }
 
 export class AgentResponseDto {
@@ -110,6 +130,12 @@ export class AgentResponseDto {
 
   @ApiProperty({ type: [CustomKpiDto] })
   custom_kpis?: CustomKpiDto[];
+
+  @ApiProperty({ type: [CoreKpiDto] })
+  corePerformanceKPIs?: CoreKpiDto[];
+
+  @ApiProperty({ type: [CoreKpiDto] })
+  otherKPIs?: CoreKpiDto[];
 
   @ApiProperty()
   created_at: Date;

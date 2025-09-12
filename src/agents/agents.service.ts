@@ -15,7 +15,11 @@ import { METERING_PROVIDER_TOKENS } from 'src/modules/metering/metering.model';
 import { DailyAgentUsage } from 'src/modules/metering/schemas/daily-agent-usage.schema';
 import { AgentPricing } from 'src/modules/metering/schemas/agent-pricing.schema';
 import { Invoice } from 'src/modules/metering/schemas/invoice.schema';
+import { KpiRegistry } from 'src/modules/metering/schemas/kpi-registry.schema';
+import { KpiGraphData } from 'src/modules/metering/schemas/kpi-graph-data.schema';
 import { KpiRegistryService } from 'src/modules/metering/services/kpi-registry.service';
+import { KpiType } from 'src/modules/metering/enums/kpi-type.enum';
+import { GraphType } from 'src/modules/metering/enums/graph-type.enum';
 
 @Injectable()
 export class AgentsService {
@@ -29,6 +33,8 @@ export class AgentsService {
     @Inject(METERING_PROVIDER_TOKENS.DAILY_AGENT_USAGE) private dailyUsageModel: Model<DailyAgentUsage>,
     @Inject(METERING_PROVIDER_TOKENS.AGENT_PRICING) private agentPricingModel: Model<AgentPricing>,
     @Inject(METERING_PROVIDER_TOKENS.INVOICE) private invoiceModel: Model<Invoice>,
+    @Inject(METERING_PROVIDER_TOKENS.KPI_REGISTRY) private kpiRegistry: Model<KpiRegistry>,
+    @Inject(METERING_PROVIDER_TOKENS.KPI_GRAPH_DATA) private kpiGraphData: Model<KpiGraphData>,
     private kpiRegistryService: KpiRegistryService,
   ) {}
 
@@ -792,41 +798,77 @@ export class AgentsService {
 
     // Get custom KPIs for this agent with graph data populated
     let customKpis = [];
+    let corePerformanceKPIs = [];
+    let otherKPIs = [];
+
     try {
-      const kpis = await this.kpiRegistryService.getAgentKpis(id);
+      // Get all KPIs for this agent
+      const registry = await this.kpiRegistry.findOne({ agent_id: id }).lean();
       
-      // For each KPI, if type is 'graph', populate graph data
-      customKpis = await Promise.all(kpis.map(async (kpi) => {
-        if (kpi.type === 'graph') {
-          try {
-            const graphData = await this.kpiRegistryService.getKpiGraphData(id, kpi.key);
-            return {
-              ...kpi,
-              graph_data: graphData ? graphData.data_points : []
-            };
-          } catch (error) {
-            console.warn(`Could not fetch graph data for KPI ${kpi.key}:`, error.message);
-            return {
-              ...kpi,
-              graph_data: []
-            };
-          }
-        } else {
-          return {
-            ...kpi,
-            graph_data: []
+      if (registry?.kpis) {
+        // Process each KPI and categorize them
+        for (const kpi of registry.kpis) {
+          const processedKpi = {
+            key: kpi.key,
+            title: kpi.title || '',
+            unit: kpi.unit || 'unit',
+            description: kpi.description || '',
+            type: kpi.type || KpiType.COUNT,
+            graph_type: kpi.type === KpiType.GRAPH ? (kpi.graph_type || GraphType.LINE) : '',
+            data: []
           };
+
+          // Get the KPI data based on type
+          if (kpi.type === KpiType.GRAPH) {
+            try {
+              // For graph type KPIs, use the graph_data array
+              if (kpi.graph_data && kpi.graph_data.length > 0) {
+                processedKpi.data = kpi.graph_data.map(point => ({
+                  xAxis: point.xAxis,
+                  yaxis: point.yAxis
+                }));
+              }
+            } catch (error) {
+              console.warn(`Could not process graph data for KPI ${kpi.key}:`, error.message);
+            }
+          } else {
+            // For count type KPIs, use the data array directly
+            processedKpi.data = kpi.data?.map(item => ({
+              name: item.name,
+              value: item.value,
+              type: item.type
+            })) || [];
+          }
+
+          // Categorize KPI based on its key prefix
+          if (kpi.key.startsWith('core_')) {
+            corePerformanceKPIs.push({
+              title: kpi.title || '',
+              description: kpi.description || '',
+              data: processedKpi.data
+            });
+          } else if (kpi.key.startsWith('other_')) {
+            otherKPIs.push({
+              title: kpi.title || '',
+              description: kpi.description || '',
+              data: processedKpi.data
+            });
+          } else {
+            customKpis.push(processedKpi);
+          }
         }
-      }));
+      }
     } catch (error) {
-      console.warn('Could not fetch custom KPIs for agent:', error.message);
+      console.warn('Could not fetch KPIs for agent:', error.message);
       // Continue without KPIs if there's an error
     }
 
     return {
       ...agent,
       invitations,
-      custom_kpis: customKpis
+      custom_kpis: customKpis,
+      corePerformanceKPIs,
+      otherKPIs
     };
   }
 

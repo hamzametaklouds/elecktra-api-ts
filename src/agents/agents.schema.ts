@@ -18,6 +18,32 @@ export interface IPricing {
   subscription_price?: number;
 }
 
+export interface IKpiDataPoint {
+  xAxis?: string | number;
+  yaxis?: number;
+  name?: string;
+  value?: number;
+  type?: 'Int' | 'Percentage' | 'Seconds' | 'Minutes' | 'Hours';
+}
+
+export interface ICustomKpi {
+  key: string;
+  title: string;
+  unit: string;
+  description: string;
+  type: 'graph' | 'count';
+  graph_type?: 'line';
+  _id?: Schema.Types.ObjectId;
+  data: IKpiDataPoint[];
+}
+
+export interface ICoreKpi {
+  _id?: Schema.Types.ObjectId;
+  title: string;
+  description: string;
+  data: IKpiDataPoint[];
+}
+
 export interface IAgent {
   _id?: Schema.Types.ObjectId;
   title: string;
@@ -37,6 +63,9 @@ export interface IAgent {
   tools_count?: number;
   created_by?: Schema.Types.ObjectId;
   updated_by?: Schema.Types.ObjectId;
+  custom_kpis?: ICustomKpi[];
+  corePerformanceKPIs?: ICoreKpi[];
+  otherKPIs?: ICoreKpi[];
   is_disabled?: boolean;
   is_deleted?: boolean;
 }
@@ -149,7 +178,55 @@ export const AgentSchema = new Schema<IAgent>(
       type: Boolean,
       required: false,
       default: false
-    }
+    },
+    custom_kpis: [{
+      key: String,
+      title: String,
+      unit: String,
+      description: String,
+      type: {
+        type: String,
+        enum: ['graph', 'count']
+      },
+      graph_type: {
+        type: String,
+        enum: ['line']
+      },
+      data: [{
+        xAxis: Schema.Types.Mixed,
+        yaxis: Number,
+        name: String,
+        value: Number,
+        type: {
+          type: String,
+          enum: ['Int', 'Percentage', 'Seconds', 'Minutes', 'Hours']
+        }
+      }]
+    }],
+    corePerformanceKPIs: [{
+      title: String,
+      description: String,
+      data: [{
+        name: String,
+        value: Number,
+        type: {
+          type: String,
+          enum: ['Int', 'Percentage', 'Seconds', 'Minutes', 'Hours']
+        }
+      }]
+    }],
+    otherKPIs: [{
+      title: String,
+      description: String,
+      data: [{
+        name: String,
+        value: Number,
+        type: {
+          type: String,
+          enum: ['Int', 'Percentage', 'Seconds', 'Minutes', 'Hours']
+        }
+      }]
+    }]
   },
   {
     timestamps: {
