@@ -5,6 +5,7 @@ import { DailyAgentUsage } from '../schemas/daily-agent-usage.schema';
 import { AgentPricing } from '../schemas/agent-pricing.schema';
 import { KpiRegistry } from '../schemas/kpi-registry.schema';
 import { KpiType } from '../enums/kpi-type.enum';
+import { GraphType } from '../enums/graph-type.enum';
 import { METERING_PROVIDER_TOKENS } from '../metering.model';
 
 function dateKey(d: Date) { return d.toISOString().slice(0,10); }
@@ -28,7 +29,13 @@ export class EventHandlerService implements IEventHandlerService {
    */
   public async getKpiType(agent_id: string, kpi_key: string): Promise<{ key: string; type: KpiType; graph_type?: GraphType } | undefined> {
     const registry = await this.kpiRegistry.findOne({ agent_id });
-    return registry?.kpis.find(k => k.key === String(kpi_key));
+    const kpi = registry?.kpis.find(k => k.key === String(kpi_key));
+    if (!kpi) return undefined;
+    return {
+      key: kpi.key,
+      type: kpi.type || KpiType.COUNT,
+      graph_type: kpi.graph_type
+    };
   }
 
   async handle(evt: any, trace_id?: string) {
@@ -183,17 +190,6 @@ export class EventHandlerService implements IEventHandlerService {
    * @param endTs End timestamp (now)
    * @returns Runtime in minutes
    */
-  /**
-   * Get KPI type from registry
-   * @param agent_id Agent ID
-   * @param kpi_key KPI key
-   * @returns KPI configuration or undefined if not found
-   */
-  public async getKpiType(agent_id: string, kpi_key: string): Promise<{ key: string; type: KpiType; graph_type?: GraphType } | undefined> {
-    const registry = await this.kpiRegistry.findOne({ agent_id });
-    return registry?.kpis.find(k => k.key === String(kpi_key));
-  }
-
   private async computeRuntimeMinutes(agent_id: string, endTs: Date): Promise<number> {
     try {
       // Find the most recent execution.completed before this one

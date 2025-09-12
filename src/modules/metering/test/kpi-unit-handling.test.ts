@@ -5,6 +5,7 @@ import { CreateKpiDto } from '../dtos/create-kpi.dto';
 import { UpdateKpiUnitDto } from '../dtos/update-kpi-unit.dto';
 import { KpiType } from '../enums/kpi-type.enum';
 import { GraphType } from '../enums/graph-type.enum';
+import { ValueType } from '../enums/value-type.enum';
 
 describe('KPI Unit Handling', () => {
   let service: KpiRegistryService;
@@ -51,9 +52,9 @@ describe('KPI Unit Handling', () => {
       const createKpiDto: CreateKpiDto = {
         agent_id: 'agent_123',
         kpi_name: 'App Opens',
-        unit: 'events',
-        type: KpiType.IMAGE,
-        graph_type: GraphType.LINE,
+        type: KpiType.COUNT,
+        value_type: ValueType.INT,
+        name: 'events'
       };
 
       const mockResult = {
@@ -96,9 +97,8 @@ describe('KPI Unit Handling', () => {
       const createKpiDto: CreateKpiDto = {
         agent_id: 'agent_123',
         kpi_name: 'App Opens',
-        // unit not provided
-        type: KpiType.IMAGE,
-        graph_type: GraphType.LINE,
+        type: KpiType.COUNT,
+        value_type: ValueType.INT
       };
 
       const mockResult = {
@@ -128,9 +128,9 @@ describe('KPI Unit Handling', () => {
       const createKpiDto: CreateKpiDto = {
         agent_id: 'agent_123',
         kpi_name: 'App Opens',
-        unit: '  events  ',
-        type: KpiType.IMAGE,
-        graph_type: GraphType.LINE,
+        type: KpiType.COUNT,
+        value_type: ValueType.INT,
+        name: '  events  '
       };
 
       const mockResult = {
@@ -241,9 +241,9 @@ describe('KPI Unit Handling', () => {
       const createKpiDto: CreateKpiDto = {
         agent_id: 'agent_123',
         kpi_name: 'App Opens',
-        unit: 'events',
-        type: KpiType.IMAGE,
-        graph_type: GraphType.LINE,
+        type: KpiType.COUNT,
+        value_type: ValueType.INT,
+        name: 'events'
       };
 
       const mockResult = {
